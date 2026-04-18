@@ -1,0 +1,2466 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Vocabolario EN→IT</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;600&display=swap');
+
+  :root {
+    --bg: #000000;
+    --surface: #16161a;
+    --border: #2a2a32;
+    --accent: #e8ff47;
+    --accent2: #47ffe8;
+    --text: #f0f0f0;
+    --muted: #666;
+    --error: #ff4747;
+    --success: #47ff8a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 14px 20px;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: linear-gradient(var(--border) 1px, transparent 1px),
+                      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 480px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 12px;
+    padding-top: 6px;
+  }
+
+  header h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.95rem;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  header p {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  .screen { display: none; }
+  .screen.active { display: flex; flex-direction: column; gap: 10px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+
+  .card-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: #aaa;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+
+  .input-group label {
+    font-size: 0.85rem;
+    color: #ccc;
+    font-weight: 600;
+  }
+
+  .input-group input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 1.2rem;
+    padding: 9px 14px;
+    width: 100%;
+    outline: none;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+
+  .input-group input:focus {
+    border-color: var(--accent);
+  }
+
+  .input-hint {
+    font-size: 0.72rem;
+    color: #888;
+    text-align: center;
+  }
+
+  .progress-bar-track {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .progress-text {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: #bbb;
+    text-align: right;
+    margin-top: 4px;
+  }
+
+  .word-category {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 8px;
+  }
+
+  .word-english {
+    font-family: 'Space Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1.1;
+    word-break: break-word;
+  }
+
+  .word-phonetic {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .mic-area {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    transition: border-color 0.3s;
+  }
+
+  .mic-area.listening {
+    border-color: var(--accent);
+    animation: pulse-border 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse-border {
+    0%, 100% { border-color: var(--accent); box-shadow: 0 0 0 0 rgba(232,255,71,0.2); }
+    50% { border-color: var(--accent); box-shadow: 0 0 0 8px rgba(232,255,71,0); }
+  }
+
+  .mic-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 150px;
+    height: 150px;
+  }
+  .mic-ring-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 150px; height: 150px;
+    pointer-events: none;
+  }
+  .mic-ring-bg { fill: none; stroke: #2a2a32; stroke-width: 6; }
+  .mic-ring-fg {
+    fill: none;
+    stroke: #e8ff47;
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-dasharray: 440;
+    stroke-dashoffset: 440;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+  }
+
+  .mic-icon {
+    width: 130px;
+    height: 130px;
+    position: relative;
+    z-index: 1;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+  }
+  
+  .mic-icon:active { transform: scale(0.92); }
+
+  .mic-area.listening .mic-icon {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+  }
+
+  .mic-status {
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .mic-area.listening .mic-status {
+    color: var(--accent);
+  }
+
+  .transcript-preview {
+    font-size: 0.9rem;
+    color: var(--text);
+    text-align: center;
+    font-style: italic;
+    min-height: 1.2em;
+  }
+
+  .feedback {
+    border-radius: 10px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.9rem;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.25s, transform 0.25s;
+  }
+
+  .feedback.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .feedback.correct {
+    background: rgba(71, 255, 138, 0.08);
+    border: 1px solid rgba(71, 255, 138, 0.3);
+    color: var(--success);
+  }
+
+  .feedback.wrong {
+    background: rgba(255, 71, 71, 0.08);
+    border: 1px solid rgba(255, 71, 71, 0.3);
+    color: var(--error);
+  }
+
+  .feedback-icon { font-size: 1.2rem; }
+  .feedback-text { flex: 1; line-height: 1.4; }
+
+  .drill-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,71,71,0.1);
+    border: 1px solid rgba(255,71,71,0.3);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--error);
+    letter-spacing: 0.1em;
+  }
+
+  .drill-counter {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 8px;
+  }
+
+  .drill-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+
+  .drill-dot.filled { background: var(--accent2); }
+
+  .btn {
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.88rem;
+    padding: 11px 16px;
+    transition: all 0.15s;
+    width: 100%;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  .btn:active { transform: scale(0.97); }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover { border-color: var(--muted); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.82rem;
+    padding: 10px;
+  }
+
+  .btn-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .arr { color: var(--accent); font-weight: 700; }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+
+  .stat-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+    color: #bbb;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .stop-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: #ccc;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    padding: 8px;
+    width: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .cat-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 13px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: border-color 0.2s, background 0.2s;
+    user-select: none;
+  }
+  .cat-toggle.selected {
+    border-color: var(--accent);
+    background: rgba(232,255,71,0.05);
+  }
+  .cat-toggle-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--text);
+    text-transform: capitalize;
+  }
+  .cat-toggle-check {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    color: var(--bg);
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .cat-toggle.selected .cat-toggle-check {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .speak-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: #ddd;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 7px 16px;
+    margin-top: 8px;
+    font-family: 'DM Sans', sans-serif; font-weight: 600;
+    -webkit-tap-highlight-color: transparent;
+    width: 100%;
+  }
+
+  .speak-btn:active { opacity: 0.7; }
+
+  .manual-input {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .manual-input input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 1rem;
+    padding: 10px 14px;
+    width: 100%;
+    outline: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .manual-input input::placeholder { color: #aaa; font-family: 'DM Sans', sans-serif; font-weight: 600; }
+
+  .manual-input input:focus { border-color: var(--accent); }
+
+  .error-msg {
+    color: var(--error);
+    font-size: 0.78rem;
+    text-align: center;
+    padding: 8px;
+    display: none;
+  }
+
+  .error-msg.show { display: block; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0 10px;">
+    <span id="mode-label" style="font-family:'DM Sans',sans-serif;font-weight:600;font-size:1rem;color:var(--accent);">EN → IT</span>
+    <span style="font-family:'DM Sans',sans-serif;font-weight:600;font-size:0.75rem;color:var(--muted);">2604171400</span>
+  </div>
+
+  <!-- SETUP SCREEN -->
+  <div id="screen-setup" class="screen active">
+    <div class="card">
+      
+      <div class="input-group">
+        <label>Da quale lemma vuoi iniziare? (1 – 969)</label>
+        <input type="number" id="input-S" min="1" max="1000" placeholder="1" inputmode="numeric">
+        
+      </div>
+      <div class="input-group">
+        <label>Quante parole vuoi tradurre?</label>
+        <input type="number" id="input-W" min="1" max="100" placeholder="10" inputmode="numeric">
+        
+      </div>
+      <div id="setup-error" class="error-msg"></div>
+    </div>
+    <div style="display:flex;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:8px;">
+      <button id="btn-mode-en" onclick="setMode('en')"
+        style="flex:1;padding:12px 8px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;font-size:1rem;color:#000;transition:all 0.2s;background:var(--accent);">
+        EN → IT
+      </button>
+      <button id="btn-mode-it" onclick="setMode('it')"
+        style="flex:1;padding:12px 8px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;font-size:1rem;color:#888;transition:all 0.2s;background:var(--surface);">
+        IT → EN
+      </button>
+    </div>
+    <button class="btn btn-secondary" onclick="testAudio()" style="margin-bottom:4px;">🔊 Testa audio</button>
+    <div id="audio-debug" style="font-size:0.72rem;color:#666;text-align:center;min-height:1.2em;"></div>
+    <button class="btn btn-primary" onclick="startExercise()" style="color:#000;font-family:'DM Sans',sans-serif;font-weight:700;font-size:1rem;">Inizia esercizio <span class="arr">→</span></button>
+  </div>
+
+  <!-- CATEGORY SCREEN -->
+  <div id="screen-cats" class="screen">
+    <div class="card">
+      <div id="cat-list" style="display:flex;flex-direction:column;gap:12px;"></div>
+    </div>
+    <button class="btn btn-primary" onclick="confirmCats()" style="color:#000;font-family:'DM Sans',sans-serif;font-weight:700;font-size:1rem;">Conferma →</button>
+    <button class="btn btn-secondary" onclick="showScreen('screen-setup')" style="color:#fff;font-family:'DM Sans',sans-serif;font-weight:600;font-size:1rem;"><span class="arr">←</span> Torna alle impostazioni</button>
+  </div>
+
+  <!-- EXERCISE SCREEN -->
+  <div id="screen-exercise" class="screen">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <div id="ex-progress-label" class="progress-text" style="margin:0;font-size:0.72rem;color:#ddd;text-align:left;"></div>
+        <div id="drill-badge" class="drill-badge" style="display:none;">⚡ DRILL <span id="drill-count">0</span></div>
+      </div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+
+      <div style="margin-top:6px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div class="word-category" id="word-category"></div>
+          <button onclick="stopExercise()" style="background:var(--accent);color:#000;border:none;border-radius:6px;padding:3px 10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.8rem;cursor:pointer;-webkit-tap-highlight-color:transparent;">STOP</button>
+        </div>
+        <div id="word-toggle-wrap">
+          <div class="word-english" id="word-english" style="cursor:pointer;" onclick="toggleWordVisibility()"></div>
+        </div>
+        <button class="speak-btn" onclick="speakCurrentWord()" style="background:var(--accent);color:#000;font-family:'DM Sans',sans-serif;font-weight:700;border:none;">🔊 Riascolta</button>
+      </div>
+    </div>
+
+    <div class="mic-area" id="mic-area">
+      <div class="mic-wrap" onclick="toggleListening()">
+        <div class="mic-icon" id="mic-icon">🎤</div>
+        <svg class="mic-ring-svg" viewBox="0 0 150 150">
+          <circle class="mic-ring-bg" cx="75" cy="75" r="70"/>
+          <circle class="mic-ring-fg" id="mic-ring" cx="75" cy="75" r="70"/>
+        </svg>
+      </div>
+      <div class="mic-status" id="mic-status">Tocca per rispondere</div>
+      <div class="transcript-preview" id="transcript-preview"></div>
+
+    </div>
+
+    <div class="manual-input" id="manual-input">
+      <input type="text" id="manual-text" placeholder="Scrivi la traduzione..." autocomplete="off" autocorrect="off" spellcheck="false">
+      <button class="btn btn-primary" onclick="submitManual()" style="color:#000;font-family:'DM Sans',sans-serif;font-weight:700;font-size:1rem;padding:14px;">Conferma</button>
+    </div>
+
+    <div class="feedback" id="feedback">
+      <div class="feedback-icon" id="feedback-icon"></div>
+      <div class="feedback-text" id="feedback-text"></div>
+    </div>
+
+  </div>
+
+  <!-- DRILL CONFIRM SCREEN -->
+  <div id="screen-drill-confirm" class="screen">
+    <div class="card">
+      <div class="card-label">Drill · Parole sbagliate</div>
+      <p style="font-size:0.95rem; color:var(--text); margin-bottom:8px;">Vuoi consolidare le <span id="drill-confirm-count" style="color:var(--error); font-family:'Space Mono',monospace;font-weight:700;"></span> parole sbagliate?</p>
+      <p style="font-size:0.78rem; color:var(--muted);">Ogni parola va tradotta correttamente 3 volte di fila per essere rimossa.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;margin:8px 0;">
+      <div class="mic-wrap" onclick="confirmMicTap()">
+        <div class="mic-icon" id="confirm-mic-icon">🎤</div>
+        <svg class="mic-ring-svg" viewBox="0 0 150 150">
+          <circle class="mic-ring-bg" cx="75" cy="75" r="70"/>
+          <circle class="mic-ring-fg" id="confirm-mic-ring" cx="75" cy="75" r="70"/>
+        </svg>
+      </div>
+      <div style="font-size:0.75rem;color:#aaa;">Dì "sì" o "no" — oppure usa i pulsanti</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="confirmDrill(true)">Sì, procedi</button>
+      <button class="btn btn-secondary" onclick="confirmDrill(false)">No, salta</button>
+    </div>
+  </div>
+
+  <!-- DRILL SCREEN -->
+  <div id="screen-drill" class="screen">
+    <div class="card">
+      <div class="card-label">Drill · Parole sbagliate</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div class="word-category" id="drill-category"></div>
+        <button onclick="stopExercise()" style="background:var(--accent);color:#000;border:none;border-radius:6px;padding:3px 10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.8rem;cursor:pointer;-webkit-tap-highlight-color:transparent;">STOP</button>
+      </div>
+      <div class="word-english" id="drill-word"></div>
+      <div class="word-phonetic" id="drill-phonetic"></div>
+      <button class="speak-btn" onclick="speakDrillWord()" style="background:var(--accent);color:#000;font-family:'DM Sans',sans-serif;font-weight:700;border:none;">🔊 Riascolta</button>
+      <div class="drill-counter" id="drill-dots"></div>
+    </div>
+
+    <div class="mic-area" id="drill-mic-area">
+      <div class="mic-wrap" onclick="toggleDrillListening()">
+        <div class="mic-icon" id="drill-mic-icon">🎤</div>
+        <svg class="mic-ring-svg" viewBox="0 0 150 150">
+          <circle class="mic-ring-bg" cx="75" cy="75" r="70"/>
+          <circle class="mic-ring-fg" id="drill-mic-ring" cx="75" cy="75" r="70"/>
+        </svg>
+      </div>
+      <div class="mic-status" id="drill-mic-status">Tocca per rispondere</div>
+      <div class="transcript-preview" id="drill-transcript"></div>
+
+    </div>
+
+    <div class="manual-input" id="drill-manual-input">
+      <input type="text" id="drill-manual-text" placeholder="Scrivi la traduzione..." style="color:#ddd;" autocomplete="off" autocorrect="off" spellcheck="false">
+      <button class="btn btn-primary" onclick="submitDrillManual()" style="color:#000;font-family:'DM Sans',sans-serif;font-weight:700;font-size:1rem;padding:14px;">Conferma</button>
+    </div>
+
+    <div class="feedback" id="drill-feedback">
+      <div class="feedback-icon" id="drill-feedback-icon"></div>
+      <div class="feedback-text" id="drill-feedback-text"></div>
+    </div>
+  </div>
+
+  <!-- END SCREEN -->
+  <div id="screen-end" class="screen">
+    <div class="card">
+      <div class="card-label">Risultati</div>
+      <div class="stat-grid">
+        <div class="stat-box">
+          <div class="stat-value" id="stat-correct">0</div>
+          <div class="stat-label">Corrette</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" id="stat-wrong">0</div>
+          <div class="stat-label">Sbagliate</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" id="stat-total">0</div>
+          <div class="stat-label">Totale</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" id="stat-pct">0%</div>
+          <div class="stat-label">Score</div>
+        </div>
+      </div>
+      <div style="margin-top:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;display:flex;justify-content:space-between;">
+        <span style="font-size:0.75rem;color:#bbb;font-family:'DM Sans',sans-serif;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;">Posizione lista</span>
+        <span id="stat-s" style="font-family:'Space Mono',monospace;font-size:0.85rem;color:var(--accent);">S=1</span>
+      </div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;" onclick="repeatSame()"><span class="arr">↻</span> Stesse parole</button>
+    <button class="btn btn-secondary" style="width:100%;" onclick="repeatNew()">Parole nuove <span class="arr">→</span></button>
+    <button class="btn btn-secondary" style="width:100%;" onclick="goHome()"><span class="arr">⟵</span> Dall'inizio</button>
+    <button class="btn btn-secondary" style="width:100%;margin-top:12px;" onclick="terminateExercise()">✕ Termina</button>
+  </div>
+</div>
+
+<script>
+// ─── WORD LIST (IDENTICO ALL'ORIGINALE) ─────────────────────────────────────
+const VALID_CATS = new Set(['sostantivo','verbo','aggettivo','avverbio','pronome','preposizione','congiunzione','articolo','aux','numero','particella']);
+
+const RAW = [
+[1,'the','/ði/','articolo','il; la; i; le'],
+[2,'be','/bi/','verbo','essere; stare'],
+[3,'and','/ænd/','congiunzione','e; ed'],
+[4,'of','/?v/','preposizione','di; da; del'],
+[5,'to','/tu/','preposizione','a; per; verso'],
+[6,'a','/?/','articolo','un; una; uno'],
+[7,'in','/?n/','preposizione','in; a; dentro'],
+[8,'have','/hæv/','aux','avere; possedere'],
+[9,'it','/?t/','pronome','esso; essa; lo; la; ci'],
+[10,'you','/ju/','pronome','tu; voi; lei'],
+[11,'he','/hi/','pronome','lui; egli; esso'],
+[12,'for','/f?r/','preposizione','per; a causa di'],
+[13,'they','/ðe?/','pronome','loro; essi; esse'],
+[14,'not','/n?t/','avverbio','non; no'],
+[15,'that','/ðæt/','pronome','che; quello; quella; ciò'],
+[16,'we','/wi/','pronome','noi; ci'],
+[17,'on','/?n/','preposizione','su; sopra; acceso; in corso'],
+[18,'with','/w?ð/','preposizione','con; insieme a'],
+[19,'this','/ð?s/','pronome','questo; questa; ciò'],
+[20,'I','/a?/','pronome','io'],
+[21,'do','/du/','verbo','fare; agire; svolgere'],
+[22,'as','/æz/','preposizione','come; in quanto; mentre'],
+[23,'at','/æt/','preposizione','a; in; presso'],
+[24,'she','/?i/','pronome','lei; ella; essa'],
+[25,'but','/b?t/','congiunzione','ma; però; tuttavia'],
+[26,'from','/fr?m/','preposizione','da; di; proveniente da'],
+[27,'by','/ba?/','preposizione','da; per; tramite; entro'],
+[28,'will','/w?l/','aux','volere; futuro; sarà'],
+[29,'or','/?r/','congiunzione','o; oppure'],
+[30,'say','/se?/','verbo','dire; affermare; dichiarare'],
+[31,'go','/go?/','verbo','andare; recarsi'],
+[32,'so','/so?/','congiunzione','così; quindi; perciò'],
+[33,'all','/?l/','aggettivo','tutto; tutti; ogni'],
+[34,'if','/?f/','congiunzione','se; qualora'],
+[35,'one','/w?n/','numero','uno; una; qualcuno'],
+[36,'would','/w?d/','aux','vorrebbe; condizionale; sarebbe'],
+[37,'about','/??ba?t/','preposizione','circa; su; riguardo a; di'],
+[38,'can','/kæn/','aux','potere; essere capace di'],
+[39,'which','/w?t?/','aggettivo','quale; che; il quale'],
+[40,'there','/ð??r/','avverbio','là; ci; lì; vi'],
+[41,'know','/no?/','verbo','sapere; conoscere'],
+[42,'more','/m?r/','aggettivo','più; di più; maggiore'],
+[43,'get','/g?t/','verbo','ottenere; prendere; ricevere'],
+[44,'who','/hu/','pronome','chi; che; il quale'],
+[45,'like','/la?k/','verbo','piacere; come; gradire'],
+[46,'when','/w?n/','avverbio','quando; nel momento in cui'],
+[47,'think','/???k/','verbo','pensare; credere; ritenere'],
+[48,'make','/me?k/','verbo','fare; creare; rendere'],
+[49,'time','/ta?m/','sostantivo','tempo; volta; periodo; ora'],
+[50,'see','/si/','verbo','vedere; guardare; capire'],
+[51,'what','/w?t/','avverbio','cosa; che cosa; quale'],
+[52,'up','/?p/','preposizione','su; in alto; verso l\'alto'],
+[53,'some','/s?m/','aggettivo','qualche; alcuni; un po\' di'],
+[54,'other','/??ð.?r/','aggettivo','altro; altri; diverso'],
+[55,'out','/a?t/','preposizione','fuori; all\'esterno'],
+[56,'good','/g?d/','aggettivo','buono; bene; bravo'],
+[57,'people','/?pi.p?l/','sostantivo','gente; persone; popolo'],
+[58,'year','/j??/','sostantivo','anno; annata'],
+[59,'take','/te?k/','verbo','prendere; afferrare; portare; assumere'],
+[60,'no','/no?/','avverbio','no; nessuno'],
+[61,'well','/w?l/','aggettivo','bene; bravo; in salute'],
+[62,'because','/b??k?z/','congiunzione','perché; poiché; dato che'],
+[63,'very','/?v?r.i/','avverbio','molto; assai'],
+[64,'just','/d??st/','avverbio','appena; solo; proprio; giusto'],
+[65,'come','/k?m/','verbo','venire; arrivare'],
+[66,'could','/k?d/','aux','poteva; avrebbe potuto; riusciva a'],
+[67,'work','/w?rk/','sostantivo','lavoro; opera; funzionamento'],
+[68,'use','/jus/','verbo','usare; utilizzare; adoperare'],
+[69,'than','/ðæn/','congiunzione','di; che (comparativo)'],
+[70,'now','/na?/','avverbio','ora; adesso; al momento'],
+[71,'then','/ð?n/','avverbio','poi; allora; in seguito'],
+[72,'also','/?l.s??/','avverbio','anche; inoltre; pure'],
+[73,'into','/?n.tu/','preposizione','in; dentro; verso'],
+[74,'only','/?o?n.li/','avverbio','solo; soltanto; unicamente'],
+[75,'look','/l?k/','verbo','guardare; sembrare; osservare'],
+[76,'want','/w?nt/','verbo','volere; desiderare; voler bene'],
+[77,'give','/g?v/','verbo','dare; donare; offrire'],
+[78,'new','/nju/','aggettivo','nuovo; recente; fresco'],
+[79,'find','/fa?nd/','verbo','trovare; scoprire; ritenere'],
+[80,'day','/de?/','sostantivo','giorno; giornata'],
+[81,'part','/p?rt/','sostantivo','parte; pezzo; ruolo'],
+[82,'place','/ple?s/','sostantivo','posto; luogo; piazza'],
+[83,'back','/bæk/','avverbio','indietro; dietro; di ritorno'],
+[84,'first','/f?rst/','aggettivo','primo; iniziale; originale'],
+[85,'way','/we?/','sostantivo','modo; via; strada'],
+[86,'even','/?i.v?n/','avverbio','anche; persino; addirittura'],
+[87,'how','/ha?/','avverbio','come; quanto; in che modo'],
+[88,'call','/k?l/','verbo','chiamare; telefonare; denominare'],
+[89,'still','/st?l/','avverbio','ancora; sempre; comunque'],
+[90,'old','/?ld/','aggettivo','vecchio; anziano; antico'],
+[91,'own','/?n/','aggettivo','proprio; personale; privato'],
+[92,'should','/?d/','aux','dovrebbe; dovresti; sarebbe opportuno'],
+[93,'last','/læst/','aggettivo','ultimo; scorso; finale'],
+[94,'large','/l?rd?/','aggettivo','grande; ampio; largo'],
+[95,'long','/l??/','aggettivo','lungo; prolungato; esteso'],
+[96,'help','/h?lp/','verbo','aiutare; assistere; dare una mano'],
+[97,'high','/ha?/','aggettivo','alto; elevato; intenso'],
+[98,'different','/?d?f.?r.?nt/','aggettivo','diverso; differente; vario'],
+[99,'turn','/t?rn/','verbo','girare; voltare; trasformare'],
+[100,'each','/it?/','aggettivo','ogni; ciascuno; ognuno'],
+[101,'hand','/hænd/','sostantivo','mano; lancetta; applauso'],
+[102,'world','/w?rld/','sostantivo','mondo; terra; universo'],
+[103,'life','/la?f/','sostantivo','vita; esistenza; modo di vivere'],
+[104,'between','/b??twin/','preposizione','tra; fra; in mezzo a'],
+[105,'need','/nid/','verbo','aver bisogno; necessitare; occorrere'],
+[106,'home','/ho?m/','sostantivo','casa; dimora; patria'],
+[107,'face','/fe?s/','sostantivo','faccia; viso; volto'],
+[108,'tell','/t?l/','verbo','dire; raccontare; rivelare'],
+[109,'few','/fju/','aggettivo','pochi; alcuni; scarsi'],
+[110,'state','/ste?t/','sostantivo','stato; condizione; nazione'],
+[111,'little','/?l?t.?l/','aggettivo','piccolo; poco; breve'],
+[112,'feel','/fil/','verbo','sentire; provare; toccare'],
+[113,'leave','/liv/','verbo','lasciare; partire; andarsene'],
+[114,'real','/ri?l/','aggettivo','reale; vero; autentico'],
+[115,'seem','/sim/','verbo','sembrare; apparire; parere'],
+[116,'country','/?k?n.tri/','sostantivo','paese; nazione; campagna'],
+[117,'ask','/æsk/','verbo','chiedere; domandare; richiedere'],
+[118,'week','/wik/','sostantivo','settimana; sette giorni'],
+[119,'big','/b?g/','aggettivo','grande; grosso; importante'],
+[120,'point','/p??nt/','sostantivo','punto; punta; argomento'],
+[121,'right','/ra?t/','aggettivo','giusto; destro; corretto'],
+[122,'keep','/kip/','verbo','tenere; mantenere; conservare'],
+[123,'run','/r?n/','verbo','correre; gestire; funzionare'],
+[124,'let','/l?t/','verbo','lasciare; permettere; affittare'],
+[125,'show','/?o?/','verbo','mostrare; dimostrare; spettacolo'],
+[126,'often','/??.f?n/','avverbio','spesso; frequentemente'],
+[127,'live','/l?v/','verbo','vivere; abitare; risiedere'],
+[128,'move','/muv/','verbo','muovere; spostarsi; spostare'],
+[129,'important','/??m.p?r.t?nt/','aggettivo','importante; significativo; rilevante'],
+[130,'play','/ple?/','verbo','giocare; suonare; recitare'],
+[131,'small','/sm?l/','aggettivo','piccolo; esiguo; minuscolo'],
+[132,'number','/?n?m.b?r/','sostantivo','numero; cifra; quantità'],
+[133,'off','/?f/','avverbio','via; spento; lontano'],
+[134,'always','/?l.we?z/','avverbio','sempre; in ogni momento'],
+[135,'talk','/t?k/','verbo','parlare; chiacchierare; discutere'],
+[136,'together','/t??g?ð.?r/','avverbio','insieme; assieme; in compagnia'],
+[137,'child','/t?a?ld/','sostantivo','bambino; figlio; bimbo'],
+[138,'most','/mo?st/','aggettivo','la maggior parte; il più; massimo'],
+[139,'start','/st?rt/','verbo','iniziare; cominciare; partire'],
+[140,'open','/?o?.p?n/','verbo','aprire; dischiudere; inaugurare'],
+[141,'hand','/hænd/','sostantivo','mano; lancetta; applauso'],
+[142,'hear','/h??r/','verbo','sentire; udire; ascoltare'],
+[143,'something','/?s?m.???/','pronome','qualcosa; una cosa; qualcosa di'],
+[144,'seem','/sim/','verbo','sembrare; apparire; parere'],
+[145,'try','/tra?/','verbo','provare; cercare; tentare'],
+[146,'next','/n?kst/','aggettivo','prossimo; seguente; vicino'],
+[147,'hard','/h?rd/','aggettivo','duro; difficile; faticoso'],
+[148,'woman','/?w?m.?n/','sostantivo','donna; femmina; signora'],
+[149,'thing','/???/','sostantivo','cosa; oggetto; faccenda'],
+[150,'public','/?p?b.l?k/','aggettivo','pubblico; comune; aperto'],
+[151,'follow','/?f?l.o?/','verbo','seguire; seguire; accompagnare'],
+[152,'write','/ra?t/','verbo','scrivere; redigere; comporre'],
+[153,'stand','/stænd/','verbo','stare in piedi; sostenere; sopportare'],
+[154,'system','/?s?s.t?m/','sostantivo','sistema; apparato; metodo'],
+[155,'program','/?pro?.græm/','sostantivo','programma; piano; schema'],
+[156,'local','/?lo?.k?l/','aggettivo','locale; del posto; vicino'],
+[157,'question','/?kw?s.t??n/','sostantivo','domanda; questione; problema'],
+[158,'government','/?g?v.?rn.m?nt/','sostantivo','governo; amministrazione; potere'],
+[159,'second','/?s?k.?nd/','aggettivo','secondo; ulteriore; successivo'],
+[160,'become','/b??k?m/','verbo','diventare; trasformarsi; divenire'],
+[161,'group','/grup/','sostantivo','gruppo; insieme; categoria'],
+[162,'area','/??r.i.?/','sostantivo','area; zona; settore'],
+[163,'possible','/?p?s.?.b?l/','aggettivo','possibile; fattibile; realizzabile'],
+[164,'social','/?so?.??l/','aggettivo','sociale; pubblico; comunitario'],
+[165,'problem','/?pr?b.l?m/','sostantivo','problema; difficoltà; questione'],
+[166,'continue','/k?n?t?n.ju/','verbo','continuare; proseguire; persistere'],
+[167,'might','/ma?t/','aux','potrebbe; forse; è possibile'],
+[168,'change','/t?e?nd?/','verbo','cambiare; modificare; trasformare'],
+[169,'increase','/??n.kris/','verbo','aumentare; crescere; incrementare'],
+[170,'pay','/pe?/','verbo','pagare; ricompensare; corrispondere'],
+[171,'human','/?hju.m?n/','aggettivo','umano; dell\'uomo; della persona'],
+[172,'provide','/pr??va?d/','verbo','fornire; offrire; provvedere'],
+[173,'school','/skul/','sostantivo','scuola; istituto; classe'],
+[174,'service','/?s?r.v?s/','sostantivo','servizio; prestazione; assistenza'],
+[175,'mean','/min/','verbo','significare; intendere; volere dire'],
+[176,'put','/p?t/','verbo','mettere; porre; collocare'],
+[177,'between','/b??twin/','preposizione','tra; fra; in mezzo a'],
+[178,'great','/gre?t/','aggettivo','grande; ottimo; magnifico'],
+[179,'own','/?n/','aggettivo','proprio; personale; privato'],
+[180,'same','/se?m/','aggettivo','stesso; uguale; medesimo'],
+[181,'use','/jus/','sostantivo','uso; utilizzo; impiego'],
+[182,'early','/?r.li/','aggettivo','presto; precoce; mattutino'],
+[183,'learn','/l?rn/','verbo','imparare; apprendere; studiare'],
+[184,'add','/æd/','verbo','aggiungere; sommare; includere'],
+[185,'often','/??.f?n/','avverbio','spesso; frequentemente'],
+[186,'book','/b?k/','sostantivo','libro; prenotare; quaderno'],
+[187,'order','/?r.d?r/','sostantivo','ordine; commissione; sequenza'],
+[188,'research','/r??s?rt?/','sostantivo','ricerca; studio; indagine'],
+[189,'national','/?næ?.?n.?l/','aggettivo','nazionale; del paese; statale'],
+[190,'few','/fju/','aggettivo','pochi; alcuni; scarsi'],
+[191,'act','/ækt/','verbo','agire; recitare; comportarsi'],
+[192,'strong','/str??/','aggettivo','forte; robusto; potente'],
+[193,'fact','/fækt/','sostantivo','fatto; realtà; dato'],
+[194,'eye','/a?/','sostantivo','occhio; vista; sguardo'],
+[195,'low','/lo?/','aggettivo','basso; ridotto; scarso'],
+[196,'body','/?b?d.i/','sostantivo','corpo; organismo; cadavere'],
+[197,'black','/blæk/','aggettivo','nero; scuro; buio'],
+[198,'door','/d?r/','sostantivo','porta; ingresso; varco'],
+[199,'case','/ke?s/','sostantivo','caso; situazione; causa'],
+[200,'power','/?pa?.?r/','sostantivo','potere; energia; forza'],
+[201,'town','/ta?n/','sostantivo','città; paese; comune'],
+[202,'street','/strit/','sostantivo','strada; via; percorso'],
+[203,'land','/lænd/','sostantivo','terra; terreno; paese'],
+[204,'money','/?m?n.i/','sostantivo','denaro; soldi; moneta'],
+[205,'company','/?k?m.p?.ni/','sostantivo','azienda; compagnia; impresa'],
+[206,'sure','/?r/','aggettivo','sicuro; certo; convinto'],
+[207,'watch','/w?t?/','verbo','guardare; osservare; sorvegliare'],
+[208,'form','/f?rm/','sostantivo','forma; modulo; struttura'],
+[209,'voice','/v??s/','sostantivo','voce; tono; suono'],
+[210,'number','/?n?m.b?r/','sostantivo','numero; cifra; quantità'],
+[211,'book','/b?k/','verbo','prenotare; riservare; registrare'],
+[212,'lose','/luz/','verbo','perdere; smarrire; essere sconfitto'],
+[213,'door','/d?r/','sostantivo','porta; ingresso; varco'],
+[214,'yet','/j?t/','avverbio','ancora; già; finora'],
+[215,'plan','/plæn/','verbo','pianificare; progettare; organizzare'],
+[216,'live','/la?v/','aggettivo','vivo; in diretta; dal vivo'],
+[217,'increase','/??n.kris/','sostantivo','aumento; crescita; incremento'],
+[218,'report','/r??p?rt/','sostantivo','rapporto; relazione; resoconto'],
+[219,'mean','/min/','aggettivo','meschino; medio; avaro'],
+[220,'hold','/ho?ld/','verbo','tenere; reggere; contenere'],
+[221,'cut','/k?t/','verbo','tagliare; ridurre; incidere'],
+[222,'include','/??n.klud/','verbo','includere; comprendere; contenere'],
+[223,'cover','/?k?v.?r/','verbo','coprire; trattare; percorrere'],
+[224,'less','/l?s/','aggettivo','meno; inferiore; ridotto'],
+[225,'level','/?l?v.?l/','sostantivo','livello; grado; piano'],
+[226,'night','/na?t/','sostantivo','notte; sera; buio'],
+[227,'since','/s?ns/','preposizione','da; poiché; dal momento che'],
+[228,'air','/?r/','sostantivo','aria; atmosfera; ambiente'],
+[229,'interest','/?n.tr?st/','sostantivo','interesse; curiosità; vantaggio'],
+[230,'able','/?e?.b?l/','aggettivo','capace; in grado; abile'],
+[231,'far','/f?r/','aggettivo','lontano; distante; remoto'],
+[232,'fast','/fæst/','aggettivo','veloce; rapido; svelto'],
+[233,'line','/la?n/','sostantivo','linea; riga; fila'],
+[234,'month','/m?n?/','sostantivo','mese; periodo mensile'],
+[235,'bring','/br??/','verbo','portare; condurre; recare'],
+[236,'free','/fri/','aggettivo','libero; gratuito; disponibile'],
+[237,'happen','/?hæp.?n/','verbo','succedere; accadere; verificarsi'],
+[238,'actually','/?æk.t?u.?.li/','avverbio','in realtà; effettivamente; davvero'],
+[239,'process','/?pro?.s?s/','sostantivo','processo; procedura; metodo'],
+[240,'sort','/s?rt/','sostantivo','tipo; genere; specie'],
+[241,'close','/klo?z/','verbo','chiudere; avvicinarsi; terminare'],
+[242,'both','/bo?θ/','aggettivo','entrambi; tutti e due; ambedue'],
+[243,'past','/pæst/','aggettivo','passato; scorso; trascorso'],
+[244,'allow','/?la?/','verbo','permettere; consentire; autorizzare'],
+[245,'since','/s?ns/','congiunzione','poiché; dato che; da quando'],
+[246,'side','/sa?d/','sostantivo','lato; parte; fianco'],
+[247,'story','/?st?r.i/','sostantivo','storia; racconto; piano (edificio)'],
+[248,'become','/b??k?m/','verbo','diventare; trasformarsi; divenire'],
+[249,'kind','/ka?nd/','aggettivo','gentile; cortese; benevolo'],
+[250,'reach','/rit?/','verbo','raggiungere; arrivare; estendersi'],
+[251,'set','/s?t/','verbo','impostare; mettere; stabilire'],
+[252,'business','/?b?z.n?s/','sostantivo','affare; impresa; occupazione'],
+[253,'among','??m??/','preposizione','tra; fra; in mezzo a'],
+[254,'send','/s?nd/','verbo','inviare; mandare; trasmettere'],
+[255,'clear','/kl??r/','aggettivo','chiaro; limpido; evidente'],
+[256,'care','/k??r/','verbo','preoccuparsi; curare; importare'],
+[257,'understand','/?n.d?r?stænd/','verbo','capire; comprendere; intendere'],
+[258,'hard','/h?rd/','avverbio','duramente; intensamente; con forza'],
+[259,'believe','/b??liv/','verbo','credere; ritenere; pensare'],
+[260,'position','/p??z??.?n/','sostantivo','posizione; posto; ruolo'],
+[261,'draw','/dr?/','verbo','disegnare; attirare; tirare'],
+[262,'different','/?d?f.?r.?nt/','aggettivo','diverso; differente; vario'],
+[263,'return','/r??t?rn/','verbo','tornare; restituire; ritornare'],
+[264,'issue','/??.?u/','sostantivo','problema; questione; numero'],
+[265,'maybe','?me?.bi/','avverbio','forse; magari; probabilmente'],
+[266,'develop','/d??v?l.?p/','verbo','sviluppare; elaborare; crescere'],
+[267,'already','/?l.r?d.i/','avverbio','già; ormai; precedentemente'],
+[268,'result','/r??z?lt/','sostantivo','risultato; esito; conseguenza'],
+[269,'meet','/mit/','verbo','incontrare; conoscere; soddisfare'],
+[270,'control','/k?n?tro?l/','sostantivo','controllo; dominio; gestione'],
+[271,'able','/?e?.b?l/','aggettivo','capace; in grado; abile'],
+[272,'behind','/b??ha?nd/','preposizione','dietro; in ritardo; oltre'],
+[273,'health','/h?l?/','sostantivo','salute; benessere; condizioni fisiche'],
+[274,'person','/?p?r.s?n/','sostantivo','persona; individuo; essere umano'],
+[275,'window','/?w?n.do?/','sostantivo','finestra; vetrina; portello'],
+[276,'low','/lo?/','avverbio','in basso; piano; silenziosamente'],
+[277,'minute','/?m?n.?t/','sostantivo','minuto; momento; breve'],
+[278,'student','/?stju.d?nt/','sostantivo','studente; alunno; discepolo'],
+[279,'whether','/?w?ð.?r/','congiunzione','se; nel caso; indipendentemente da'],
+[280,'lead','/lid/','verbo','guidare; dirigere; condurre'],
+[281,'ready','/?r?d.i/','aggettivo','pronto; preparato; disponibile'],
+[282,'market','/?m?r.k?t/','sostantivo','mercato; piazza; sbocco'],
+[283,'happen','/?hæp.?n/','verbo','succedere; accadere; verificarsi'],
+[284,'family','/?fæm.?l.i/','sostantivo','famiglia; parenti; stirpe'],
+[285,'name','/ne?m/','sostantivo','nome; cognome; denominazione'],
+[286,'water','/?w?.t?r/','sostantivo','acqua; mare; liquido'],
+[287,'choose','/t?uz/','verbo','scegliere; selezionare; optare'],
+[288,'specific','/sp??s?f.?k/','aggettivo','specifico; preciso; determinato'],
+[289,'seem','/sim/','verbo','sembrare; apparire; parere'],
+[290,'spend','/sp?nd/','verbo','spendere; trascorrere; impiegare'],
+[291,'later','/?le?.t?r/','avverbio','dopo; più tardi; in seguito'],
+[292,'change','/t?e?nd?/','sostantivo','cambiamento; modifica; variazione'],
+[293,'room','/rum/','sostantivo','stanza; camera; spazio'],
+[294,'whether','/?w?ð.?r/','congiunzione','se; nel caso; indipendentemente da'],
+[295,'consider','/k?n?s?d.?r/','verbo','considerare; ritenere; valutare'],
+[296,'rate','/re?t/','sostantivo','tasso; velocità; tariffa'],
+[297,'couple','/?k?p.?l/','sostantivo','coppia; paio; due'],
+[298,'idea','/a???d.i.?/','sostantivo','idea; pensiero; concetto'],
+[299,'term','/t?rm/','sostantivo','termine; periodo; condizione'],
+[300,'type','/ta?p/','sostantivo','tipo; genere; varietà'],
+[301,'certainly','/?s?r.t?n.li/','avverbio','certamente; sicuramente; senz\'altro'],
+[302,'music','/?mju.z?k/','sostantivo','musica; melodia; arte sonora'],
+[303,'evidence','/??v.?.d?ns/','sostantivo','prova; evidenza; testimonianza'],
+[304,'simple','/?s?m.p?l/','aggettivo','semplice; facile; elementare'],
+[305,'rather','/?ræð.?r/','avverbio','piuttosto; abbastanza; invece'],
+[306,'white','/wa?t/','aggettivo','bianco; pallido; candido'],
+[307,'able','/?e?.b?l/','aggettivo','capace; in grado; abile'],
+[308,'food','/fud/','sostantivo','cibo; alimento; nutrimento'],
+[309,'possible','/?p?s.?.b?l/','aggettivo','possibile; fattibile; realizzabile'],
+[310,'nothing','/?n?θ.??/','pronome','niente; nulla; nessuna cosa'],
+[311,'mind','/ma?nd/','sostantivo','mente; intelletto; pensiero'],
+[312,'age','/e?d?/','sostantivo','età; era; epoca'],
+[313,'although','/??l.ðo?/','congiunzione','sebbene; benché; nonostante'],
+[314,'war','/w?r/','sostantivo','guerra; conflitto; lotta'],
+[315,'late','/le?t/','aggettivo','tardi; in ritardo; recente'],
+[316,'car','/k?r/','sostantivo','auto; macchina; vettura'],
+[317,'together','/t??g?ð.?r/','avverbio','insieme; assieme; in compagnia'],
+[318,'seem','/sim/','verbo','sembrare; apparire; parere'],
+[319,'mean','/min/','verbo','significare; intendere; volere dire'],
+[320,'above','??b?v/','preposizione','sopra; al di sopra; oltre'],
+[321,'offer','/??.f?r/','verbo','offrire; proporre; mettere a disposizione'],
+[322,'example','/??g.z?m.p?l/','sostantivo','esempio; caso; modello'],
+[323,'view','/vju/','sostantivo','vista; veduta; opinione'],
+[324,'expect','/??k.sp?kt/','verbo','aspettarsi; prevedere; attendersi'],
+[325,'hard','/h?rd/','aggettivo','duro; difficile; faticoso'],
+[326,'information','/?n.f?r?me?.??n/','sostantivo','informazione; notizia; dato'],
+[327,'court','/k?rt/','sostantivo','corte; tribunale; campo'],
+[328,'serious','/?s??r.i.?s/','aggettivo','serio; grave; importante'],
+[329,'never','/?n?v.?r/','avverbio','mai; in nessun caso'],
+[330,'type','/ta?p/','verbo','digitare; scrivere; tipizzare'],
+[331,'actually','/?æk.t?u.?.li/','avverbio','in realtà; effettivamente; davvero'],
+[332,'though','/ðo?/','congiunzione','sebbene; anche se; tuttavia'],
+[333,'question','/?kw?s.t??n/','verbo','interrogare; mettere in dubbio'],
+[334,'quickly','/?kw?k.li/','avverbio','velocemente; rapidamente; in fretta'],
+[335,'support','/s??p?rt/','verbo','supportare; sostenere; appoggiare'],
+[336,'include','/??n.klud/','verbo','includere; comprendere; contenere'],
+[337,'history','/?h?s.t?r.i/','sostantivo','storia; cronaca; passato'],
+[338,'until','/?n.t?l/','preposizione','fino a; finché; non prima di'],
+[339,'specific','/sp??s?f.?k/','aggettivo','specifico; preciso; determinato'],
+[340,'plan','/plæn/','sostantivo','piano; progetto; programma'],
+[341,'moment','/?mo?.m?nt/','sostantivo','momento; istante; attimo'],
+[342,'community','/k??mju.n?.ti/','sostantivo','comunità; quartiere; gruppo sociale'],
+[343,'true','/tru/','aggettivo','vero; autentico; reale'],
+[344,'set','/s?t/','sostantivo','insieme; set; serie'],
+[345,'network','/?n?t.w?rk/','sostantivo','rete; network; sistema'],
+[346,'behind','/b??ha?nd/','preposizione','dietro; in ritardo; oltre'],
+[347,'especially','/??.sp??.?l.i/','avverbio','specialmente; soprattutto; in particolare'],
+[348,'age','/e?d?/','verbo','invecchiare; maturare; stagionare'],
+[349,'table','/?te?.b?l/','sostantivo','tavolo; tabella; prospetto'],
+[350,'open','/?o?.p?n/','aggettivo','aperto; libero; accessibile'],
+[351,'hand','/hænd/','verbo','passare; consegnare; distribuire'],
+[352,'type','/ta?p/','sostantivo','tipo; genere; varietà'],
+[353,'allow','??la?/','verbo','permettere; consentire; autorizzare'],
+[354,'president','/?pr?z.?.d?nt/','sostantivo','presidente; capo di stato; direttore'],
+[355,'present','/?pr?z.?nt/','aggettivo','presente; attuale; in corso'],
+[356,'role','/ro?l/','sostantivo','ruolo; parte; funzione'],
+[357,'usually','/?ju?.?u.?.li/','avverbio','di solito; normalmente; generalmente'],
+[358,'major','/?me?.d??r/','aggettivo','principale; maggiore; importante'],
+[359,'economy','/??k?n.?.mi/','sostantivo','economia; sistema economico'],
+[360,'situation','/?s?t?.u??e?.??n/','sostantivo','situazione; circostanza; condizione'],
+[361,'season','/?si.z?n/','sostantivo','stagione; periodo; tempo'],
+[362,'party','/?p?r.ti/','sostantivo','partito; festa; gruppo'],
+[363,'cut','/k?t/','sostantivo','taglio; riduzione; incisione'],
+[364,'space','/spe?s/','sostantivo','spazio; posto; area'],
+[365,'field','/fild/','sostantivo','campo; settore; terreno'],
+[366,'job','/d??b/','sostantivo','lavoro; impiego; compito'],
+[367,'short','/?rt/','aggettivo','corto; breve; basso'],
+[368,'hard','/h?rd/','aggettivo','duro; difficile; faticoso'],
+[369,'true','/tru/','aggettivo','vero; autentico; reale'],
+[370,'reason','/?ri.z?n/','sostantivo','ragione; motivo; causa'],
+[371,'recent','/?ri.s?nt/','aggettivo','recente; nuovo; attuale'],
+[372,'child','/t?a?ld/','sostantivo','bambino; figlio; bimbo'],
+[373,'course','/k?rs/','sostantivo','corso; percorso; rotta'],
+[374,'rise','/ra?z/','verbo','alzarsi; aumentare; sorgere'],
+[375,'fall','/f?l/','verbo','cadere; diminuire; scendere'],
+[376,'social','/?so?.??l/','aggettivo','sociale; pubblico; comunitario'],
+[377,'police','/p??lis/','sostantivo','polizia; forze dell\'ordine'],
+[378,'important','/??m.p?r.t?nt/','aggettivo','importante; significativo; rilevante'],
+[379,'issue','/??.?u/','verbo','emettere; pubblicare; distribuire'],
+[380,'price','/pra?s/','sostantivo','prezzo; costo; valore'],
+[381,'hospital','/?h?s.p?.t?l/','sostantivo','ospedale; clinica; nosocomio'],
+[382,'ability','/?b?l.?.ti/','sostantivo','capacità; abilità; talento'],
+[383,'office','/??.f?s/','sostantivo','ufficio; studio; carica'],
+[384,'full','/f?l/','aggettivo','pieno; completo; intero'],
+[385,'behind','/b??ha?nd/','avverbio','indietro; in ritardo; di rinforzo'],
+[386,'include','/??n.klud/','verbo','includere; comprendere; contenere'],
+[387,'low','/lo?/','aggettivo','basso; ridotto; scarso'],
+[388,'provide','/pr??va?d/','verbo','fornire; offrire; provvedere'],
+[389,'together','/t??g?ð.?r/','avverbio','insieme; assieme; in compagnia'],
+[390,'player','/?ple?.?r/','sostantivo','giocatore; musicista; protagonista'],
+[391,'force','/f?rs/','verbo','forzare; costringere; obbligare'],
+[392,'already','/?l.r?d.i/','avverbio','già; ormai; precedentemente'],
+[393,'fine','/fa?n/','aggettivo','bene; ottimo; fine'],
+[394,'rate','/re?t/','verbo','valutare; classificare; stimare'],
+[395,'win','/w?n/','verbo','vincere; conquistare; guadagnare'],
+[396,'left','/l?ft/','aggettivo','sinistra; restante; rimasto'],
+[397,'break','/bre?k/','verbo','rompere; spezzare; interrompere'],
+[398,'drive','/dra?v/','verbo','guidare; spingere; motivare'],
+[399,'deal','/dil/','sostantivo','affare; accordo; trattativa'],
+[400,'buy','/ba?/','verbo','comprare; acquistare; procurarsi'],
+[401,'role','/ro?l/','sostantivo','ruolo; parte; funzione'],
+[402,'throughout','/?ru?a?t/','preposizione','per tutto; dall\'inizio alla fine'],
+[403,'knowledge','/?n?l.?d?/','sostantivo','conoscenza; sapere; cultura'],
+[404,'especially','/??.sp??.?l.i/','avverbio','specialmente; soprattutto; in particolare'],
+[405,'house','/ha?s/','sostantivo','casa; abitazione; dimora'],
+[406,'move','/muv/','sostantivo','mossa; movimento; spostamento'],
+[407,'hold','/ho?ld/','sostantivo','presa; controllo; stiva'],
+[408,'party','/?p?r.ti/','verbo','festeggiare; fare festa'],
+[409,'enter','/?n.t?r/','verbo','entrare; accedere; iscriversi'],
+[410,'pass','/pæs/','verbo','passare; superare; sorpassare'],
+[411,'method','/?m?θ.?d/','sostantivo','metodo; procedura; approccio'],
+[412,'perhaps','/p?r?hæps/','avverbio','forse; magari; probabilmente'],
+[413,'possible','/?p?s.?.b?l/','aggettivo','possibile; fattibile; realizzabile'],
+[414,'service','/?s?r.v?s/','verbo','servire; riparare; manutenere'],
+[415,'able','/?e?.b?l/','aggettivo','capace; in grado; abile'],
+[416,'difficult','/?d?f.?.k?lt/','aggettivo','difficile; arduo; complicato'],
+[417,'concern','/k?n?s?rn/','sostantivo','preoccupazione; interesse; riguardo'],
+[418,'event','/??v?nt/','sostantivo','evento; avvenimento; caso'],
+[419,'experience','/??k.sp??r.i.?ns/','sostantivo','esperienza; pratica; vissuto'],
+[420,'cause','/k?z/','sostantivo','causa; motivo; ragione'],
+[421,'political','/p??l?t.?.k?l/','aggettivo','politico; di partito; governativo'],
+[422,'force','/f?rs/','sostantivo','forza; potenza; esercito'],
+[423,'pay','/pe?/','sostantivo','paga; stipendio; retribuzione'],
+[424,'certain','/?s?r.t?n/','aggettivo','certo; sicuro; determinato'],
+[425,'since','/s?ns/','avverbio','da; da allora; nel frattempo'],
+[426,'product','/?pr?d.?kt/','sostantivo','prodotto; articolo; merce'],
+[427,'focus','/?fo?.k?s/','verbo','concentrarsi; mettere a fuoco; mirare'],
+[428,'hold','/ho?ld/','verbo','tenere; reggere; contenere'],
+[429,'interest','/?n.tr?st/','verbo','interessare; incuriosire; coinvolgere'],
+[430,'study','/?st?d.i/','verbo','studiare; analizzare; esaminare'],
+[431,'across','??kr?s/','preposizione','attraverso; dall\'altra parte; in tutta'],
+[432,'road','/ro?d/','sostantivo','strada; via; percorso'],
+[433,'value','/?væl.ju/','sostantivo','valore; importanza; principio'],
+[434,'available','??ve?.l?.b?l/','aggettivo','disponibile; accessibile; libero'],
+[435,'natural','/?næt??.?l/','aggettivo','naturale; spontaneo; innato'],
+[436,'indeed','/??n.did/','avverbio','davvero; in effetti; certamente'],
+[437,'move','/muv/','verbo','muovere; spostarsi; spostare'],
+[438,'require','/r??kwa??r/','verbo','richiedere; esigere; necessitare'],
+[439,'contain','/k?n?te?n/','verbo','contenere; includere; limitare'],
+[440,'white','/wa?t/','sostantivo','bianco; persona bianca; albume'],
+[441,'morning','/?m?r.n??/','sostantivo','mattina; mattino; alba'],
+[442,'economic','/?i.k??n?m.?k/','aggettivo','economico; finanziario; conveniente'],
+[443,'speak','/spik/','verbo','parlare; discorrere; pronunciare'],
+[444,'age','/e?d?/','sostantivo','età; era; epoca'],
+[445,'point','/p??nt/','verbo','indicare; puntare; segnalare'],
+[446,'especially','/??.sp??.?l.i/','avverbio','specialmente; soprattutto; in particolare'],
+[447,'stop','/st?p/','verbo','fermare; smettere; arrestare'],
+[448,'teacher','/?ti.t??r/','sostantivo','insegnante; professore; maestro'],
+[449,'present','/?pr?z.?nt/','verbo','presentare; offrire; consegnare'],
+[450,'figure','/?f?g.j?r/','sostantivo','figura; numero; personaggio'],
+[451,'miss','/m?s/','verbo','mancare; perdere; sbagliare'],
+[452,'important','/??m.p?r.t?nt/','aggettivo','importante; significativo; rilevante'],
+[453,'apply','??pla?/','verbo','applicare; richiedere; iscriversi'],
+[454,'specific','/sp??s?f.?k/','aggettivo','specifico; preciso; determinato'],
+[455,'economic','/?i.k??n?m.?k/','aggettivo','economico; finanziario; conveniente'],
+[456,'report','/r??p?rt/','verbo','riferire; riportare; segnalare'],
+[457,'expect','/??k.sp?kt/','verbo','aspettarsi; prevedere; attendersi'],
+[458,'hope','/ho?p/','verbo','sperare; augurarsi; aver fiducia'],
+[459,'simple','/?s?m.p?l/','aggettivo','semplice; facile; elementare'],
+[460,'effect','??f?kt/','sostantivo','effetto; risultato; impatto'],
+[461,'response','/r??sp?ns/','sostantivo','risposta; reazione; replica'],
+[462,'begin','/b??g?n/','verbo','iniziare; cominciare; avviare'],
+[463,'meet','/mit/','verbo','incontrare; conoscere; soddisfare'],
+[464,'produce','/pr??djus/','verbo','produrre; generare; creare'],
+[465,'form','/f?rm/','verbo','formare; costituire; modellare'],
+[466,'general','/?d??n.?r.?l/','aggettivo','generale; comune; globale'],
+[467,'human','/?hju.m?n/','sostantivo','essere umano; uomo; persona'],
+[468,'suggest','/s?d?d??st/','verbo','suggerire; proporre; consigliare'],
+[469,'building','/?b?l.d??/','sostantivo','edificio; palazzo; costruzione'],
+[470,'personal','/?p?r.s?n.?l/','aggettivo','personale; privato; individuale'],
+[471,'quality','/?kw?l.?.ti/','sostantivo','qualità; livello; caratteristica'],
+[472,'power','/?pa?.?r/','verbo','alimentare; azionare; potenziare'],
+[473,'already','/?l.r?d.i/','avverbio','già; ormai; precedentemente'],
+[474,'late','/le?t/','avverbio','tardi; in ritardo; recentemente'],
+[475,'hour','?a?.?r/','sostantivo','ora; sessanta minuti'],
+[476,'black','/blæk/','sostantivo','nero; colore nero; persona di colore'],
+[477,'understand','/?n.d?r?stænd/','verbo','capire; comprendere; intendere'],
+[478,'cost','/k?st/','sostantivo','costo; prezzo; spesa'],
+[479,'stand','/stænd/','sostantivo','supporto; postazione; tribuna'],
+[480,'situation','/?s?t?.u??e?.??n/','sostantivo','situazione; circostanza; condizione'],
+[481,'manage','/?mæn.?d?/','verbo','gestire; riuscire; amministrare'],
+[482,'economy','/??k?n.?.mi/','sostantivo','economia; sistema economico'],
+[483,'open','/?o?.p?n/','verbo','aprire; dischiudere; inaugurare'],
+[484,'large','/l?rd?/','aggettivo','grande; ampio; largo'],
+[485,'change','/t?e?nd?/','verbo','cambiare; modificare; trasformare'],
+[486,'close','/klo?s/','aggettivo','vicino; intimo; stretto'],
+[487,'continue','/k?n?t?n.ju/','verbo','continuare; proseguire; persistere'],
+[488,'attack','??tæk/','verbo','attaccare; aggredire; assalire'],
+[489,'fight','/fa?t/','verbo','combattere; lottare; litigare'],
+[490,'kill','/k?l/','verbo','uccidere; ammazzare; eliminare'],
+[491,'light','/la?t/','sostantivo','luce; lampada; chiarore'],
+[492,'remember','/r??m?m.b?r/','verbo','ricordare; rammentare; non dimenticare'],
+[493,'able','/?e?.b?l/','aggettivo','capace; in grado; abile'],
+[494,'experience','/??k.sp??r.i.?ns/','verbo','sperimentare; vivere; provare'],
+[495,'true','/tru/','aggettivo','vero; autentico; reale'],
+[496,'money','/?m?n.i/','sostantivo','denaro; soldi; moneta'],
+[497,'difficult','/?d?f.?.k?lt/','aggettivo','difficile; arduo; complicato'],
+[498,'rather','/?ræð.?r/','avverbio','piuttosto; abbastanza; invece'],
+[499,'change','/t?e?nd?/','verbo','cambiare; modificare; trasformare'],
+[500,'special','/?sp??.?l/','aggettivo','speciale; particolare; straordinario'],
+[501,'lose','/luz/','verbo','perdere; smarrire; essere sconfitto'],
+[502,'perhaps','/p?r?hæps/','avverbio','forse; magari; probabilmente'],
+[503,'age','/e?d?/','sostantivo','età; era; epoca'],
+[504,'test','/t?st/','sostantivo','test; prova; esame'],
+[505,'test','/t?st/','verbo','testare; provare; esaminare'],
+[506,'cost','/k?st/','verbo','costare; valere; avere un costo'],
+[507,'note','/no?t/','sostantivo','nota; appunto; banconota'],
+[508,'quite','/kwa?t/','avverbio','abbastanza; piuttosto; del tutto'],
+[509,'official','??f??.?l/','aggettivo','ufficiale; formale; autorizzato'],
+[510,'cultural','/?k?l.t??r.?l/','aggettivo','culturale; artistico; intellettuale'],
+[511,'detail','/?di.te?l/','sostantivo','dettaglio; particolare; minuzia'],
+[512,'member','/?m?m.b?r/','sostantivo','membro; componente; socio'],
+[513,'create','/kri??e?t/','verbo','creare; realizzare; produrre'],
+[514,'model','/?m?d.?l/','sostantivo','modello; esempio; schema'],
+[515,'close','/klo?z/','verbo','chiudere; avvicinarsi; terminare'],
+[516,'size','/sa?z/','sostantivo','dimensione; taglia; misura'],
+[517,'claim','/kle?m/','verbo','affermare; dichiarare; rivendicare'],
+[518,'win','/w?n/','sostantivo','vittoria; successo; trionfo'],
+[519,'final','/?fa?.n?l/','aggettivo','finale; definitivo; conclusivo'],
+[520,'activity','/?k.t?v.?.ti/','sostantivo','attività; azione; iniziativa'],
+[521,'record','/?r?k.?rd/','sostantivo','record; registrazione; primato'],
+[522,'instead','/??n.st?d/','avverbio','invece; al posto; in sostituzione'],
+[523,'leader','/?li.d?r/','sostantivo','leader; capo; guida'],
+[524,'significant','/s?g.?n?f.?.k?nt/','aggettivo','significativo; importante; notevole'],
+[525,'best','/b?st/','aggettivo','migliore; ottimo; eccellente'],
+[526,'success','/s?k.?s?s/','sostantivo','successo; riuscita; traguardo'],
+[527,'relate','/r??le?t/','verbo','relazionare; collegare; riguardare'],
+[528,'fact','/fækt/','sostantivo','fatto; realtà; dato'],
+[529,'evidence','/?v?.d?ns/','sostantivo','prova; evidenza; testimonianza'],
+[530,'understand','/?n.d?r?stænd/','verbo','capire; comprendere; intendere'],
+[531,'win','/w?n/','verbo','vincere; conquistare; guadagnare'],
+[532,'ability','??b?l.?.ti/','sostantivo','capacità; abilità; talento'],
+[533,'consider','/k?n?s?d.?r/','verbo','considerare; ritenere; valutare'],
+[534,'program','/?pro?.græm/','verbo','programmare; pianificare; schedulare'],
+[535,'red','/r?d/','aggettivo','rosso; vermiglio; scarlatto'],
+[536,'specific','/sp??s?f.?k/','aggettivo','specifico; preciso; determinato'],
+[537,'issue','/??.?u/','sostantivo','problema; questione; numero'],
+[538,'feel','/fil/','verbo','sentire; provare; toccare'],
+[539,'price','/pra?s/','verbo','prezzare; valutare; tarare'],
+[540,'walk','/w?k/','verbo','camminare; passeggiare; andare a piedi'],
+[541,'white','/wa?t/','aggettivo','bianco; pallido; candido'],
+[542,'black','/blæk/','aggettivo','nero; scuro; buio'],
+[543,'deal','/dil/','verbo','occuparsi; trattare; distribuire'],
+[544,'effort','/?f.?rt/','sostantivo','sforzo; impegno; tentativo'],
+[545,'ready','/?r?d.i/','aggettivo','pronto; preparato; disponibile'],
+[546,'hold','/ho?ld/','verbo','tenere; reggere; contenere'],
+[547,'accept','?k.?s?pt/','verbo','accettare; ricevere; ammettere'],
+[548,'produce','/pr??djus/','verbo','produrre; generare; creare'],
+[549,'leader','/?li.d?r/','sostantivo','leader; capo; guida'],
+[550,'level','/?l?v.?l/','aggettivo','piano; livellato; orizzontale'],
+[551,'strong','/str??/','aggettivo','forte; robusto; potente'],
+[552,'police','/p??lis/','verbo','sorvegliare; controllare; pattugliare'],
+[553,'fall','/f?l/','sostantivo','caduta; autunno; declino'],
+[554,'receive','/r??siv/','verbo','ricevere; ottenere; accogliere'],
+[555,'across','??kr?s/','avverbio','attraverso; di traverso; dall\'altra parte'],
+[556,'red','/r?d/','sostantivo','rosso; colore rosso'],
+[557,'explain','/??k.sple?n/','verbo','spiegare; chiarire; illustrare'],
+[558,'position','/p??z??.?n/','verbo','posizionare; collocare; disporre'],
+[559,'increase','/??n.kris/','sostantivo','aumento; crescita; incremento'],
+[560,'approach','??pro?t?/','verbo','avvicinarsi; approcciare; affrontare'],
+[561,'approach','??pro?t?/','sostantivo','approccio; metodo; modo'],
+[562,'fast','/fæst/','avverbio','velocemente; rapidamente; in fretta'],
+[563,'land','/lænd/','verbo','atterrare; sbarcare; ottenere'],
+[564,'situation','/?s?t?.u??e?.??n/','sostantivo','situazione; circostanza; condizione'],
+[565,'note','/no?t/','verbo','notare; annotare; segnalare'],
+[566,'culture','/?k?l.t??r/','sostantivo','cultura; civiltà; coltura'],
+[567,'technology','/t?k.?n?l.?.d?i/','sostantivo','tecnologia; tecnica; sistema'],
+[568,'understand','/?n.d?r?stænd/','verbo','capire; comprendere; intendere'],
+[569,'effect','??f?kt/','verbo','effettuare; realizzare; attuare'],
+[570,'environmental','/?n.va?.r?n?m?n.t?l/','aggettivo','ambientale; ecologico; naturale'],
+[571,'cover','/?k?v.?r/','sostantivo','copertina; copertura; riparo'],
+[572,'sign','/sa?n/','sostantivo','segno; segnale; firma'],
+[573,'sign','/sa?n/','verbo','firmare; segnalare; indicare'],
+[574,'exist','/??g.z?st/','verbo','esistere; essere; trovarsi'],
+[575,'role','/ro?l/','sostantivo','ruolo; parte; funzione'],
+[576,'card','/k?rd/','sostantivo','carta; cartolina; tessera'],
+[577,'face','/fe?s/','verbo','affrontare; fronteggiare; guardare verso'],
+[578,'beyond','/bi??nd/','preposizione','oltre; al di là; più di'],
+[579,'team','/tim/','sostantivo','squadra; team; gruppo'],
+[580,'particular','/p?r?t?k.j?.l?r/','aggettivo','particolare; specifico; speciale'],
+[581,'free','/fri/','verbo','liberare; rilasciare; svincolare'],
+[582,'response','/r??sp?ns/','sostantivo','risposta; reazione; replica'],
+[583,'age','/e?d?/','sostantivo','età; era; epoca'],
+[584,'fire','?fa?.?r/','sostantivo','fuoco; incendio; fiamma'],
+[585,'fire','?fa?.?r/','verbo','sparare; licenziare; accendere'],
+[586,'positive','/?p?z.?.t?v/','aggettivo','positivo; ottimista; favorevole'],
+[587,'significant','/s?g.?n?f.?.k?nt/','aggettivo','significativo; importante; notevole'],
+[588,'religious','/r??l?d?.?s/','aggettivo','religioso; devoto; sacro'],
+[589,'voice','/v??s/','verbo','esprimere; enunciare; vocalizzare'],
+[590,'short','/?rt/','avverbio','brevemente; di poco; bruscamente'],
+[591,'wrong','/r??/','aggettivo','sbagliato; errato; ingiusto'],
+[592,'evidence','/?v?.d?ns/','verbo','dimostrare; provare; testimoniare'],
+[593,'manage','/?mæn.?d?/','verbo','gestire; riuscire; amministrare'],
+[594,'affect','??f?kt/','verbo','influenzare; colpire; commuovere'],
+[595,'sense','/s?ns/','sostantivo','senso; significato; percezione'],
+[596,'interest','/?n.tr?st/','sostantivo','interesse; curiosità; vantaggio'],
+[597,'particularly','/p?r?t?k.j?.l?r.li/','avverbio','particolarmente; in modo speciale'],
+[598,'safe','/se?f/','aggettivo','sicuro; al sicuro; sano'],
+[599,'recent','/?ri.s?nt/','aggettivo','recente; nuovo; attuale'],
+[600,'couple','/?k?p.?l/','verbo','accoppiare; unire; collegare'],
+[601,'record','/?r?k.?rd/','verbo','registrare; documentare; trascrivere'],
+[602,'share','/?r/','verbo','condividere; spartire; dividere'],
+[603,'base','/be?s/','sostantivo','base; fondamento; sede'],
+[604,'base','/be?s/','verbo','basare; fondare; stabilire'],
+[605,'occur','??k?r/','verbo','accadere; verificarsi; presentarsi'],
+[606,'course','/k?rs/','verbo','scorrere; percorrere; inseguire'],
+[607,'past','/pæst/','sostantivo','passato; storia; trascorso'],
+[608,'patient','/?pe?.??nt/','sostantivo','paziente; malato; degente'],
+[609,'democratic','/d?m??kræt.?k/','aggettivo','democratico; del popolo'],
+[610,'security','/s??kjr.?.ti/','sostantivo','sicurezza; protezione; garanzia'],
+[611,'standard','/?stæn.d?rd/','aggettivo','standard; normale; comune'],
+[612,'trial','/?tra?.?l/','sostantivo','processo; prova; tentativo'],
+[613,'treatment','/?trit.m?nt/','sostantivo','trattamento; cura; terapia'],
+[614,'deep','/dip/','aggettivo','profondo; intenso; grave'],
+[615,'care','/k??r/','sostantivo','cura; attenzione; assistenza'],
+[616,'doctor','/?d?k.t?r/','sostantivo','dottore; medico; chirurgo'],
+[617,'protect','/pr??t?kt/','verbo','proteggere; difendere; tutelare'],
+[618,'return','/r??t?rn/','sostantivo','ritorno; resa; rimpatrio'],
+[619,'heart','/h?rt/','sostantivo','cuore; centro; nucleo'],
+[620,'serve','/s?rv/','verbo','servire; prestare; soddisfare'],
+[621,'policy','/?p?l.?.si/','sostantivo','politica; norma; regola'],
+[622,'cut','/k?t/','verbo','tagliare; ridurre; incidere'],
+[623,'determine','/d??t?r.m?n/','verbo','determinare; stabilire; decidere'],
+[624,'result','/r??z?lt/','verbo','risultare; conseguire; derivare'],
+[625,'include','/??n.klud/','verbo','includere; comprendere; contenere'],
+[626,'possible','/?p?s.?.b?l/','aggettivo','possibile; fattibile; realizzabile'],
+[627,'certainly','/?s?r.t?n.li/','avverbio','certamente; sicuramente; senz\'altro'],
+[628,'church','/t??rt?/','sostantivo','chiesa; tempio; parrocchia'],
+[629,'add','/æd/','verbo','aggiungere; sommare; includere'],
+[630,'speak','/spik/','verbo','parlare; discorrere; pronunciare'],
+[631,'quickly','/?kw?k.li/','avverbio','velocemente; rapidamente; in fretta'],
+[632,'grow','/gro?/','verbo','crescere; sviluppare; coltivare'],
+[633,'class','/klæs/','sostantivo','classe; lezione; categoria'],
+[634,'opportunity','/?p.?r?tju.n?.ti/','sostantivo','opportunità; occasione; possibilità'],
+[635,'civil','/?s?v.?l/','aggettivo','civile; educato; cittadino'],
+[636,'actually','/?æk.t?u.?.li/','avverbio','in realtà; effettivamente; davvero'],
+[637,'fight','/fa?t/','sostantivo','lotta; combattimento; litigio'],
+[638,'instead','/??n.st?d/','avverbio','invece; al posto; in sostituzione'],
+[639,'third','/?rd/','aggettivo','terzo; terzultimo; trecentesimo'],
+[640,'understand','/?n.d?r?stænd/','verbo','capire; comprendere; intendere'],
+[641,'challenge','/?t?æl.?nd?/','sostantivo','sfida; problema; ostacolo'],
+[642,'move','/muv/','verbo','muovere; spostarsi; spostare'],
+[643,'deep','/dip/','avverbio','profondamente; in profondità; molto'],
+[644,'learn','/l?rn/','verbo','imparare; apprendere; studiare'],
+[645,'decide','/d??sa?d/','verbo','decidere; scegliere; stabilire'],
+[646,'mention','/?m?n.??n/','verbo','menzionare; citare; accennare'],
+[647,'environment','/??n.va?.r?n.m?nt/','sostantivo','ambiente; contesto; ecosistema'],
+[648,'official','??f??.?l/','sostantivo','funzionario; ufficiale; dirigente'],
+[649,'relationship','/r??le?.??n.??p/','sostantivo','relazione; rapporto; legame'],
+[650,'build','/b?ld/','verbo','costruire; edificare; sviluppare'],
+[651,'attack','??tæk/','sostantivo','attacco; aggressione; assalto'],
+[652,'parent','/?p??r.?nt/','sostantivo','genitore; padre; madre'],
+[653,'food','/fud/','sostantivo','cibo; alimento; nutrimento'],
+[654,'important','/??m.p?r.t?nt/','aggettivo','importante; significativo; rilevante'],
+[655,'loss','/l?s/','sostantivo','perdita; sconfitta; mancanza'],
+[656,'economic','/?i.k??n?m.?k/','aggettivo','economico; finanziario; conveniente'],
+[657,'hard','/h?rd/','aggettivo','duro; difficile; faticoso'],
+[658,'effort','/?f.?rt/','sostantivo','sforzo; impegno; tentativo'],
+[659,'clearly','/?kl??r.li/','avverbio','chiaramente; ovviamente; evidentemente'],
+[660,'energy','/?n.?r.d?i/','sostantivo','energia; forza; vigore'],
+[661,'investment','/?n.v?st.m?nt/','sostantivo','investimento; impiego; spesa'],
+[662,'medical','/?m?d.?.k?l/','aggettivo','medico; sanitario; clinico'],
+[663,'avoid','??v??d/','verbo','evitare; schivare; rifuggire'],
+[664,'laugh','/læf/','verbo','ridere; scoppiare a ridere; scherzare'],
+[665,'future','/?fju.t??r/','sostantivo','futuro; avvenire; domani'],
+[666,'against','??g?nst/','preposizione','contro; opposto; in contrasto a'],
+[667,'list','/l?st/','sostantivo','lista; elenco; registro'],
+[668,'opportunity','/?p.?r?tju.n?.ti/','sostantivo','opportunità; occasione; possibilità'],
+[669,'able','/?e?.b?l/','aggettivo','capace; in grado; abile'],
+[670,'cut','/k?t/','verbo','tagliare; ridurre; incidere'],
+[671,'break','/bre?k/','sostantivo','pausa; interruzione; rottura'],
+[672,'table','/?te?.b?l/','verbo','rimandare; posticipare; tabulare'],
+[673,'build','/b?ld/','verbo','costruire; edificare; sviluppare'],
+[674,'step','/st?p/','sostantivo','passo; gradino; fase'],
+[675,'final','/?fa?.n?l/','sostantivo','finale; conclusione; torneo'],
+[676,'himself','/h?m?s?lf/','pronome','lui stesso; se stesso'],
+[677,'share','/?r/','sostantivo','quota; azione; parte'],
+[678,'practice','/?præk.t?s/','sostantivo','pratica; esercizio; abitudine'],
+[679,'wonder','/?w?n.d?r/','verbo','chiedersi; meravigliarsi; stupirsi'],
+[680,'natural','/?næt??.?l/','aggettivo','naturale; spontaneo; innato'],
+[681,'allow','??la?/','verbo','permettere; consentire; autorizzare'],
+[682,'population','/?p?p.j??le?.??n/','sostantivo','popolazione; abitanti; gente'],
+[683,'spend','/sp?nd/','verbo','spendere; trascorrere; impiegare'],
+[684,'economic','/?i.k??n?m.?k/','aggettivo','economico; finanziario; conveniente'],
+[685,'fear','/f??r/','sostantivo','paura; timore; terrore'],
+[686,'fear','/f??r/','verbo','temere; aver paura; preoccuparsi'],
+[687,'truth','/tru?/','sostantivo','verità; realtà; fatto'],
+[688,'develop','/d??v?l.?p/','verbo','sviluppare; elaborare; crescere'],
+[689,'clear','/kl??r/','verbo','chiarire; sgombrare; liberare'],
+[690,'win','/w?n/','verbo','vincere; conquistare; guadagnare'],
+[691,'simply','/?s?m.pli/','avverbio','semplicemente; solo; unicamente'],
+[692,'player','/?ple?.?r/','sostantivo','giocatore; musicista; protagonista'],
+[693,'peace','/pis/','sostantivo','pace; tranquillità; armonia'],
+[694,'organization','/?r.g?n.??ze?.??n/','sostantivo','organizzazione; ente; struttura'],
+[695,'concern','/k?n?s?rn/','verbo','riguardare; preoccupare; interessare'],
+[696,'event','/??v?nt/','sostantivo','evento; avvenimento; caso'],
+[697,'light','/la?t/','aggettivo','leggero; chiaro; lieve'],
+[698,'significant','/s?g.?n?f.?.k?nt/','aggettivo','significativo; importante; notevole'],
+[699,'political','/p??l?t.?.k?l/','aggettivo','politico; di partito; governativo'],
+[700,'issue','/??.?u/','sostantivo','problema; questione; numero'],
+[701,'tough','/t?f/','aggettivo','duro; resistente; difficile'],
+[702,'civil','/?s?v.?l/','aggettivo','civile; educato; cittadino'],
+[703,'challenge','/?t?æl.?nd?/','verbo','sfidare; mettere in discussione'],
+[704,'produce','/pr??djus/','verbo','produrre; generare; creare'],
+[705,'drive','/dra?v/','sostantivo','guida; impulso; unità'],
+[706,'wall','/w?l/','sostantivo','muro; parete; barriera'],
+[707,'reduce','/r??djus/','verbo','ridurre; diminuire; tagliare'],
+[708,'knowledge','/?n?l.?d?/','sostantivo','conoscenza; sapere; cultura'],
+[709,'tend','/t?nd/','verbo','tendere; prendersi cura; badare'],
+[710,'rich','/r?t?/','aggettivo','ricco; abbondante; sostanzioso'],
+[711,'describe','/d??skra?b/','verbo','descrivere; illustrare; delineare'],
+[712,'image','/?m.?d?/','sostantivo','immagine; foto; visione'],
+[713,'especially','/??.sp??.?l.i/','avverbio','specialmente; soprattutto; in particolare'],
+[714,'security','/s??kjr.?.ti/','sostantivo','sicurezza; protezione; garanzia'],
+[715,'suggest','/s?d?d??st/','verbo','suggerire; proporre; consigliare'],
+[716,'support','/s??p?rt/','sostantivo','supporto; sostegno; appoggio'],
+[717,'significant','/s?g.?n?f.?.k?nt/','aggettivo','significativo; importante; notevole'],
+[718,'sense','/s?ns/','verbo','percepire; avvertire; intuire'],
+[719,'patient','/?pe?.??nt/','aggettivo','paziente; tollerante; calmo'],
+[720,'continue','/k?n?t?n.ju/','verbo','continuare; proseguire; persistere'],
+[721,'measure','/?m??.??r/','verbo','misurare; valutare; calcolare'],
+[722,'measure','/?m??.??r/','sostantivo','misura; provvedimento; dimensione'],
+[723,'surface','/?s?r.f?s/','sostantivo','superficie; esterno; faccia'],
+[724,'lead','/lid/','sostantivo','piombo; vantaggio; protagonista'],
+[725,'especially','/??.sp??.?l.i/','avverbio','specialmente; soprattutto; in particolare'],
+[726,'present','/?pr?z.?nt/','sostantivo','regalo; presente; dono'],
+[727,'control','/k?n?tro?l/','verbo','controllare; gestire; dominare'],
+[728,'international','??n.t?r?næ?.??n.?l/','aggettino','internazionale; mondiale; globale'],
+[729,'step','/st?p/','verbo','camminare; procedere; pestare'],
+[730,'reach','/rit?/','sostantivo','portata; raggiungimento; tratto'],
+[731,'indeed','/??n.did/','avverbio','davvero; in effetti; certamente'],
+[732,'wide','/wa?d/','aggettivo','largo; ampio; vasto'],
+[733,'practice','/?præk.t?s/','verbo','praticare; esercitarsi; allenarsi'],
+[734,'run','/r?n/','sostantivo','corsa; serie; produzione'],
+[735,'growth','/gro?θ/','sostantivo','crescita; sviluppo; aumento'],
+[736,'focus','/?fo?.k?s/','sostantivo','fuoco; centro; attenzione'],
+[737,'attack','??tæk/','verbo','attaccare; aggredire; assalire'],
+[738,'gun','/g?n/','sostantivo','pistola; arma; fucile'],
+[739,'democratic','/d?m??kræt.?k/','aggettivo','democratico; del popolo'],
+[740,'pressure','/?pr??.??r/','sostantivo','pressione; stress; insistenza'],
+[741,'election','??l?k.??n/','sostantivo','elezione; voto; scrutinio'],
+[742,'peace','/pis/','sostantivo','pace; tranquillità; armonia'],
+[743,'various','/?v??r.i.?s/','aggettivo','vario; diverso; molteplice'],
+[744,'relate','/r??le?t/','verbo','relazionare; collegare; riguardare'],
+[745,'cut','/k?t/','verbo','tagliare; ridurre; incidere'],
+[746,'beautiful','/?bju.t?.f?l/','aggettivo','bello; bellissimo; magnifico'],
+[747,'dark','/d?rk/','sostantivo','buio; oscurità; tenebre'],
+[748,'center','/?s?n.t?r/','sostantivo','centro; nucleo; punto centrale'],
+[749,'involve','??n.v?lv/','verbo','coinvolgere; implicare; riguardare'],
+[750,'ready','/?r?d.i/','aggettivo','pronto; preparato; disponibile'],
+[751,'military','/?m?l.?.t?r.i/','aggettivo','militare; dell\'esercito; armato'],
+[752,'especially','/??.sp??.?l.i/','avverbio','specialmente; soprattutto; in particolare'],
+[753,'air','/?r/','verbo','arieggiare; trasmettere; ventilare'],
+[754,'break','/bre?k/','verbo','rompere; spezzare; interrompere'],
+[755,'describe','/d??skra?b/','verbo','descrivere; illustrare; delineare'],
+[756,'carry','/?kær.i/','verbo','portare; trasportare; reggere'],
+[757,'exactly','/??g.zækt.li/','avverbio','esattamente; precisamente; appunto'],
+[758,'current','/?k?r.?nt/','aggettivo','attuale; corrente; presente'],
+[759,'control','/k?n?tro?l/','verbo','controllare; gestire; dominare'],
+[760,'oil','/?l/','sostantivo','olio; petrolio; grasso'],
+[761,'analysis','??næl.?.s?s/','sostantivo','analisi; studio; esame'],
+[762,'identify','/a???d?n.t?.fa?/','verbo','identificare; riconoscere; individuare'],
+[763,'agreement','??gri.m?nt/','sostantivo','accordo; intesa; consenso'],
+[764,'vote','/vo?t/','verbo','votare; eleggere; esprimere'],
+[765,'vote','/vo?t/','sostantivo','voto; scelta; suffragio'],
+[766,'wrong','/r??/','avverbio','sbagliato; in modo errato'],
+[767,'benefit','/?b?n.?.f?t/','sostantivo','beneficio; vantaggio; prestazione'],
+[768,'official','??f??.?l/','aggettivo','ufficiale; formale; autorizzato'],
+[769,'tough','/t?f/','avverbio','duramente; con forza; decisamente'],
+[770,'respond','/r??sp?nd/','verbo','rispondere; reagire; replicare'],
+[771,'cause','/k?z/','verbo','causare; provocare; generare'],
+[772,'effect','??f?kt/','sostantivo','effetto; risultato; impatto'],
+[773,'exactly','/??g.zækt.li/','avverbio','esattamente; precisamente; appunto'],
+[774,'movement','/?muv.m?nt/','sostantivo','movimento; spostamento; moto'],
+[775,'situation','/?s?t?.u??e?.??n/','sostantivo','situazione; circostanza; condizione'],
+[776,'figure','/?f?g.j?r/','verbo','figurare; immaginare; calcolare'],
+[777,'specific','/sp??s?f.?k/','aggettivo','specifico; preciso; determinato'],
+[778,'involve','??n.v?lv/','verbo','coinvolgere; implicare; riguardare'],
+[779,'present','/?pr?z.?nt/','aggettivo','presente; attuale; in corso'],
+[780,'exist','/??g.z?st/','verbo','esistere; essere; trovarsi'],
+[781,'cultural','/?k?l.t??r.?l/','aggettivo','culturale; artistico; intellettuale'],
+[782,'military','/?m?l.?.t?r.i/','sostantivo','militare; esercito; truppe'],
+[783,'organization','/?r.g?n.??ze?.??n/','sostantivo','organizzazione; ente; struttura'],
+[784,'deal','/dil/','verbo','occuparsi; trattare; distribuire'],
+[785,'gun','/g?n/','verbo','sparare; accelerare; puntare'],
+[786,'simple','/?s?m.p?l/','aggettivo','semplice; facile; elementare'],
+[787,'recently','/?ri.s?nt.li/','avverbio','recentemente; ultimamente; di recente'],
+[788,'certainly','/?s?r.t?n.li/','avverbio','certamente; sicuramente; senz\'altro'],
+[789,'particularly','/p?r?t?k.j?.l?r.li/','avverbio','particolarmente; in modo speciale'],
+[790,'rich','/r?t?/','aggettivo','ricco; abbondante; sostanzioso'],
+[791,'practice','/?præk.t?s/','verbo','praticare; esercitarsi; allenarsi'],
+[792,'exactly','/??g.zækt.li/','avverbio','esattamente; precisamente; appunto'],
+[793,'population','/?p?p.j??le?.??n/','sostantivo','popolazione; abitanti; gente'],
+[794,'important','/??m.p?r.t?nt/','aggettivo','importante; significativo; rilevante'],
+[795,'technology','/t?k.?n?l.?.d?i/','sostantivo','tecnologia; tecnica; sistema'],
+[796,'decision','/d??s??.?n/','sostantivo','decisione; scelta; sentenza'],
+[797,'treatment','/?trit.m?nt/','sostantivo','trattamento; cura; terapia'],
+[798,'pressure','/?pr??.??r/','verbo','fare pressione; spingere; insistere'],
+[799,'raise','/re?z/','verbo','alzare; aumentare; crescere'],
+[800,'peace','/pis/','sostantivo','pace; tranquillità; armonia'],
+[801,'total','/?to?.t?l/','aggettivo','totale; complessivo; assoluto'],
+[802,'ability','??b?l.?.ti/','sostantivo','capacità; abilità; talento'],
+[803,'experience','/??k.sp??r.i.?ns/','sostantivo','esperienza; pratica; vissuto'],
+[804,'difficult','/?d?f.?.k?lt/','aggettivo','difficile; arduo; complicato'],
+[805,'benefit','/?b?n.?.f?t/','verbo','beneficiare; giovare; avvantaggiarsi'],
+[806,'truth','/tru?/','sostantivo','verità; realtà; fatto'],
+[807,'question','/?kw?s.t??n/','sostantivo','domanda; questione; problema'],
+[808,'challenge','/?t?æl.?nd?/','verbo','sfidare; mettere in discussione'],
+[809,'consider','/k?n?s?d.?r/','verbo','considerare; ritenere; valutare'],
+[810,'significant','/s?g.?n?f.?.k?nt/','aggettivo','significativo; importante; notevole'],
+[811,'international','??n.t?r?næ?.??n.?l/','aggettivo','internazionale; mondiale; globale'],
+[812,'deep','/dip/','aggettivo','profondo; intenso; grave'],
+[813,'cold','/ko?ld/','sostantivo','freddo; raffreddore; bassa temperatura'],
+[814,'cold','/ko?ld/','aggettivo','freddo; gelido; fresco'],
+[815,'hot','/h?t/','aggettivo','caldo; rovente; piccante'],
+[816,'hot','/h?t/','avverbio','caldo; con ardore; intensamente'],
+[817,'activity','/?k.t?v.?.ti/','sostantivo','attività; azione; iniziativa'],
+[818,'blood','/bl?d/','sostantivo','sangue; lignaggio; temperamento'],
+[819,'wide','/wa?d/','avverbio','ampiamente; largamente; del tutto'],
+[820,'movement','/?muv.m?nt/','sostantivo','movimento; spostamento; moto'],
+[821,'current','/?k?r.?nt/','sostantivo','corrente; flusso; tendenza'],
+[822,'defense','/d??f?ns/','sostantivo','difesa; protezione; scudo'],
+[823,'growth','/gro?θ/','sostantivo','crescita; sviluppo; aumento'],
+[824,'detail','/?di.te?l/','verbo','dettagliare; descrivere; specificare'],
+[825,'blood','/bl?d/','verbo','insanguinare; far sanguinare'],
+[826,'war','/w?r/','verbo','combattere; guerreggiare; lottare'],
+[827,'decision','/d??s??.?n/','sostantivo','decisione; scelta; sentenza'],
+[828,'trial','/?tra?.?l/','aggettivo','sperimentale; di prova; pilota'],
+[829,'network','/?n?t.w?rk/','verbo','fare networking; collegare in rete'],
+[830,'analysis','??næl.?.s?s/','sostantivo','analisi; studio; esame'],
+[831,'identify','/a???d?n.t?.fa?/','verbo','identificare; riconoscere; individuare'],
+[832,'agreement','??gri.m?nt/','sostantivo','accordo; intesa; consenso'],
+[833,'beautiful','/?bju.t?.f?l/','aggettivo','bello; bellissimo; magnifico'],
+[834,'benefit','/?b?n.?.f?t/','sostantivo','beneficio; vantaggio; prestazione'],
+[835,'investment','/?n.v?st.m?nt/','sostantivo','investimento; impiego; spesa'],
+[836,'religious','/r??l?d?.?s/','aggettivo','religioso; devoto; sacro'],
+[837,'wonder','/?w?n.d?r/','sostantivo','meraviglia; stupore; prodigio'],
+[838,'standard','/?stæn.d?rd/','sostantivo','standard; norma; livello'],
+[839,'movement','/?muv.m?nt/','sostantivo','movimento; spostamento; moto'],
+[840,'wall','/w?l/','verbo','murare; chiudere; isolare'],
+[841,'election','??l?k.??n/','sostantivo','elezione; voto; scrutinio'],
+[842,'growth','/gro?θ/','sostantivo','crescita; sviluppo; aumento'],
+[843,'laugh','/læf/','sostantivo','risata; riso; ilarità'],
+[844,'church','/t??rt?/','verbo','portare in chiesa; officiare'],
+[845,'competition','/?k?m.p??t??.?n/','sostantivo','competizione; gara; concorrenza'],
+[846,'scene','/sin/','sostantivo','scena; scenario; luogo'],
+[847,'fund','/f?nd/','sostantivo','fondo; finanziamento; capitale'],
+[848,'fund','/f?nd/','verbo','finanziare; sovvenzionare; stanziare'],
+[849,'choose','/t?uz/','verbo','scegliere; selezionare; optare'],
+[850,'various','/?v??r.i.?s/','aggettivo','vario; diverso; molteplice'],
+[851,'fear','/f??r/','verbo','temere; aver paura; preoccuparsi'],
+[852,'suffer','/?s?f.?r/','verbo','soffrire; patire; subire'],
+[853,'throw','/?ro?/','verbo','lanciare; gettare; tirare'],
+[854,'task','/tæsk/','sostantivo','compito; incarico; mansione'],
+[855,'normal','/?n?r.m?l/','aggettivo','normale; ordinario; standard'],
+[856,'goal','/go?l/','sostantivo','obiettivo; gol; traguardo'],
+[857,'associate','??so?.?i?e?t/','verbo','associare; collegare; accoppiare'],
+[858,'blue','/blu/','aggettivo','blu; azzurro; triste'],
+[859,'positive','/?p?z.?.t?v/','aggettivo','positivo; ottimista; favorevole'],
+[860,'option','/?p.??n/','sostantivo','opzione; scelta; alternativa'],
+[861,'box','/b?ks/','sostantivo','scatola; box; cassetta'],
+[862,'huge','/hjud?/','aggettivo','enorme; gigantesco; immenso'],
+[863,'message','/?m?s.?d?/','sostantivo','messaggio; testo; comunicazione'],
+[864,'instance','??n.st?ns/','sostantivo','esempio; caso; istanza'],
+[865,'style','/sta?l/','sostantivo','stile; moda; eleganza'],
+[866,'refer','/r??f?r/','verbo','riferirsi; rimandare; fare riferimento'],
+[867,'cold','/ko?ld/','aggettivo','freddo; gelido; fresco'],
+[868,'push','/p??/','verbo','spingere; pressare; premere'],
+[869,'quarter','/?kw?r.t?r/','sostantivo','quarto; trimestre; quartiere'],
+[870,'assume','??sum/','verbo','presumere; dare per scontato; supporre'],
+[871,'baby','/?be?.bi/','sostantivo','bambino; bebè; neonato'],
+[872,'successful','/s?k?s?s.f?l/','aggettivo','di successo; fortunato; riuscito'],
+[873,'sing','/s??/','verbo','cantare; intonare; modulare'],
+[874,'doubt','/da?t/','sostantivo','dubbio; incertezza; perplessità'],
+[875,'competition','/?k?m.p??t??.?n/','sostantivo','competizione; gara; concorrenza'],
+[876,'theory','/??.ri/','sostantivo','teoria; ipotesi; tesi'],
+[877,'propose','/pr??po?z/','verbo','proporre; avanzare; suggerire'],
+[878,'reference','/?r?f.?r.?ns/','sostantivo','riferimento; citazione; fonte'],
+[879,'argument','/?r.gj?.m?nt/','sostantivo','argomento; discussione; controversia'],
+[880,'adult','/?æd.?lt/','sostantivo','adulto; maggiorenne; persona matura'],
+[881,'fly','/fla?/','verbo','volare; pilotare; scappare'],
+[882,'document','/?d?k.j?.m?nt/','sostantivo','documento; atto; certificato'],
+[883,'pattern','/?pæt.?rn/','sostantivo','modello; schema; motivo'],
+[884,'application','/?æp.l??ke?.??n/','sostantivo','applicazione; domanda; richiesta'],
+[885,'hot','/h?t/','aggettivo','caldo; rovente; piccante'],
+[886,'obviously','/?b.v?.?s.li/','avverbio','ovviamente; chiaramente; palesemente'],
+[887,'unclear','/??n.kl??r/','aggettivo','poco chiaro; ambiguo; incerto'],
+[888,'bill','/b?l/','sostantivo','conto; banconota; bolletta'],
+[889,'search','/s?rt?/','verbo','cercare; ricercare; perquisire'],
+[890,'separate','/?s?p.??re?t/','verbo','separare; dividere; distaccare'],
+[891,'central','/?s?n.tr?l/','aggettivo','centrale; principale; fondamentale'],
+[892,'career','/k??r??r/','sostantivo','carriera; professione; percorso'],
+[893,'anyway','/?n.i?we?/','avverbio','comunque; in ogni caso; ad ogni modo'],
+[894,'speech','/spit?/','sostantivo','discorso; parlato; orazione'],
+[895,'dog','/d?g/','sostantivo','cane; cucciolo; bastardo'],
+[896,'officer','?.f?.s?r/','sostantivo','ufficiale; agente; funzionario'],
+[897,'throughout','/?ru?a?t/','preposizione','per tutto; dall\'inizio alla fine'],
+[898,'oil','/?l/','sostantivo','olio; petrolio; carburante'],
+[899,'dress','/dr?s/','verbo','vestirsi; abbigliarsi; indossare'],
+[900,'profit','/?pr?f.?t/','sostantivo','profitto; guadagno; utile'],
+[901,'guess','/g?s/','verbo','indovinare; supporre; immaginare'],
+[902,'fun','/f?n/','aggettivo','divertente; piacevole; allegro'],
+[903,'protect','/pr??t?kt/','verbo','proteggere; difendere; tutelare'],
+[904,'resource','/r??s?rs/','sostantivo','risorsa; mezzo; fonte'],
+[905,'science','?sa?.?ns/','sostantivo','scienza; disciplina scientifica'],
+[906,'disease','/d??ziz/','sostantivo','malattia; morbo; patologia'],
+[907,'balance','?bæl.?ns/','verbo','bilanciare; equilibrare; pareggiare'],
+[908,'damage','?dæm.?d?/','sostantivo','danno; deterioramento; avaria'],
+[909,'basis','?be?.s?s/','sostantivo','base; fondamento; punto di partenza'],
+[910,'author','?.??r/','sostantivo','autore; scrittore; autrice'],
+[911,'basic','?be?.s?k/','aggettivo','di base; fondamentale; elementare'],
+[912,'encourage','/??nk?r.?d?/','verbo','incoraggiare; stimolare; incentivare'],
+[913,'hair','/h??r/','sostantivo','capelli; pelo; chioma'],
+[914,'male','/me?l/','aggettivo','maschio; maschile'],
+[915,'operate','??.??re?t/','verbo','operare; funzionare; gestire'],
+[916,'reflect','/r??fl?kt/','verbo','riflettere; specchiarsi; meditare'],
+[917,'exercise','??k.s?r?sa?z/','sostantivo','esercizio; allenamento; pratica'],
+[918,'useful','?jus.f?l/','aggettivo','utile; pratico; vantaggioso'],
+[919,'restaurant','?r?s.t??r?nt/','sostantivo','ristorante; locale; trattoria'],
+[920,'income','??n.k?m/','sostantivo','reddito; entrate; guadagno'],
+[921,'property','?pr?p.?r.ti/','sostantivo','proprietà; bene; immobile'],
+[922,'previous','?pri.vi.?s/','aggettivo','precedente; scorso; anteriore'],
+[923,'dark','/d?rk/','aggettivo','scuro; buio; tenebroso'],
+[924,'imagine','??mæd?.?n/','verbo','immaginare; figurarsi; fantasticare'],
+[925,'strict','/str?kt/','aggettivo','severo; rigido; stretto; rigoroso'],
+[926,'earn','/?rn/','verbo','guadagnare; meritare; percepire'],
+[927,'daughter','?d?.t?r/','sostantivo','figlia; figliola'],
+[928,'post','/po?st/','verbo','pubblicare; inviare; affiggere'],
+[929,'newspaper','?nuz?pe?.p?r/','sostantivo','giornale; quotidiano; testata'],
+[930,'define','/d??fa?n/','verbo','definire; determinare; delimitare'],
+[931,'conclusion','/k?n?klu.??n/','sostantivo','conclusione; fine; deduzione'],
+[932,'clock','/kl?k/','sostantivo','orologio; sveglia; pendola'],
+[933,'everybody','??v.ri?b?.di/','pronome','tutti; ognuno; ciascuno'],
+[934,'weekend','?wik??nd/','sostantivo','fine settimana; weekend'],
+[935,'perform','/p?r?f?rm/','verbo','eseguire; esibirsi; recitare'],
+[936,'professional','/pr??f??.?.nl/','aggettivo','professionale; esperto; qualificato'],
+[937,'mine','/ma?n/','pronome','mio; il mio; miniera'],
+[938,'debate','/d??be?t/','sostantivo','dibattito; discussione; confronto'],
+[939,'memory','?m?m.?.ri/','sostantivo','memoria; ricordo; mente'],
+[940,'green','/grin/','aggettivo','verde; ecologico; inesperto'],
+[941,'song','/s??/','sostantivo','canzone; brano; melodia'],
+[942,'object','?b?d??kt/','verbo','opporsi; protestare; obiettare'],
+[943,'maintain','/me?n?te?n/','verbo','mantenere; conservare; sostenere'],
+[944,'credit','?kr?d.?t/','sostantivo','credito; merito; riconoscimento'],
+[945,'ring','/r??/','sostantivo','anello; squillo; ring'],
+[946,'discover','/d??sk?v.?r/','verbo','scoprire; trovare; individuare'],
+[947,'dead','/d?d/','aggettivo','morto; defunto; spento'],
+[948,'afternoon','?æf.t?r?nun/','sostantivo','pomeriggio; dopo pranzo'],
+[949,'prefer','/pr??f?r/','verbo','preferire; gradire; prediligere'],
+[950,'extend','??kst?nd/','verbo','estendere; prolungare; allungare'],
+[951,'possibility','?p?s.??b?l.?.ti/','sostantivo','possibilità; eventualità; ipotesi'],
+[952,'direction','/d??r?k.??n/','sostantivo','direzione; orientamento; indicazione'],
+[953,'facility','/f??s?l.?.ti/','sostantivo','struttura; impianto; servizio'],
+[954,'variety','/v??ra?.?.ti/','sostantivo','varietà; diversità; gamma'],
+[955,'daily','?de?.li/','avverbio','quotidianamente; ogni giorno'],
+[956,'clothes','/klo?ðz/','sostantivo','vestiti; abbigliamento; indumenti'],
+[957,'screen','/skrin/','sostantivo','schermo; display; protezione'],
+[958,'track','/træk/','verbo','seguire; monitorare; tracciare'],
+[959,'dance','/dæns/','verbo','ballare; danzare; cimentarsi'],
+[960,'completely','/k?m?plit.li/','avverbio','completamente; del tutto; interamente'],
+[961,'female','?fi.me?l/','aggettivo','femmina; femminile'],
+[962,'responsibility','/r??sp?n.s??b?l.?.ti/','sostantivo','responsabilità; obbligo; dovere'],
+[963,'original','??r?d?.?.nl/','aggettivo','originale; autentico; genuino'],
+[964,'sister','?s?s.t?r/','sostantivo','sorella; suora'],
+[965,'rock','/r?k/','sostantivo','roccia; sasso; rock'],
+[966,'dream','/drim/','sostantivo','sogno; desiderio; visione'],
+[967,'nor','/n?r/','congiunzione','né... né; nemmeno'],
+[968,'university','?ju.n??v?r.s?.ti/','sostantivo','università; ateneo; facoltà'],
+[969,'easily','?i.z?.li/','avverbio','facilmente; senza difficoltà; agevolmente'],
+[970,'agency','/?e?.d??n.si/','sostantivo','agenzia; ente; organismo'],
+[971,'dollar','/?d?.l?r/','sostantivo','dollaro; valuta americana'],
+[972,'garden','/?g?r.dn/','sostantivo','giardino; orto; parco'],
+[973,'fix','/f?ks/','verbo','riparare; sistemare; aggiustare'],
+[974,'ahead','/??h?d/','avverbio','avanti; in anticipo; più avanti'],
+[975,'cross','/kr?s/','verbo','attraversare; incrociare; superare'],
+[976,'airport','/eəp?rt/','sostantivo','aeroporto'],
+[977,'candidate','/?kæn.d?.de?t/','sostantivo','candidato; aspirante; concorrente'],
+[978,'weight','/we?t/','sostantivo','peso; carico; importanza'],
+[979,'legal','/?li.g?l/','aggettivo','legale; giuridico; lecito'],
+[980,'proposal','/pr??po?.z?l/','sostantivo','proposta; progetto; piano'],
+[981,'version','/?v?r.??n/','sostantivo','versione; edizione; variante'],
+[982,'conversation','/?k?n.v?r?se?.??n/','sostantivo','conversazione; dialogo; chiacchierata'],
+[983,'somebody','/?s?m.b?.di/','pronome','qualcuno; una persona'],
+[984,'pound','/pa?nd/','sostantivo','libbra; sterlina; peso'],
+[985,'magazine','/?mæg.??zin/','sostantivo','rivista; magazine; periodico'],
+[986,'shape','/?e?p/','sostantivo','forma; sagoma; silhouette'],
+[987,'sea','/si/','sostantivo','mare; oceano; distesa acqua'],
+[988,'immediately','/??mi.di.?t.li/','avverbio','immediatamente; subito; istante'],
+[989,'welcome','/?w?l.k?m/','aggettivo','benvenuto; gradito; accetto'],
+[990,'smile','/sma?l/','verbo','sorridere; fare un sorriso'],
+[991,'communication','/k??mju.n??ke?.??n/','sostantivo','comunicazione; scambio informazioni'],
+[992,'agent','/?e?.d??nt/','sostantivo','agente; rappresentante; intermediario'],
+[993,'traditional','/tr??d??.?.n?l/','aggettivo','tradizionale; classico; convenzionale'],
+[994,'replace','/r??ple?s/','verbo','sostituire; rimpiazzare; surrogare'],
+[995,'judge','/d??d?/','verbo','giudicare; valutare; sentenziare'],
+[996,'herself','/h?r?s?lf/','pronome','lei stessa; se stessa'],
+[997,'suddenly','/?s?d?n.li/','avverbio','improvvisamente; di colpo'],
+[998,'generation','/?d??n.??re?.??n/','sostantivo','generazione; epoca; coorte'],
+[999,'estimate','/??s.t?.m?t/','sostantivo','stima; calcolo; preventivo'],
+[1000,'favorite','/?fe?v.r?t/','aggettivo','preferito; favorito; prediletto'],
+];
+
+// ─── FUNZIONI PRINCIPALI (CORRETTE) ─────────────────────────────────────────
+let S = 1, W = 10;
+let words = [];
+let currentIdx = 0;
+let drill = [];
+let stats = {correct: 0, wrong: 0};
+let recognition = null;
+let speechSupported = false;
+let drillCurrentIdx = 0;
+let drillCurrentWord = null;
+let selectedCats = new Set(['sostantivo','verbo','aggettivo','avverbio']);
+let exerciseMode = 'en';
+let wordVisible = true;
+const MASK = '*****';
+let micActive = false, micEndTime = 0, accumulatedTranscript = '';
+let drillMicActive = false, drillMicEndTime = 0, accumulatedDrillTranscript = '';
+let _answered = false;
+let isListening = false;
+let drillRecognition = null;
+let confirmMicActive = false, confirmMicEndTime = 0, confirmRec = null;
+
+function getWords(S, W) {
+  const eligible = [];
+  for (let i = S - 1; i < RAW.length && eligible.length < W * 3; i++) {
+    const row = RAW[i];
+    if (selectedCats.has(row[3])) eligible.push(row);
+    if (eligible.length >= W * 3) break;
+  }
+  return shuffle(eligible.slice(0, W));
+}
+
+function shuffle(arr) {
+  if (arr.length <= 1) return arr;
+  const result = [...arr];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+function setMode(mode) {
+  exerciseMode = mode;
+  document.getElementById('mode-label').textContent = mode === 'en' ? 'EN → IT' : 'IT → EN';
+  const btnEn = document.getElementById('btn-mode-en');
+  const btnIt = document.getElementById('btn-mode-it');
+  if (mode === 'en') {
+    btnEn.style.background = 'var(--accent)'; btnEn.style.color = '#000';
+    btnIt.style.background = 'var(--surface)'; btnIt.style.color = '#888';
+  } else {
+    btnIt.style.background = 'var(--accent)'; btnIt.style.color = '#000';
+    btnEn.style.background = 'var(--surface)'; btnEn.style.color = '#888';
+  }
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function testAudio() {
+  const dbg = document.getElementById('audio-debug');
+  dbg.textContent = 'Provo...';
+  speakAsyncLang('Hello. Test. To be or not to be.', 'en-US');
+  dbg.textContent = '✓ Test avviato';
+}
+
+function startExercise() {
+  const sVal = parseInt(document.getElementById('input-S').value);
+  const wVal = parseInt(document.getElementById('input-W').value);
+  const errEl = document.getElementById('setup-error');
+  if (!sVal || sVal < 1 || sVal > 1000) {
+    errEl.textContent = 'Inserisci un numero valido per S (1–969)';
+    errEl.classList.add('show'); return;
+  }
+  if (!wVal || wVal < 1 || wVal > 100) {
+    errEl.textContent = 'Inserisci un numero valido per W (1–100)';
+    errEl.classList.add('show'); return;
+  }
+  errEl.classList.remove('show');
+  S = sVal; W = wVal;
+  buildCatScreen();
+  showScreen('screen-cats');
+}
+
+const ALL_CATS = ['aggettivo', 'articolo', 'aux', 'avverbio', 'congiunzione', 'numero', 'preposizione', 'pronome', 'sostantivo', 'verbo'];
+const DEFAULT_CATS = new Set(['sostantivo','verbo','aggettivo','avverbio']);
+
+function buildCatScreen() {
+  const listEl = document.getElementById('cat-list');
+  listEl.innerHTML = '';
+  const sorted = [...ALL_CATS].sort((a,b) => a.localeCompare(b));
+  sorted.forEach(cat => {
+    const isOn = selectedCats.has(cat);
+    const isDefault = DEFAULT_CATS.has(cat);
+    const div = document.createElement('div');
+    div.className = 'cat-toggle' + (isOn ? ' selected' : '');
+    div.dataset.cat = cat;
+    const badge = isDefault ? ' <span style="font-size:0.6rem;color:var(--accent);letter-spacing:0.1em;">DEFAULT</span>' : '';
+    div.innerHTML = `<span class="cat-toggle-label">${cat}${badge}</span><div class="cat-toggle-check">${isOn ? '✓' : ''}</div>`;
+    div.onclick = () => toggleCat(cat, div);
+    listEl.appendChild(div);
+  });
+}
+
+function toggleCat(cat, el) {
+  if (selectedCats.has(cat)) {
+    if (selectedCats.size <= 1) return;
+    selectedCats.delete(cat);
+    el.classList.remove('selected');
+    el.querySelector('.cat-toggle-check').textContent = '';
+  } else {
+    selectedCats.add(cat);
+    el.classList.add('selected');
+    el.querySelector('.cat-toggle-check').textContent = '✓';
+  }
+}
+
+function confirmCats() {
+  words = getWords(S, W);
+  if (words.length === 0) {
+    alert('Nessuna parola trovata con queste categorie da questa posizione.');
+    return;
+  }
+  W = words.length;
+  currentIdx = 0;
+  drill = [];
+  stats = {correct: 0, wrong: 0};
+  showScreen('screen-exercise');
+  showWord();
+}
+
+function setWordText(elementId, text) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  el.dataset.real = text;
+  el.textContent = wordVisible ? text : MASK;
+}
+
+function toggleWordVisibility() {
+  wordVisible = !wordVisible;
+  const el = document.getElementById('word-english');
+  if (el) {
+    if (!wordVisible) {
+      el.dataset.real = el.textContent;
+      el.textContent = MASK;
+    } else if (el.dataset.real) {
+      el.textContent = el.dataset.real;
+    }
+  }
+  const del = document.getElementById('drill-word');
+  if (del) {
+    if (!wordVisible) {
+      del.dataset.real = del.textContent;
+      del.textContent = MASK;
+    } else if (del.dataset.real) {
+      del.textContent = del.dataset.real;
+    }
+  }
+}
+
+function speakCurrentWord() {
+  if (words[currentIdx]) {
+    const w = words[currentIdx];
+    if (exerciseMode === 'en') {
+      const display = (w[3] === 'verbo') ? 'To ' + w[1] : w[1];
+      speakAsyncLang(display, 'en-US');
+    } else {
+      const firstTrans = w[4].split(';')[0].trim();
+      speakAsyncLang(firstTrans, 'it-IT');
+    }
+  }
+}
+
+function speakDrillWord() {
+  if (drillCurrentWord) {
+    const w = drillCurrentWord.word;
+    if (exerciseMode === 'en') {
+      speakAsyncLang((w[3] === 'verbo') ? 'To ' + w[1] : w[1], 'en-US');
+    } else {
+      speakAsyncLang(w[4].split(';')[0].trim(), 'it-IT');
+    }
+  }
+}
+
+async function speakAsyncLang(text, lang) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  return new Promise(resolve => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = lang;
+    utterance.rate = lang.startsWith('en') ? 0.7 : 0.85;
+    utterance.onend = resolve;
+    utterance.onerror = resolve;
+    window.speechSynthesis.speak(utterance);
+    setTimeout(resolve, Math.max(1500, text.length * 100));
+  });
+}
+
+function showWord() {
+  const w = words[currentIdx];
+  const catLabel = w[3].charAt(0).toUpperCase() + w[3].slice(1);
+  const display = (w[3] === 'verbo') ? 'To ' + w[1] : w[1];
+  
+  if (exerciseMode === 'en') {
+    document.getElementById('word-category').textContent = catLabel;
+    setWordText('word-english', display);
+  } else {
+    const firstTrans = w[4].split(';')[0].trim();
+    document.getElementById('word-category').textContent = catLabel;
+    setWordText('word-english', firstTrans);
+  }
+  
+  const pct = (currentIdx / W) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('ex-progress-label').textContent = `Parola ${currentIdx + 1} di ${W} da ${S}`;
+  
+  const db = document.getElementById('drill-badge');
+  if (drill.length > 0) {
+    db.style.display = 'flex';
+    document.getElementById('drill-count').textContent = drill.length;
+  } else {
+    db.style.display = 'none';
+  }
+
+  hideFeedback('feedback');
+  document.getElementById('transcript-preview').textContent = '';
+  document.getElementById('mic-icon').textContent = '🎤';
+  document.getElementById('mic-icon').style.background = 'var(--surface)';
+  document.getElementById('mic-area').classList.remove('listening');
+  micActive = false;
+
+  setTimeout(async () => {
+    const spokenText = exerciseMode === 'en' ? display : words[currentIdx][4].split(';')[0].trim();
+    const lang = exerciseMode === 'en' ? 'en-US' : 'it-IT';
+    await speakAsyncLang(spokenText, lang);
+    await sleep(800);
+    if (speechSupported) startListening();
+  }, 300);
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function startListening() {
+  if (!speechSupported || micActive) return;
+  micActive = true;
+  _answered = false;
+  accumulatedTranscript = '';
+  document.getElementById('transcript-preview').textContent = '';
+  document.getElementById('mic-area').classList.add('listening');
+  document.getElementById('mic-status').textContent = 'In ascolto... (10s)';
+  document.getElementById('mic-icon').textContent = '⏹';
+  document.getElementById('mic-icon').style.background = '#1a1a00';
+  playMicSound(true);
+  startRing('mic-ring');
+  
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = exerciseMode === 'en' ? 'it-IT' : 'en-US';
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  
+  recognition.onresult = (e) => {
+    let final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) final += e.results[i][0].transcript;
+    }
+    if (final && !_answered) {
+      _answered = true;
+      stopListening();
+      evaluateAnswer(final.trim().toLowerCase(), false);
+    }
+  };
+  
+  recognition.onend = () => {
+    if (micActive && !_answered) {
+      stopListening();
+      if (accumulatedTranscript.trim()) {
+        evaluateAnswer(accumulatedTranscript.trim().toLowerCase(), false);
+      }
+    }
+  };
+  
+  recognition.onerror = () => {
+    if (micActive && !_answered) stopListening();
+  };
+  
+  recognition.start();
+  setTimeout(() => { if (micActive && !_answered) stopListening(); }, 10000);
+}
+
+function stopListening() {
+  if (recognition) {
+    try { recognition.stop(); } catch(e) {}
+    recognition = null;
+  }
+  if (micActive) {
+    micActive = false;
+    stopRing('mic-ring');
+    playMicSound(false);
+    document.getElementById('mic-area').classList.remove('listening');
+    document.getElementById('mic-status').textContent = 'Tocca per rispondere';
+    document.getElementById('mic-icon').textContent = '🎤';
+    document.getElementById('mic-icon').style.background = 'var(--surface)';
+  }
+}
+
+function toggleListening() {
+  if (micActive) stopListening();
+  else startListening();
+}
+
+function submitManual() {
+  const val = document.getElementById('manual-text').value.trim().toLowerCase();
+  if (!val) return;
+  document.getElementById('manual-text').value = '';
+  stopListening();
+  evaluateAnswer(val, false);
+}
+
+function evaluateAnswer(answer, isDrill) {
+  if (answer === 'stop' || answer === 'stopp') {
+    stopListening();
+    showEnd();
+    return;
+  }
+  
+  const w = isDrill ? drillCurrentWord.word : words[currentIdx];
+  let translations, display;
+  if (exerciseMode === 'en') {
+    translations = w[4].split(';').map(t => t.trim().toLowerCase());
+    display = (w[3] === 'verbo') ? 'To ' + w[1] : w[1];
+  } else {
+    const verb = w[3] === 'verbo';
+    translations = [w[1].toLowerCase()];
+    if (verb) translations.push(('to ' + w[1]).toLowerCase());
+    display = (verb ? 'To ' + w[1] : w[1]);
+  }
+  
+  const correct = isCorrectAnswer(answer, translations);
+  
+  if (isDrill) {
+    showDrillFeedback(correct, w, display);
+    if (correct) {
+      drillCurrentWord.counter++;
+      if (drillCurrentWord.counter >= 3) {
+        drill = drill.filter(d => d !== drillCurrentWord);
+      }
+    } else {
+      drillCurrentWord.counter = 0;
+    }
+  } else {
+    showFeedback(correct, w, display);
+    if (!correct) {
+      const existing = drill.find(d => d.word[0] === w[0]);
+      if (!existing) drill.push({word: w, counter: 0});
+    }
+    if (correct) stats.correct++; else stats.wrong++;
+  }
+}
+
+function isCorrectAnswer(answer, translations) {
+  const answerParts = answer.split(/[,;]+/).map(p => p.trim()).filter(p => p.length > 0);
+  for (const part of answerParts) {
+    if (matchesSingle(part, translations)) return true;
+  }
+  return false;
+}
+
+function matchesSingle(answer, translations) {
+  const ansNorm = normalize(answer);
+  if (ansNorm.length === 0) return false;
+  for (const t of translations) {
+    const nt = normalize(t);
+    if (nt === ansNorm) return true;
+    if (ansNorm.length > 3 && levenshtein(ansNorm, nt) <= 1) return true;
+    const tWords = nt.split(/\s+/);
+    if (tWords.includes(ansNorm)) return true;
+  }
+  return false;
+}
+
+function normalize(s) {
+  return s.toLowerCase()
+    .replace(/[àáâãä]/g,'a').replace(/[èéêë]/g,'e')
+    .replace(/[ìíîï]/g,'i').replace(/[òóôõö]/g,'o')
+    .replace(/[ùúûü]/g,'u').replace(/[ç]/g,'c')
+    .replace(/[^a-z0-9\s]/g,'').trim();
+}
+
+function levenshtein(a, b) {
+  if (a.length > 8 || b.length > 8) return Math.abs(a.length - b.length);
+  const dp = Array.from({length: a.length+1}, (_, i) => 
+    Array.from({length: b.length+1}, (_, j) => i === 0 ? j : j === 0 ? i : 0));
+  for (let i = 1; i <= a.length; i++)
+    for (let j = 1; j <= b.length; j++)
+      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] :
+        1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+  return dp[a.length][b.length];
+}
+
+async function showFeedback(correct, word, display) {
+  const fb = document.getElementById('feedback');
+  const icon = document.getElementById('feedback-icon');
+  const text = document.getElementById('feedback-text');
+  fb.className = 'feedback show ' + (correct ? 'correct' : 'wrong');
+  icon.textContent = correct ? '✓' : '✗';
+
+  if (exerciseMode === 'en') {
+    if (correct) {
+      text.textContent = `Yes. ${display}.`;
+      await speakAsyncLang('Yes.', 'en-US');
+      await speakAsyncLang(display, 'en-US');
+    } else {
+      const firstTrans = word[4].split(';')[0].trim();
+      text.textContent = `No. ${firstTrans}.`;
+      await speakAsyncLang('No.', 'en-US');
+      await speakAsyncLang(firstTrans, 'it-IT');
+    }
+  } else {
+    if (correct) {
+      text.textContent = `Yes. ${display}.`;
+      await speakAsyncLang('Yes.', 'it-IT');
+      await speakAsyncLang(display, 'en-US');
+    } else {
+      text.textContent = `No. ${display}.`;
+      await speakAsyncLang('No.', 'it-IT');
+      await speakAsyncLang(display, 'en-US');
+    }
+  }
+  await sleep(2000);
+  nextWord();
+}
+
+function hideFeedback(id) {
+  document.getElementById(id).className = 'feedback';
+}
+
+function nextWord() {
+  currentIdx++;
+  if (currentIdx >= words.length) {
+    if (drill.length > 0) {
+      startDrill();
+    } else {
+      showEnd();
+    }
+  } else {
+    showWord();
+  }
+}
+
+function stopExercise() {
+  stopListening();
+  showEnd();
+}
+
+function startDrill() {
+  if (drill.length === 0) { showEnd(); return; }
+  document.getElementById('drill-confirm-count').textContent = drill.length;
+  showScreen('screen-drill-confirm');
+  speakAsyncLang(`Vuoi consolidare le ${drill.length} parole sbagliate?`, 'it-IT');
+  setTimeout(() => startConfirmMic(), 1000);
+}
+
+function startConfirmMic() {
+  if (!speechSupported || confirmMicActive) return;
+  confirmMicActive = true;
+  const icon = document.getElementById('confirm-mic-icon');
+  icon.textContent = '⏹';
+  icon.style.background = '#1a1a00';
+  startRing('confirm-mic-ring');
+  playMicSound(true);
+  
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  confirmRec = new SR();
+  confirmRec.lang = 'it-IT';
+  confirmRec.continuous = false;
+  confirmRec.interimResults = false;
+  confirmRec.onresult = (e) => {
+    const ans = e.results[0][0].transcript.trim().toLowerCase();
+    stopConfirmMic();
+    if (ans.includes('sì') || ans.includes('si') || ans.includes('yes') || ans.includes('ok')) {
+      confirmDrill(true);
+    } else {
+      confirmDrill(false);
+    }
+  };
+  confirmRec.onerror = () => { stopConfirmMic(); confirmDrill(false); };
+  confirmRec.start();
+  setTimeout(() => { if (confirmMicActive) stopConfirmMic(); }, 10000);
+}
+
+function stopConfirmMic() {
+  if (!confirmMicActive) return;
+  confirmMicActive = false;
+  if (confirmRec) { try { confirmRec.stop(); } catch(e) {} confirmRec = null; }
+  stopRing('confirm-mic-ring');
+  playMicSound(false);
+  const icon = document.getElementById('confirm-mic-icon');
+  if (icon) {
+    icon.textContent = '🎤';
+    icon.style.background = 'var(--surface)';
+  }
+}
+
+function confirmMicTap() {
+  if (confirmMicActive) stopConfirmMic();
+  else startConfirmMic();
+}
+
+function confirmDrill(yes) {
+  stopConfirmMic();
+  if (yes) {
+    showScreen('screen-drill');
+    nextDrillWord();
+  } else {
+    showEnd();
+  }
+}
+
+function nextDrillWord() {
+  if (drill.length === 0) { showEnd(); return; }
+  drillCurrentWord = drill[Math.floor(Math.random() * drill.length)];
+  const w = drillCurrentWord.word;
+  const catLabel = w[3].charAt(0).toUpperCase() + w[3].slice(1);
+  const display = (w[3] === 'verbo') ? 'To ' + w[1] : w[1];
+  
+  document.getElementById('drill-category').textContent = catLabel;
+  if (exerciseMode === 'en') {
+    setWordText('drill-word', display);
+  } else {
+    const firstTrans = w[4].split(';')[0].trim();
+    setWordText('drill-word', firstTrans);
+  }
+  
+  const dotsEl = document.getElementById('drill-dots');
+  dotsEl.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'drill-dot' + (i < drillCurrentWord.counter ? ' filled' : '');
+    dotsEl.appendChild(dot);
+  }
+  
+  hideFeedback('drill-feedback');
+  document.getElementById('drill-transcript').textContent = '';
+  
+  setTimeout(async () => {
+    const drillSpoken = exerciseMode === 'en' ? display : w[4].split(';')[0].trim();
+    const lang = exerciseMode === 'en' ? 'en-US' : 'it-IT';
+    await speakAsyncLang(drillSpoken, lang);
+    await sleep(800);
+    if (speechSupported) startDrillListening();
+  }, 300);
+}
+
+function startDrillListening() {
+  if (!speechSupported || drillMicActive) return;
+  drillMicActive = true;
+  _answered = false;
+  accumulatedDrillTranscript = '';
+  document.getElementById('drill-transcript').textContent = '';
+  document.getElementById('drill-mic-area').classList.add('listening');
+  document.getElementById('drill-mic-status').textContent = 'In ascolto... (10s)';
+  document.getElementById('drill-mic-icon').textContent = '⏹';
+  document.getElementById('drill-mic-icon').style.background = '#1a1a00';
+  playMicSound(true);
+  startRing('drill-mic-ring');
+  
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  drillRecognition = new SR();
+  drillRecognition.lang = exerciseMode === 'en' ? 'it-IT' : 'en-US';
+  drillRecognition.continuous = false;
+  drillRecognition.interimResults = true;
+  
+  drillRecognition.onresult = (e) => {
+    let final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) final += e.results[i][0].transcript;
+    }
+    if (final && !_answered) {
+      _answered = true;
+      stopDrillListening();
+      evaluateAnswer(final.trim().toLowerCase(), true);
+    }
+  };
+  
+  drillRecognition.onend = () => {
+    if (drillMicActive && !_answered) {
+      stopDrillListening();
+    }
+  };
+  
+  drillRecognition.onerror = () => {
+    if (drillMicActive && !_answered) stopDrillListening();
+  };
+  
+  drillRecognition.start();
+  setTimeout(() => { if (drillMicActive && !_answered) stopDrillListening(); }, 10000);
+}
+
+function stopDrillListening() {
+  if (drillRecognition) {
+    try { drillRecognition.stop(); } catch(e) {}
+    drillRecognition = null;
+  }
+  if (drillMicActive) {
+    drillMicActive = false;
+    stopRing('drill-mic-ring');
+    playMicSound(false);
+    document.getElementById('drill-mic-area').classList.remove('listening');
+    document.getElementById('drill-mic-status').textContent = 'Tocca per rispondere';
+    document.getElementById('drill-mic-icon').textContent = '🎤';
+    document.getElementById('drill-mic-icon').style.background = 'var(--surface)';
+  }
+}
+
+function toggleDrillListening() {
+  if (drillMicActive) stopDrillListening();
+  else startDrillListening();
+}
+
+function submitDrillManual() {
+  const val = document.getElementById('drill-manual-text').value.trim().toLowerCase();
+  if (!val) return;
+  document.getElementById('drill-manual-text').value = '';
+  stopDrillListening();
+  evaluateAnswer(val, true);
+}
+
+async function showDrillFeedback(correct, word, display) {
+  const fb = document.getElementById('drill-feedback');
+  const icon = document.getElementById('drill-feedback-icon');
+  const text = document.getElementById('drill-feedback-text');
+  fb.className = 'feedback show ' + (correct ? 'correct' : 'wrong');
+  icon.textContent = correct ? '✓' : '✗';
+
+  if (exerciseMode === 'en') {
+    if (correct) {
+      text.textContent = `Yes. ${display}.`;
+      await speakAsyncLang('Yes.', 'en-US');
+      await speakAsyncLang(display, 'en-US');
+    } else {
+      const firstTrans = word[4].split(';')[0].trim();
+      text.textContent = `No. ${firstTrans}.`;
+      await speakAsyncLang('No.', 'en-US');
+      await speakAsyncLang(firstTrans, 'it-IT');
+    }
+  } else {
+    if (correct) {
+      text.textContent = `Yes. ${display}.`;
+      await speakAsyncLang('Yes.', 'it-IT');
+      await speakAsyncLang(display, 'en-US');
+    } else {
+      text.textContent = `No. ${display}.`;
+      await speakAsyncLang('No.', 'it-IT');
+      await speakAsyncLang(display, 'en-US');
+    }
+  }
+  await sleep(2000);
+  nextDrillWord();
+}
+
+function showEnd() {
+  stopListening();
+  stopDrillListening();
+  const total = stats.correct + stats.wrong;
+  const pct = total > 0 ? Math.round((stats.correct / total) * 100) : 0;
+  document.getElementById('stat-correct').textContent = stats.correct;
+  document.getElementById('stat-wrong').textContent = stats.wrong;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-pct').textContent = pct + '%';
+  document.getElementById('stat-s').textContent = 'S=' + S + '  W=' + W;
+  showScreen('screen-end');
+}
+
+function repeatSame() {
+  words = getWords(S, W);
+  W = words.length;
+  currentIdx = 0; drill = []; stats = {correct:0, wrong:0};
+  showScreen('screen-exercise');
+  showWord();
+}
+
+function repeatNew() {
+  S = S + Math.floor(W / 2);
+  if (S > 969) S = 1;
+  words = getWords(S, W);
+  W = words.length;
+  currentIdx = 0; drill = []; stats = {correct:0, wrong:0};
+  showScreen('screen-exercise');
+  showWord();
+}
+
+function goHome() {
+  stopListening();
+  stopDrillListening();
+  showScreen('screen-setup');
+}
+
+function terminateExercise() {
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+  stopListening();
+  stopDrillListening();
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const endDiv = document.createElement('div');
+  endDiv.style.cssText = 'text-align:center;padding:60px 20px;font-family:Space Mono,monospace;color:var(--accent);font-size:1.2rem;';
+  endDiv.innerHTML = 'Esercizio terminato.<br><br><button class="btn btn-secondary" style="margin-top:20px;" onclick="location.reload()"><span class="arr">↺</span> Ricomincia</button>';
+  document.querySelector('.container').appendChild(endDiv);
+}
+
+function startRing(id) {
+  const r = document.getElementById(id);
+  if (!r) return;
+  r.style.transition = 'none';
+  r.style.strokeDashoffset = '0';
+  r.getBoundingClientRect();
+  r.style.transition = 'stroke-dashoffset 10000ms linear';
+  r.style.strokeDashoffset = '440';
+}
+
+function stopRing(id) {
+  const r = document.getElementById(id);
+  if (!r) return;
+  r.style.transition = 'none';
+  r.style.strokeDashoffset = '440';
+}
+
+function playMicSound(on) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.6, ctx.currentTime + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.15);
+    osc.frequency.setValueAtTime(on ? 880 : 440, ctx.currentTime);
+    osc.type = 'sine';
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.15);
+    osc.onended = () => ctx.close();
+  } catch(e) {}
+}
+
+window.onload = function() {
+  if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    speechSupported = true;
+  }
+  if (window.speechSynthesis) {
+    window.speechSynthesis.getVoices();
+  }
+};
+</script>
+</body>
+</html>
