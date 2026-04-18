@@ -509,7 +509,7 @@
 <div class="container">
   <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0 10px;">
     <span id="mode-label" style="font-weight:600;font-size:1rem;color:var(--accent);">EN → IT</span>
-    <span style="font-size:0.75rem;color:var(--muted);">DS2604181700</span>
+    <span style="font-size:0.75rem;color:var(--muted);">DS2604181800</span>
   </div>
 
   <!-- SETUP SCREEN -->
@@ -692,6 +692,61 @@ const MASK = '*****';
 let currentRecognition = null;
 let confirmRecognition = null;
 
+// Variabile per tracciare la migliore voce italiana
+let bestItalianVoice = null;
+
+function getBestItalianVoice() {
+    if (bestItalianVoice) return bestItalianVoice;
+    const voices = window.speechSynthesis.getVoices();
+    // Cerca voci italiane di qualità (Google, Alice, Federica)
+    const preferred = ['Google', 'Alice', 'Federica', 'Silvia', 'Luca', 'it-IT'];
+    for (const pref of preferred) {
+        const found = voices.find(v => v.lang === 'it-IT' && v.name.includes(pref));
+        if (found) {
+            bestItalianVoice = found;
+            return found;
+        }
+    }
+    // Qualsiasi voce italiana
+    bestItalianVoice = voices.find(v => v.lang === 'it-IT') || voices[0];
+    return bestItalianVoice;
+}
+
+function getBestEnglishVoice() {
+    const voices = window.speechSynthesis.getVoices();
+    const preferred = ['Google', 'Samantha', 'Karen', 'en-US'];
+    for (const pref of preferred) {
+        const found = voices.find(v => v.lang === 'en-US' && v.name.includes(pref));
+        if (found) return found;
+    }
+    return voices.find(v => v.lang === 'en-US') || voices[0];
+}
+
+async function speakAsyncLang(text, lang) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    return new Promise(resolve => {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = lang;
+        utterance.rate = 0.85;
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
+        
+        if (lang === 'it-IT') {
+            const voice = getBestItalianVoice();
+            if (voice) utterance.voice = voice;
+        } else if (lang === 'en-US') {
+            const voice = getBestEnglishVoice();
+            if (voice) utterance.voice = voice;
+        }
+        
+        utterance.onend = resolve;
+        utterance.onerror = resolve;
+        window.speechSynthesis.speak(utterance);
+        setTimeout(resolve, Math.max(1500, text.length * 100));
+    });
+}
+
 function getWords(S, W) {
   const eligible = [];
   for (let i = S - 1; i < RAW.length && eligible.length < W * 3; i++) {
@@ -831,20 +886,6 @@ function showToast(message) {
   setTimeout(() => toast.remove(), 2000);
 }
 
-async function speakAsyncLang(text, lang) {
-  if (!window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  return new Promise(resolve => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang;
-    utterance.rate = lang.startsWith('en') ? 0.7 : 0.85;
-    utterance.onend = resolve;
-    utterance.onerror = resolve;
-    window.speechSynthesis.speak(utterance);
-    setTimeout(resolve, Math.max(1500, text.length * 100));
-  });
-}
-
 function speakCurrentWord() {
   if (words[currentIdx]) {
     const w = words[currentIdx];
@@ -951,12 +992,16 @@ function startListening(isDrillMode = false) {
     currentRecognition.lang = exerciseMode === 'en' ? 'it-IT' : 'en-US';
     currentRecognition.continuous = false;
     currentRecognition.interimResults = true;
+    currentRecognition.maxAlternatives = 1;
     
     currentRecognition.onresult = (e) => {
       let final = '';
       for (let i = e.resultIndex; i < e.results.length; i++) {
         if (e.results[i].isFinal) {
           final += e.results[i][0].transcript;
+        } else if (!final && e.results[i][0].transcript) {
+          // Mostra anche risultati intermedi per feedback
+          document.getElementById(transcriptId).textContent = e.results[i][0].transcript;
         }
       }
       if (final) {
@@ -967,6 +1012,13 @@ function startListening(isDrillMode = false) {
     };
     
     currentRecognition.onend = () => {
+      if (currentRecognition && currentRecognition.isDrillMode === isDrillMode) {
+        stopListening(isDrillMode);
+      }
+    };
+    
+    currentRecognition.onerror = (e) => {
+      console.log('Recognition error:', e.error);
       if (currentRecognition && currentRecognition.isDrillMode === isDrillMode) {
         stopListening(isDrillMode);
       }
@@ -1035,27 +1087,34 @@ function startConfirmListening() {
     confirmRecognition.lang = 'it-IT';
     confirmRecognition.continuous = false;
     confirmRecognition.interimResults = true;
+    confirmRecognition.maxAlternatives = 3;
     
     confirmRecognition.onresult = (e) => {
       let final = '';
       for (let i = e.resultIndex; i < e.results.length; i++) {
         if (e.results[i].isFinal) {
           final += e.results[i][0].transcript;
+        } else {
+          document.getElementById('confirm-transcript').textContent = e.results[i][0].transcript;
         }
       }
       if (final) {
         document.getElementById('confirm-transcript').textContent = final;
         stopConfirmListening();
         const ans = final.trim().toLowerCase();
-        if (ans.includes('sì') || ans.includes('si') || ans.includes('yes')) {
+        if (ans.includes('sì') || ans.includes('si') || ans.includes('s') || ans === 'si' || ans === 'sì') {
           confirmDrill(true);
-        } else if (ans.includes('no')) {
+        } else if (ans.includes('no') || ans === 'no') {
           confirmDrill(false);
         }
       }
     };
     
     confirmRecognition.onend = () => {
+      if (confirmRecognition) stopConfirmListening();
+    };
+    
+    confirmRecognition.onerror = () => {
       if (confirmRecognition) stopConfirmListening();
     };
     
@@ -1110,14 +1169,20 @@ function normalize(s) {
 }
 
 function levenshtein(a, b) {
-  if (a.length > 8 || b.length > 8) return Math.abs(a.length - b.length);
-  const dp = Array.from({length: a.length+1}, (_, i) => 
-    Array.from({length: b.length+1}, (_, j) => i === 0 ? j : j === 0 ? i : 0));
-  for (let i = 1; i <= a.length; i++)
-    for (let j = 1; j <= b.length; j++)
-      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] :
-        1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
-  return dp[a.length][b.length];
+  const lenA = a.length, lenB = b.length;
+  if (lenA === 0) return lenB;
+  if (lenB === 0) return lenA;
+  if (Math.abs(lenA - lenB) > 2 && lenA > 5 && lenB > 5) return Math.abs(lenA - lenB);
+  const dp = Array.from({length: lenA + 1}, (_, i) => Array(lenB + 1).fill(0));
+  for (let i = 0; i <= lenA; i++) dp[i][0] = i;
+  for (let j = 0; j <= lenB; j++) dp[0][j] = j;
+  for (let i = 1; i <= lenA; i++) {
+    for (let j = 1; j <= lenB; j++) {
+      const cost = a[i-1] === b[j-1] ? 0 : 1;
+      dp[i][j] = Math.min(dp[i-1][j] + 1, dp[i][j-1] + 1, dp[i-1][j-1] + cost);
+    }
+  }
+  return dp[lenA][lenB];
 }
 
 function getTranslationsList(translationsStr) {
@@ -1141,8 +1206,9 @@ function isCorrectAnswer(answer, translationsStr) {
     for (const t of translations) {
       const nt = normalize(t);
       if (nt === ansNorm) return true;
-      if (ansNorm.length > 3 && levenshtein(ansNorm, nt) <= 1) return true;
+      if (ansNorm.length > 2 && levenshtein(ansNorm, nt) <= 1) return true;
       if (nt.split(/\s+/).includes(ansNorm)) return true;
+      if (ansNorm.length >= 3 && nt.length >= 3 && levenshtein(ansNorm.substring(0, Math.min(5, ansNorm.length)), nt.substring(0, Math.min(5, nt.length))) <= 1) return true;
     }
   }
   return false;
@@ -1395,7 +1461,12 @@ function startDrill() {
   document.getElementById('drill-confirm-count').textContent = drill.length;
   showScreen('screen-drill-confirm');
   const msg = `Vuoi consolidare le ${drill.length} parole sbagliate?`;
-  speakAsyncLang(msg, 'it-IT');
+  speakAsyncLang(msg, 'it-IT').then(() => {
+    setTimeout(() => {
+      playMicSound(true);
+      startConfirmListening();
+    }, 500);
+  });
 }
 
 function confirmDrill(yes) {
@@ -1479,6 +1550,15 @@ window.onload = function() {
   }
   if (window.speechSynthesis) {
     window.speechSynthesis.getVoices();
+    // Forza il caricamento delle voci
+    window.speechSynthesis.onvoiceschanged = () => {
+      getBestItalianVoice();
+      getBestEnglishVoice();
+    };
+    setTimeout(() => {
+      getBestItalianVoice();
+      getBestEnglishVoice();
+    }, 500);
   }
 };
 </script>
