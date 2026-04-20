@@ -241,29 +241,14 @@
     color: var(--bg);
   }
 
-  .waveform {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-    justify-content: center;
-    height: 30px;
-    margin-top: 5px;
-  }
-  .waveform .bar {
-    width: 4px;
-    height: 10px;
-    background: var(--accent);
-    border-radius: 2px;
-    animation: wave 0.8s ease-in-out infinite;
-  }
-  .waveform .bar:nth-child(1) { animation-delay: 0s; }
-  .waveform .bar:nth-child(2) { animation-delay: 0.1s; }
-  .waveform .bar:nth-child(3) { animation-delay: 0.2s; }
-  .waveform .bar:nth-child(4) { animation-delay: 0.3s; }
-  .waveform .bar:nth-child(5) { animation-delay: 0.4s; }
-  @keyframes wave {
-    0%, 100% { height: 8px; }
-    50% { height: 22px; }
+  /* Promemoria sopra il cerchio */
+  .prompt-hint {
+    font-size: 0.85rem;
+    color: #aaa;
+    text-align: center;
+    margin-bottom: 8px;
+    font-style: italic;
+    letter-spacing: 0.5px;
   }
 
   .mic-status {
@@ -277,16 +262,24 @@
   }
 
   .listening-feedback {
-    font-size: 0.9rem;
-    color: var(--accent2);
+    font-size: 1.2rem;
+    font-weight: bold;
     text-align: center;
-    font-style: italic;
-    min-height: 1.2em;
-    background: rgba(71,255,232,0.1);
-    padding: 6px 12px;
-    border-radius: 20px;
-    margin-top: 5px;
+    padding: 10px 16px;
+    border-radius: 40px;
+    margin-top: 8px;
     display: none;
+    background: var(--accent);
+    color: var(--bg);
+    letter-spacing: 1px;
+    animation: blink-feedback 0.8s ease-in-out infinite;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 15px var(--accent);
+  }
+
+  @keyframes blink-feedback {
+    0%, 100% { opacity: 1; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+    50% { opacity: 0.85; background: #d4e63e; box-shadow: 0 0 20px var(--accent); }
   }
 
   .feedback {
@@ -537,7 +530,7 @@
 <div class="container">
   <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0 10px;">
     <span id="mode-label" style="font-weight:600;font-size:1rem;color:var(--accent);">EN → IT</span>
-    <span style="font-size:0.75rem;color:var(--muted);">DS2604201200</span>
+    <span style="font-size:0.75rem;color:var(--muted);">DS2604201300</span>
   </div>
 
   <!-- SETUP SCREEN -->
@@ -588,15 +581,13 @@
 
     <div class="mic-area" id="mic-area">
       <button class="pause-btn" id="pause-btn" onclick="togglePause()" title="Pausa">⏸️</button>
+      <div class="prompt-hint">📢 La traduzione della parola è...</div>
       <div class="mic-wrap" onclick="toggleListening()">
         <div class="mic-icon" id="mic-icon">🎤</div>
         <svg class="mic-ring-svg" viewBox="0 0 150 150">
           <circle class="mic-ring-bg" cx="75" cy="75" r="70"/>
           <circle class="mic-ring-fg" id="mic-ring" cx="75" cy="75" r="70"/>
         </svg>
-      </div>
-      <div class="waveform" id="waveform" style="display:none;">
-        <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
       </div>
       <div class="mic-status" id="mic-status"></div>
       <div class="listening-feedback" id="listening-feedback">🎤 Sto ricevendo la tua traduzione...</div>
@@ -621,15 +612,13 @@
       <p style="font-size:0.78rem; color:var(--muted);">Ogni parola va tradotta correttamente 3 volte di fila.</p>
     </div>
     <div class="mic-area" id="drill-confirm-mic-area">
+      <div class="prompt-hint">📢 Rispondi con Sì o No</div>
       <div class="mic-wrap" onclick="toggleConfirmListening()">
         <div class="mic-icon" id="confirm-mic-icon">🎤</div>
         <svg class="mic-ring-svg" viewBox="0 0 150 150">
           <circle class="mic-ring-bg" cx="75" cy="75" r="70"/>
           <circle class="mic-ring-fg" id="confirm-mic-ring" cx="75" cy="75" r="70"/>
         </svg>
-      </div>
-      <div class="waveform" id="confirm-waveform" style="display:none;">
-        <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
       </div>
       <div class="mic-status" id="confirm-mic-status"></div>
       <div class="listening-feedback" id="confirm-listening-feedback" style="display:none;">🎤 Sto ricevendo la tua risposta...</div>
@@ -654,15 +643,13 @@
     </div>
     <div class="mic-area" id="drill-mic-area">
       <button class="pause-btn" id="drill-pause-btn" onclick="togglePause()" title="Pausa" style="position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;z-index:10;">⏸️</button>
+      <div class="prompt-hint">📢 La traduzione della parola è...</div>
       <div class="mic-wrap" onclick="toggleDrillListening()">
         <div class="mic-icon" id="drill-mic-icon">🎤</div>
         <svg class="mic-ring-svg" viewBox="0 0 150 150">
           <circle class="mic-ring-bg" cx="75" cy="75" r="70"/>
           <circle class="mic-ring-fg" id="drill-mic-ring" cx="75" cy="75" r="70"/>
         </svg>
-      </div>
-      <div class="waveform" id="drill-waveform" style="display:none;">
-        <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
       </div>
       <div class="mic-status" id="drill-mic-status"></div>
       <div class="listening-feedback" id="drill-listening-feedback" style="display:none;">🎤 Sto ricevendo la tua traduzione...</div>
@@ -951,8 +938,6 @@ function togglePause() {
     }
     const micAreas = document.querySelectorAll('.mic-area');
     micAreas.forEach(area => area.classList.remove('listening'));
-    const waveforms = document.querySelectorAll('.waveform');
-    waveforms.forEach(wf => wf.style.display = 'none');
     const feedbacks = document.querySelectorAll('.listening-feedback');
     feedbacks.forEach(fb => fb.style.display = 'none');
     const micIcons = document.querySelectorAll('.mic-icon');
@@ -1001,11 +986,6 @@ async function requestMicrophonePermission() {
     showToast('Permetti l\'accesso al microfono dalle impostazioni del browser');
     return false;
   }
-}
-
-function showWaveform(show, elementId) {
-  const wf = document.getElementById(elementId);
-  if (wf) wf.style.display = show ? 'flex' : 'none';
 }
 
 function showListeningFeedback(show, isDrill = false, isConfirm = false) {
@@ -1080,12 +1060,10 @@ function startListening(isDrillMode = false) {
     const areaId = isDrillMode ? 'drill-mic-area' : 'mic-area';
     const iconId = isDrillMode ? 'drill-mic-icon' : 'mic-icon';
     const ringId = isDrillMode ? 'drill-mic-ring' : 'mic-ring';
-    const waveformId = isDrillMode ? 'drill-waveform' : 'waveform';
     
     document.getElementById(areaId).classList.add('listening');
     document.getElementById(iconId).textContent = '🎤';
     document.getElementById(iconId).style.background = '#1a1a00';
-    showWaveform(true, waveformId);
     startRing(ringId);
     isListeningActive = true;
     
@@ -1102,7 +1080,6 @@ function startListening(isDrillMode = false) {
         if (e.results[i].isFinal) {
           const transcript = e.results[i][0].transcript;
           fullTranscript += ' ' + transcript;
-          // Appena riceviamo qualcosa di sensato, mostriamo il feedback
           if (!hasReceivedSpeech && transcript.trim().length > 0) {
             hasReceivedSpeech = true;
             showListeningFeedback(true, isDrillMode);
@@ -1160,12 +1137,10 @@ function stopListening(isDrillMode = false) {
   const areaId = isDrillMode ? 'drill-mic-area' : 'mic-area';
   const iconId = isDrillMode ? 'drill-mic-icon' : 'mic-icon';
   const ringId = isDrillMode ? 'drill-mic-ring' : 'mic-ring';
-  const waveformId = isDrillMode ? 'drill-waveform' : 'waveform';
   
   document.getElementById(areaId).classList.remove('listening');
   document.getElementById(iconId).textContent = '🎤';
   document.getElementById(iconId).style.background = 'var(--surface)';
-  showWaveform(false, waveformId);
   showListeningFeedback(false, isDrillMode);
   stopRing(ringId);
   
@@ -1206,7 +1181,6 @@ function startConfirmListening() {
     document.getElementById('drill-confirm-mic-area').classList.add('listening');
     document.getElementById('confirm-mic-icon').textContent = '🎤';
     document.getElementById('confirm-mic-icon').style.background = '#1a1a00';
-    showWaveform(true, 'confirm-waveform');
     startRing('confirm-mic-ring');
     
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -1263,7 +1237,6 @@ function stopConfirmListening() {
   document.getElementById('drill-confirm-mic-area').classList.remove('listening');
   document.getElementById('confirm-mic-icon').textContent = '🎤';
   document.getElementById('confirm-mic-icon').style.background = 'var(--surface)';
-  showWaveform(false, 'confirm-waveform');
   showListeningFeedback(false, false, true);
   stopRing('confirm-mic-ring');
   playMicSound(false);
