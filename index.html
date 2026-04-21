@@ -520,7 +520,7 @@
 <div class="container">
   <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0 10px;">
     <span id="mode-label" style="font-weight:600;font-size:1rem;color:var(--accent);">EN → IT</span>
-    <span style="font-size:0.75rem;color:var(--muted);">DS2604201400</span>
+    <span style="font-size:0.75rem;color:var(--muted);">DS2604210800</span>
   </div>
 
   <!-- SETUP SCREEN -->
@@ -531,8 +531,12 @@
         <input type="number" id="input-S" min="1" max="1000" placeholder="1" inputmode="numeric" value="1">
       </div>
       <div class="input-group">
-        <label>Quante parole vuoi tradurre?</label>
-        <input type="number" id="input-W" min="1" max="100" placeholder="10" inputmode="numeric" value="10">
+        <label>Quante parole vuoi tradurre? (1-50)</label>
+        <input type="number" id="input-W" min="1" max="50" placeholder="10" inputmode="numeric" value="10">
+      </div>
+      <div class="input-group">
+        <label>Quanti secondi vuoi per tradurre? (10-30)</label>
+        <input type="number" id="input-T" min="10" max="30" placeholder="15" inputmode="numeric" value="15">
       </div>
       <div id="setup-error" class="error-msg"></div>
     </div>
@@ -682,7 +686,7 @@ const RAW = [
 ];
 
 // ==================== FUNZIONI PRINCIPALI ====================
-let S = 1, W = 10;
+let S = 1, W = 10, T = 15;
 let words = [];
 let currentIdx = 0;
 let drill = [];
@@ -804,17 +808,22 @@ function showScreen(id) {
 function startExercise() {
   const sVal = parseInt(document.getElementById('input-S').value);
   const wVal = parseInt(document.getElementById('input-W').value);
+  const tVal = parseInt(document.getElementById('input-T').value);
   const errEl = document.getElementById('setup-error');
   if (!sVal || sVal < 1 || sVal > 1000) {
     errEl.textContent = 'Inserisci un numero valido per S (1–1000)';
     errEl.classList.add('show'); return;
   }
-  if (!wVal || wVal < 1 || wVal > 100) {
-    errEl.textContent = 'Inserisci un numero valido per W (1–100)';
+  if (!wVal || wVal < 1 || wVal > 50) {
+    errEl.textContent = 'Inserisci un numero valido per W (1–50)';
+    errEl.classList.add('show'); return;
+  }
+  if (!tVal || tVal < 10 || tVal > 30) {
+    errEl.textContent = 'Inserisci un numero valido per T (10–30)';
     errEl.classList.add('show'); return;
   }
   errEl.classList.remove('show');
-  S = sVal; W = wVal;
+  S = sVal; W = wVal; T = tVal;
   buildCatScreen();
   showScreen('screen-cats');
 }
@@ -994,7 +1003,7 @@ function startRing(id) {
   r.style.transition = 'none';
   r.style.strokeDashoffset = '0';
   r.getBoundingClientRect();
-  r.style.transition = 'stroke-dashoffset 15000ms linear';
+  r.style.transition = `stroke-dashoffset ${T * 1000}ms linear`;
   r.style.strokeDashoffset = '440';
 }
 
@@ -1094,7 +1103,7 @@ function startListening(isDrillMode = false) {
     
     currentRecognition.start();
     
-    // 15 secondi per assicurare il riconoscimento
+    // Timeout basato su T (secondi)
     recognitionTimeout = setTimeout(() => {
       if (currentRecognition && currentRecognition.isDrillMode === isDrillMode) {
         stopListening(isDrillMode);
@@ -1107,14 +1116,13 @@ function startListening(isDrillMode = false) {
           retryCount++;
           showToast(`Nessuna parola riconosciuta. Tentativo ${retryCount}`);
           if (!isDrillMode) {
-            // Riproponi la stessa parola
             setTimeout(() => {
               showWord();
             }, 2000);
           }
         }
       }
-    }, 15000);
+    }, T * 1000);
   }, 500);
 }
 
@@ -1220,7 +1228,7 @@ function startConfirmListening() {
           showToast('Non ho capito. Usa i pulsanti Sì/No.');
         }
       }
-    }, 8000);
+    }, T * 1000);
   });
 }
 
@@ -1432,7 +1440,7 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 function saveProgress() {
   const progress = {
-    S, W,
+    S, W, T,
     currentIdx,
     stats,
     drill: drill.map(d => ({ wordId: d.word[0], counter: d.counter })),
@@ -1456,7 +1464,7 @@ function loadProgress() {
       showToast('Esercizio scaduto (più di 24 ore)');
       return false;
     }
-    S = p.S; W = p.W;
+    S = p.S; W = p.W; T = p.T || 15;
     stats = p.stats;
     exerciseMode = p.exerciseMode;
     setMode(exerciseMode);
@@ -1616,7 +1624,7 @@ function showEnd() {
   document.getElementById('stat-wrong').textContent = stats.wrong;
   document.getElementById('stat-total').textContent = total;
   document.getElementById('stat-pct').textContent = pct + '%';
-  document.getElementById('stat-s').textContent = `S=${S} W=${W}`;
+  document.getElementById('stat-s').textContent = `S=${S} W=${W} T=${T}`;
   showScreen('screen-end');
 }
 
