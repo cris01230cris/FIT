@@ -598,53 +598,125 @@ function showToast(m){const t=document.createElement('div'); t.className='toast'
 function speakCurrentWord(){if(words[currentIdx]){const w=words[currentIdx]; if(exerciseMode==='en')speakAsyncLang((w[2]==='verbo'?'To ':'')+w[1],'en-US'); else speakAsyncLang(w[3].split(';')[0].trim().split('/')[0].trim(),'it-IT');}}
 function speakDrillWord(){if(drillCurrentWord){const w=drillCurrentWord.word; if(exerciseMode==='en')speakAsyncLang((w[2]==='verbo'?'To ':'')+w[1],'en-US'); else speakAsyncLang(w[3].split(';')[0].trim().split('/')[0].trim(),'it-IT');}}
 
-// PUSH-TO-TALK: nessun timeout automatico, si ferma solo al rilascio
+// PUSH-TO-TALK con restart automatico finché il dito è premuto
 let currentTranscript = '';
+let isHolding = false;       // true = dito premuto
+let holdingDrillMode = false; // modalità drill del hold corrente
+let restartCount = 0;
+const MAX_RESTARTS = 30;
+
 async function startPushListening(isDrillMode=false){
   if(isPaused){showToast('Pausa attiva'); return;}
-  if(currentRecognition) stopPushListening(isDrillMode);
+  if(currentRecognition) _killRecognition();
   const hasPerm=await navigator.mediaDevices.getUserMedia({audio:true}).then(s=>{s.getTracks().forEach(t=>t.stop()); return true;}).catch(()=>false);
-  if(!hasPerm){showToast('Permetti microfono'); return;}
+  if(!hasPerm){showToast('Permetti microfono'); isHolding=false; return;}
+  _spawnRecognition(isDrillMode);
+}
+
+function _spawnRecognition(isDrillMode){
+  if(!isHolding) return; // dito già rilasciato, non aprire
+  if(restartCount > MAX_RESTARTS){ showToast('Microfono instabile'); isHolding=false; return; }
   const micIcon=document.getElementById(isDrillMode?'drill-mic-icon':'mic-icon');
   micIcon.classList.add('push-active');
-  currentTranscript = '';
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   currentRecognition=new SR();
   currentRecognition.lang=exerciseMode==='en'?'it-IT':'en-US';
   currentRecognition.continuous=true;
   currentRecognition.interimResults=false;
-  currentRecognition.onresult=(e)=>{for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)currentTranscript+=' '+e.results[i][0].transcript;}};
+
+  currentRecognition.onresult=(e)=>{
+    restartCount=0; // riceve audio: tutto ok
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal) currentTranscript+=' '+e.results[i][0].transcript;
+    }
+  };
+
+  currentRecognition.onerror=(e)=>{
+    if(e.error==='not-allowed'||e.error==='service-not-allowed'){
+      showToast('Permesso microfono revocato'); isHolding=false; return;
+    }
+    // altri errori (network, aborted…): riprova se ancora premuto
+    restartCount++;
+    currentRecognition=null;
+    if(isHolding) setTimeout(()=>_spawnRecognition(isDrillMode), 250);
+  };
+
   currentRecognition.onend=()=>{
+    currentRecognition=null;
+    if(isHolding){
+      // Chrome ha chiuso da solo ma il dito è ancora premuto → riapri
+      restartCount++;
+      setTimeout(()=>_spawnRecognition(isDrillMode), 150);
+    } else {
+      // dito rilasciato → valuta
+      micIcon.classList.remove('push-active');
+      if(pendingEvalTimeout) clearTimeout(pendingEvalTimeout);
+      pendingEvalTimeout = setTimeout(()=>{
+        if(currentTranscript.trim().length>0){
+          evaluateAnswer(currentTranscript.trim().toLowerCase(), isDrillMode);
+        } else {
+          retryCount++;
+          showToast(`Nessuna parola. Tentativo ${retryCount}`);
+          if(!isDrillMode) setTimeout(()=>showWord(),1500);
+          else setTimeout(()=>{if(drillCurrentWord) startPushListening(true);},1500);
+        }
+        pendingEvalTimeout=null;
+      }, 300);
+    }
+  };
+
+  try{ currentRecognition.start(); }
+  catch(e){
+    restartCount++;
+    currentRecognition=null;
+    if(isHolding) setTimeout(()=>_spawnRecognition(isDrillMode), 300);
+  }
+}
+
+function _killRecognition(){
+  if(currentRecognition){ try{currentRecognition.stop();}catch(e){} currentRecognition=null; }
+}
+
+function stopPushListening(isDrillMode=false){
+  isHolding=false;
+  if(pendingEvalTimeout) clearTimeout(pendingEvalTimeout);
+  // Non killare subito: lascia che onend scatti naturalmente e valuti.
+  // Se recognition è già null (Chrome ha già chiuso), simula onend manuale:
+  if(!currentRecognition){
+    const micIcon=document.getElementById(isDrillMode?'drill-mic-icon':'mic-icon');
     micIcon.classList.remove('push-active');
-    // attendi 1 secondo dopo lo stop prima di valutare
     if(pendingEvalTimeout) clearTimeout(pendingEvalTimeout);
-    pendingEvalTimeout = setTimeout(() => {
+    pendingEvalTimeout = setTimeout(()=>{
       if(currentTranscript.trim().length>0){
         evaluateAnswer(currentTranscript.trim().toLowerCase(), isDrillMode);
-      }else{
+      } else {
         retryCount++;
         showToast(`Nessuna parola. Tentativo ${retryCount}`);
         if(!isDrillMode) setTimeout(()=>showWord(),1500);
         else setTimeout(()=>{if(drillCurrentWord) startPushListening(true);},1500);
       }
-      pendingEvalTimeout = null;
-    }, 1000);
-    currentRecognition=null;
-  };
-  currentRecognition.start();
-}
-function stopPushListening(isDrillMode=false){
-  if(pendingEvalTimeout) clearTimeout(pendingEvalTimeout);
-  if(currentRecognition){
-    try{currentRecognition.stop();}catch(e){}
-    currentRecognition=null;
+      pendingEvalTimeout=null;
+    }, 300);
+  } else {
+    try{ currentRecognition.stop(); }catch(e){}
   }
-  const micIcon=document.getElementById(isDrillMode?'drill-mic-icon':'mic-icon');
-  micIcon.classList.remove('push-active');
 }
-function handlePushStart(e){ e.preventDefault(); if(isEvaluating)return; if(currentRecognition)stopPushListening(false); startPushListening(false);}
+
+function handlePushStart(e){
+  e.preventDefault();
+  if(isEvaluating) return;
+  isHolding=true; holdingDrillMode=false; restartCount=0; currentTranscript='';
+  if(currentRecognition) _killRecognition();
+  startPushListening(false);
+}
 function handlePushEnd(e){ e.preventDefault(); stopPushListening(false);}
-function handleDrillPushStart(e){ e.preventDefault(); if(isEvaluating)return; if(currentRecognition)stopPushListening(true); startPushListening(true);}
+function handleDrillPushStart(e){
+  e.preventDefault();
+  if(isEvaluating) return;
+  isHolding=true; holdingDrillMode=true; restartCount=0; currentTranscript='';
+  if(currentRecognition) _killRecognition();
+  startPushListening(true);
+}
 function handleDrillPushEnd(e){ e.preventDefault(); stopPushListening(true);}
 
 function submitManual(){if(isPaused){showToast('Pausa');return;} const val=document.getElementById('manual-text').value.trim().toLowerCase(); if(!val)return; document.getElementById('manual-text').value=''; if(currentRecognition)stopPushListening(false); if(pendingEvalTimeout)clearTimeout(pendingEvalTimeout); isEvaluating=true; evaluateAnswer(val,false);}
