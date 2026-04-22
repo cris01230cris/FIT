@@ -30,15 +30,18 @@
     background: var(--bg);
     color: var(--text);
     font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 12px;
-    overflow: hidden;
+    min-height: 100vh;
+    padding: 16px;
+    margin: 0;
     position: fixed;
-    width: 100%;
-    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
   }
 
   body::before {
@@ -57,27 +60,28 @@
     position: relative;
     z-index: 1;
     width: 100%;
-    max-width: 480px;
-    height: 100%;
-    max-height: 780px;
+    max-width: 500px;
+    height: auto;
+    max-height: 90vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     overflow-y: auto;
     scrollbar-width: none;
+    padding: 8px 0;
   }
   .container::-webkit-scrollbar {
     display: none;
   }
 
   .screen { display: none; }
-  .screen.active { display: flex; flex-direction: column; gap: 12px; }
+  .screen.active { display: flex; flex-direction: column; gap: 14px; }
 
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 14px 16px;
+    border-radius: 24px;
+    padding: 18px 16px;
   }
 
   .card-label {
@@ -86,18 +90,18 @@
     letter-spacing: 0.15em;
     color: #aaa;
     text-transform: uppercase;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
   }
 
   .input-group {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    margin-bottom: 12px;
+    gap: 6px;
+    margin-bottom: 16px;
   }
 
   .input-group label {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     color: #ccc;
     font-weight: 500;
   }
@@ -105,11 +109,11 @@
   .input-group input {
     background: var(--bg);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 14px;
     color: var(--text);
     font-family: 'Space Mono', monospace;
     font-size: 1rem;
-    padding: 10px 14px;
+    padding: 12px 14px;
     width: 100%;
     outline: none;
     text-align: center;
@@ -160,12 +164,12 @@
     cursor: pointer;
   }
 
-  /* MIC AREA - design pulito */
+  /* MIC AREA */
   .mic-area {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 32px;
-    padding: 18px 12px;
+    padding: 20px 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -176,7 +180,6 @@
     touch-action: manipulation;
   }
 
-  /* Pulsante microfono che pulsa quando premuto */
   .mic-icon {
     width: 130px;
     height: 130px;
@@ -206,7 +209,6 @@
     100% { box-shadow: 0 0 0 12px rgba(232,255,71,0); background: #f5ffb0; }
   }
 
-  /* pulsante pausa giallo fluo in alto a destra */
   .pause-btn {
     position: absolute;
     top: 12px;
@@ -221,7 +223,6 @@
     align-items: center;
     justify-content: center;
     font-size: 1.2rem;
-    transition: all 0.1s;
     z-index: 12;
     box-shadow: 0 2px 6px rgba(0,0,0,0.3);
     color: #000;
@@ -229,7 +230,6 @@
   .pause-btn:active { transform: scale(0.94); }
   .pause-btn.paused { background: #ffaa44; }
 
-  /* pulsante stop giallo fluo in basso a destra */
   .stop-circle-btn {
     position: absolute;
     bottom: 12px;
@@ -245,14 +245,12 @@
     justify-content: center;
     font-size: 1rem;
     font-weight: bold;
-    transition: all 0.1s;
     z-index: 12;
     box-shadow: 0 2px 6px rgba(0,0,0,0.3);
     color: #000;
   }
   .stop-circle-btn:active { transform: scale(0.94); }
 
-  /* drill counter badge rosso fluo in alto a sinistra */
   .drill-counter-badge {
     position: absolute;
     top: 12px;
@@ -276,7 +274,7 @@
 
   .feedback {
     border-radius: 16px;
-    padding: 10px 14px;
+    padding: 12px 14px;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -322,12 +320,12 @@
 
   .btn {
     border: none;
-    border-radius: 14px;
+    border-radius: 16px;
     cursor: pointer;
     font-family: 'DM Sans', sans-serif;
     font-weight: 600;
-    font-size: 0.9rem;
-    padding: 12px 14px;
+    font-size: 1rem;
+    padding: 14px 16px;
     transition: all 0.1s;
     width: 100%;
     text-align: center;
@@ -341,6 +339,10 @@
     background: transparent;
     color: var(--text);
     border: 1px solid var(--border);
+  }
+  .btn-danger {
+    background: var(--error);
+    color: #000;
   }
 
   .speak-btn {
@@ -356,9 +358,9 @@
     width: 100%;
   }
   .btn-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
   .stat-grid {
     display: grid;
@@ -440,7 +442,7 @@
 <div class="container">
   <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0 6px;">
     <span id="mode-label" style="font-weight:600;font-size:0.9rem;color:var(--accent);">EN → IT</span>
-    <span style="font-size:0.7rem;color:var(--muted);font-family:'Space Mono';">DS26042210</span>
+    <span style="font-size:0.7rem;color:var(--muted);font-family:'Space Mono';">DS26042211</span>
   </div>
 
   <!-- SETUP -->
@@ -468,7 +470,7 @@
   <div id="screen-cats" class="screen">
     <div class="card"><div id="cat-list" style="display:flex;flex-direction:column;gap:10px;"></div></div>
     <button class="btn btn-primary" onclick="confirmCats()">Conferma →</button>
-    <button class="btn btn-secondary" onclick="showScreen('screen-setup')">← Torna</button>
+    <button class="btn btn-secondary" onclick="showScreen('screen-setup')">← Indietro</button>
   </div>
 
   <!-- ESERCIZIO PRINCIPALE -->
@@ -483,7 +485,6 @@
       </div>
     </div>
 
-    <!-- MIC AREA con pulsanti -->
     <div class="mic-area" id="mic-area">
       <button class="pause-btn" id="pause-btn" onclick="togglePause()" title="Pausa">⏸️</button>
       <button class="stop-circle-btn" id="stop-circle-btn" onclick="stopExercise()" title="Stop">⏹️</button>
@@ -507,7 +508,7 @@
       <p style="font-size:0.7rem;">Ogni parola va tradotta correttamente 3 volte.</p>
     </div>
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="confirmDrill(true)">Sì, procedi</button>
+      <button class="btn btn-primary" onclick="confirmDrill(true)" style="background:var(--accent);">Sì, procedi</button>
       <button class="btn btn-secondary" onclick="confirmDrill(false)">No, salta</button>
     </div>
   </div>
@@ -574,7 +575,6 @@ let currentRecognition = null;
 let isEvaluating = false;
 let isPaused = false;
 let retryCount = 0;
-let pushTimer = null;
 let bestItalianVoice = null, bestEnglishVoice = null;
 
 function getBestItalianVoice() { if(bestItalianVoice)return bestItalianVoice; const voices=window.speechSynthesis.getVoices(); const pref=['Google','Alice','Federica','Silvia','Luca','it-IT']; for(let p of pref){let v=voices.find(v=>v.lang==='it-IT'&&v.name.includes(p));if(v){bestItalianVoice=v;return v;}} bestItalianVoice=voices.find(v=>v.lang==='it-IT')||voices[0]; return bestItalianVoice;}
@@ -597,7 +597,7 @@ function showToast(m){const t=document.createElement('div'); t.className='toast'
 function speakCurrentWord(){if(words[currentIdx]){const w=words[currentIdx]; if(exerciseMode==='en')speakAsyncLang((w[2]==='verbo'?'To ':'')+w[1],'en-US'); else speakAsyncLang(w[3].split(';')[0].trim().split('/')[0].trim(),'it-IT');}}
 function speakDrillWord(){if(drillCurrentWord){const w=drillCurrentWord.word; if(exerciseMode==='en')speakAsyncLang((w[2]==='verbo'?'To ':'')+w[1],'en-US'); else speakAsyncLang(w[3].split(';')[0].trim().split('/')[0].trim(),'it-IT');}}
 
-// PUSH-TO-TALK: si avvia al press, si ferma al release (con timeout sicurezza 5s)
+// PUSH-TO-TALK: nessun timeout automatico, si spegne solo al rilascio
 async function startPushListening(isDrillMode=false){
   if(isPaused){showToast('Pausa attiva'); return;}
   if(currentRecognition) stopPushListening(isDrillMode);
@@ -623,14 +623,10 @@ async function startPushListening(isDrillMode=false){
       else setTimeout(()=>{if(drillCurrentWord) startPushListening(true);},1500);
     }
     currentRecognition=null;
-    if(pushTimer) clearTimeout(pushTimer);
   };
   currentRecognition.start();
-  // timeout sicurezza: dopo 5 secondi ferma il microfono anche se dito ancora premuto
-  pushTimer = setTimeout(() => { if(currentRecognition) stopPushListening(isDrillMode); }, 5000);
 }
 function stopPushListening(isDrillMode=false){
-  if(pushTimer){ clearTimeout(pushTimer); pushTimer=null; }
   if(currentRecognition){
     try{currentRecognition.stop();}catch(e){}
     currentRecognition=null;
@@ -686,7 +682,7 @@ function goHome(){if(currentRecognition)try{currentRecognition.stop()}catch(e){}
 function terminateExercise(){if(window.speechSynthesis)window.speechSynthesis.cancel(); if(currentRecognition)try{currentRecognition.stop()}catch(e){} currentRecognition=null; localStorage.removeItem('vocabProgress'); showScreen('screen-setup'); location.reload();}
 function stopExercise(){if(currentRecognition)try{currentRecognition.stop()}catch(e){} currentRecognition=null; showEnd();}
 function togglePause(){isPaused=!isPaused; const btns=document.querySelectorAll('.pause-btn'); btns.forEach(btn=>{if(isPaused){btn.textContent='▶️'; btn.classList.add('paused');}else{btn.textContent='⏸️'; btn.classList.remove('paused');}}); if(isPaused){if(currentRecognition)stopPushListening(false); showToast('Pausa');}else{showToast('Ripresa'); if(words[currentIdx])setTimeout(()=>showWord(),300);}}
-window.onload=function(){if('webkitSpeechRecognition'in window||'SpeechRecognition'in window){} if(window.speechSynthesis){window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged=()=>{getBestItalianVoice();getBestEnglishVoice();}; setTimeout(()=>{getBestItalianVoice();getBestEnglishVoice();},500);}};
+window.onload=function(){if(window.speechSynthesis){window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged=()=>{getBestItalianVoice();getBestEnglishVoice();}; setTimeout(()=>{getBestItalianVoice();getBestEnglishVoice();},500);}};
 </script>
 </body>
 </html>
