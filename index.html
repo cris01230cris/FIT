@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26051609_FIT</title>
+<title>CL26051612_FIT</title>
 <style>
   :root {
     --nero: #000000;
@@ -28,7 +28,6 @@
   .h-sessione  { color: #fff;          font-size: 0.68rem; font-weight: 900; flex: 1; text-align: center; }
   .h-versione  { color: #555;          font-size: 0.58rem; font-weight: 700; flex: 1; text-align: right; }
 
-  /* ── PULSANTI ─────────────────────────────────────────────── */
   .btn {
     display: block; width: 100%; padding: 13px 6px;
     background: var(--giallo); color: var(--nero);
@@ -56,7 +55,7 @@
   .btn.lamp-verde        { animation: btnLampVerde 0.7s infinite; background: var(--verde); color: var(--nero); box-shadow: 0 4px 0 #008833; }
   .btn.lamp-verde:active { animation: none; transform: translateY(3px); box-shadow: 0 1px 0 #008833; }
 
-  /* MOD 1: nav griglia 1/4 · 2/4 · 1/4 */
+  /* nav 1/4 · 2/4 · 1/4 */
   .nav4 { display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 5px; margin-bottom: 5px; }
 
   .btn-nav {
@@ -99,10 +98,13 @@
   .id-verde  { background: var(--verde);  color: #000; }
   .id-giallo { background: var(--giallo); color: #000; }
 
-  .pos-txt   { font-size: 0.9rem; font-weight: 900; color: var(--giallo); white-space: nowrap; }
-  .serie-txt { font-size: 1rem;   font-weight: 900; color: var(--giallo); white-space: nowrap; }
+  /* MOD 4: pos-txt più spazio per "SESSIONE 1 DI 4" */
+  .pos-txt   { font-size: 0.72rem; font-weight: 900; color: var(--giallo); white-space: nowrap; }
+  /* MOD 3: serie-txt più spazio per "SERIE 1 DI 5" */
+  .serie-txt { font-size: 0.78rem; font-weight: 900; color: var(--giallo); white-space: nowrap; }
+  /* MOD 3: spunta rossa a fine serie */
+  .serie-done { font-size: 1rem; font-weight: 900; color: var(--rosso); white-space: nowrap; }
 
-  /* MOD 5: una sola descrizione 5 righe, giallo fluo, font ottimizzato */
   .desc-box { background: var(--grigio2); border: 1px solid #2a2a2a; border-radius: 6px; padding: 8px 10px; margin-bottom: 5px; }
   .desc-unica {
     font-size: 0.78rem; color: var(--giallo); line-height: 1.5;
@@ -171,7 +173,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26051609_FIT</span>
+    <span class="h-versione">CL26051612_FIT</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -187,37 +189,38 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26051609_FIT</span>
+    <span class="h-versione">CL26051612_FIT</span>
   </div>
 
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
-    <div class="pos-txt"   id="pos-txt">0_0</div>
-    <div class="serie-txt" id="serie-txt">SERIE: —</div>
+    <!-- MOD 4: SESSIONE N DI T -->
+    <div class="pos-txt" id="pos-txt">SESSIONE — DI —</div>
+    <!-- MOD 3: SERIE N DI T o spunta rossa -->
+    <div class="serie-txt" id="serie-txt">SERIE — DI —</div>
   </div>
 
-  <!-- MOD 5: una sola descrizione 5 righe giallo fluo -->
   <div class="desc-box">
     <div class="desc-unica" id="desc-unica">—</div>
   </div>
 
-  <!-- Parametri riga 1: SERIE · RIPETIZIONI · 0/1/2 x KG (MOD 6) -->
+  <!-- MOD 2: 0/1/2 x KG (x minuscola) | MOD 5: interi, no zero iniziale -->
   <div class="pgrid3">
     <div class="pitem">
       <div class="plabel">SERIE</div>
       <input class="pinput" id="p-ser" type="number" min="1" max="10" step="1"
-             inputmode="numeric" oninput="clampInt(this,1,10)" onchange="saveP()">
+             inputmode="numeric" oninput="sanitizeInt(this,1,10)" onchange="saveP()">
     </div>
     <div class="pitem">
       <div class="plabel">RIPETIZIONI</div>
       <input class="pinput" id="p-rip" type="number" min="1" max="50" step="1"
-             inputmode="numeric" oninput="clampInt(this,1,50)" onchange="saveP()">
+             inputmode="numeric" oninput="sanitizeInt(this,1,50)" onchange="saveP()">
     </div>
     <div class="pitem">
-      <div class="plabel">0/1/2 x KG</div><!-- MOD 6: x minuscola -->
+      <div class="plabel">0/1/2 x KG</div>
       <div class="pesi-row">
         <input class="pinput" id="p-pn" type="number" min="0" max="2" step="1"
-               inputmode="numeric" oninput="clampInt(this,0,2)" onchange="saveP()">
+               inputmode="numeric" oninput="sanitizeInt(this,0,2)" onchange="saveP()">
         <span class="pesi-x">×</span>
         <input class="pinput-kg" id="p-pk" type="text" inputmode="decimal"
                pattern="[0-9]*[,.]?[0-9]*" placeholder="0,0"
@@ -226,41 +229,40 @@
     </div>
   </div>
 
-  <!-- Parametri riga 2: DURATA · RIPOSO SERIE · RIPOSO FINALE (MOD 8) -->
   <div class="pgrid3">
     <div class="pitem">
       <div class="plabel">DURATA MIN:SEC</div>
       <div class="dur-row">
         <input class="pinput" id="p-dm" type="number" min="0" max="90" step="1"
-               inputmode="numeric" oninput="clampInt(this,0,90)" onchange="saveP()">
+               inputmode="numeric" oninput="sanitizeInt(this,0,90)" onchange="saveP()">
         <span class="dur-sep">:</span>
         <input class="pinput" id="p-ds" type="number" min="0" max="59" step="1"
-               inputmode="numeric" oninput="clampInt(this,0,59)" onchange="saveP()">
+               inputmode="numeric" oninput="sanitizeInt(this,0,59)" onchange="saveP()">
       </div>
     </div>
     <div class="pitem">
       <div class="plabel">RIPOSO SERIE MIN:SEC</div>
       <div class="dur-row">
         <input class="pinput" id="p-rs-m" type="number" min="0" max="90" step="1"
-               inputmode="numeric" oninput="clampInt(this,0,90)" onchange="saveP()">
+               inputmode="numeric" oninput="sanitizeInt(this,0,90)" onchange="saveP()">
         <span class="dur-sep">:</span>
         <input class="pinput" id="p-rs-s" type="number" min="0" max="59" step="1"
-               inputmode="numeric" oninput="clampInt(this,0,59)" onchange="saveP()">
+               inputmode="numeric" oninput="sanitizeInt(this,0,59)" onchange="saveP()">
       </div>
     </div>
     <div class="pitem">
       <div class="plabel">RIPOSO FINALE MIN:SEC</div>
       <div class="dur-row">
         <input class="pinput" id="p-rf-m" type="number" min="0" max="90" step="1"
-               inputmode="numeric" oninput="clampInt(this,0,90)" onchange="saveP()">
+               inputmode="numeric" oninput="sanitizeInt(this,0,90)" onchange="saveP()">
         <span class="dur-sep">:</span>
         <input class="pinput" id="p-rf-s" type="number" min="0" max="59" step="1"
-               inputmode="numeric" oninput="clampInt(this,0,59)" onchange="saveP()">
+               inputmode="numeric" oninput="sanitizeInt(this,0,59)" onchange="saveP()">
       </div>
     </div>
   </div>
 
-  <!-- Timer (MOD 7: longpress 5s) -->
+  <!-- MOD 6: longpress 5s -->
   <div class="tim3">
     <button class="btn sm" id="btn-td"  disabled
             onpointerdown="lpStart('d')" onpointerup="lpEnd()" onpointerleave="lpEnd()">
@@ -281,7 +283,6 @@
     <span class="cd-tipo" id="cd-tipo" style="display:none"></span>
   </div>
 
-  <!-- MOD 1: nav 1/4 · 2/4 · 1/4 | MOD 2: testo centrale dinamico -->
   <div class="nav4" style="margin-bottom:5px">
     <button class="btn-nav" id="btn-prec" onclick="goPrec()">&#x23EA;</button>
     <button class="btn sm"  id="btn-avs"  onclick="tapAvs()" style="margin-bottom:0" disabled>ESERCIZIO</button>
@@ -298,19 +299,19 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26051609_FIT</span>
+    <span class="h-versione">CL26051612_FIT</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
   <div class="fine-i" id="fine-i"></div>
   <button class="btn verde lamp-verde" id="btn-salva" onclick="salvaSessione()">SALVA SESSIONE</button>
   <button class="btn grigio" style="margin-top:6px" onclick="tornaInizio()">TORNA ALL'INIZIO</button>
-  <button class="btn-nav"    style="margin-top:6px;box-shadow:0 4px 0 #7a9900" onclick="tornaUltimaScheda()">&#x23EA;</button>
+  <button class="btn-nav" style="margin-top:6px;box-shadow:0 4px 0 #7a9900" onclick="tornaUltimaScheda()">&#x23EA;</button>
 </div>
 
 <script>
 // ══════════════════════════════════════════════════════════════
-// STATO GLOBALE
+// STATO
 // ══════════════════════════════════════════════════════════════
 let J        = null;
 let SI       = -1;
@@ -318,25 +319,37 @@ let CI       = 0;
 let PL       = [];
 let ultComp  = -1;
 let activeCI = -1;
-let serR     = 0;   // serie in corso (1 = ultima), mai negativo
+// MOD 3: serR = serie corrente INCREMENTALE (parte da 1, arriva a p.ser)
+let serR     = 0;
 
 let tInt         = null;
 let tSec         = 0;
 let timerInCorso = false;
 let tTipo        = '';
 
-// ── STATI MACCHINA ─────────────────────────────────────────
-// 'idle'                   → nessuna scheda avviata
-// 'attesa_inizio'          → lampeggia INIZIA ESERCIZIO
-// 'attesa_durata'          → lampeggia AVVIO DURATA
-// 'attesa_fine_esercizio'  → lampeggia ESERCIZIO TERMINATO
-// 'attesa_rs'              → lampeggia AVVIO RIPOSO SERIE
-// 'attesa_rf'              → lampeggia AVVIO RIPOSO FINALE
-// 'completata'             → lampeggia AVANTI, badge rosso
+// stati: idle | attesa_inizio | attesa_durata | attesa_fine_esercizio
+//        attesa_rs | attesa_rf | completata
 let fase = 'idle';
 
-// longpress
 let lpTimer = null;
+
+// MOD 8: WakeLock
+let wakeLock = null;
+async function richiediWakeLock() {
+  if ('wakeLock' in navigator) {
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => { wakeLock = null; });
+    } catch(e) {}
+  }
+}
+async function rilasciaWakeLock() {
+  if (wakeLock) { try { await wakeLock.release(); } catch(e) {} wakeLock = null; }
+}
+// Richiedi al load e al ritorno in foreground
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') richiediWakeLock();
+});
 
 // ══════════════════════════════════════════════════════════════
 // UTILITY
@@ -358,16 +371,62 @@ function fmtKg(v) {
   return (Math.round(v*10)/10).toFixed(1).replace('.', ',');
 }
 function cleanKg(el) {
+  // MOD 5: solo cifre, virgola o punto, 1 decimale, no zero iniziale su parte intera
   el.value = el.value.replace(/[^0-9,\.]/g, '');
   const parts = el.value.split(/[,\.]/);
   if (parts.length > 2) el.value = parts[0] + ',' + parts.slice(1).join('');
   if (parts.length === 2 && parts[1].length > 1) el.value = parts[0] + ',' + parts[1].slice(0,1);
+  // Rimuovi zero iniziale sulla parte intera (es. 05 → 5) ma non se è solo "0"
+  if (parts[0].length > 1 && parts[0].startsWith('0')) {
+    const rest = parts.length === 2 ? ',' + parts[1] : '';
+    el.value = parts[0].replace(/^0+/, '') + rest;
+    if (el.value.startsWith(',')) el.value = '0' + el.value;
+  }
   const n = parseFloat(el.value.replace(',','.'));
   if (!isNaN(n) && n > 999.9) el.value = '999,9';
 }
-function clampInt(el, mn, mx) {
-  let v = parseInt(el.value); if (isNaN(v)) return;
-  if (v < mn) el.value = mn; if (v > mx) el.value = mx;
+
+// MOD 5: interi — no decimali, no zero iniziale, clamp min/max
+function sanitizeInt(el, mn, mx) {
+  let v = el.value;
+  // Rimuovi qualsiasi carattere non numerico (incluso punto e virgola)
+  v = v.replace(/[^0-9]/g, '');
+  // Rimuovi zeri iniziali (es. 05 → 5), ma mantieni "0" da solo
+  v = v.replace(/^0+([1-9])/, '$1');
+  // Clamp
+  if (v !== '' && v !== '0') {
+    const n = parseInt(v);
+    if (!isNaN(n)) {
+      if (n < mn) v = String(mn);
+      if (n > mx) v = String(mx);
+    }
+  }
+  el.value = v;
+}
+
+// ══════════════════════════════════════════════════════════════
+// MOD 3: testo contatore serie incrementale
+// ══════════════════════════════════════════════════════════════
+function txtSerie(serCorrente, serTot, completata) {
+  if (completata) return ''; // spunta rossa gestita separatamente
+  return 'SERIE ' + serCorrente + ' DI ' + serTot;
+}
+
+function aggSerieTxt(completata) {
+  const el = document.getElementById('serie-txt');
+  if (completata) {
+    el.className = 'serie-done';
+    el.textContent = '✔';
+  } else {
+    el.className = 'serie-txt';
+    const p = CI === activeCI ? PL[activeCI] : PL[CI];
+    const tot = p ? p.ser : 0;
+    if (CI === activeCI) {
+      el.textContent = txtSerie(serR, tot, false);
+    } else {
+      el.textContent = 'SERIE 1 DI ' + tot;
+    }
+  }
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -414,6 +473,7 @@ function avviaSessione() {
   }));
   CI = 0; ultComp = -1; activeCI = -1; serR = 0; fase = 'idle';
   setH(J.programma, sess.nome);
+  richiediWakeLock(); // MOD 8
   go('s2'); render();
 }
 
@@ -427,7 +487,8 @@ function render() {
   const lib  = J.libreria[sc.id];
   const p    = PL[CI];
 
-  document.getElementById('pos-txt').textContent = (CI+1) + '_' + nT;
+  // MOD 4: SESSIONE N DI T
+  document.getElementById('pos-txt').textContent = 'SESSIONE ' + (CI+1) + ' DI ' + nT;
 
   // Badge
   const bd = document.getElementById('id-badge');
@@ -440,7 +501,10 @@ function render() {
     bd.className = 'id-badge id-verde';
   }
 
-  // MOD 5: descrizione unica = desc_breve + ' — ' + desc_dettagliata (5 righe)
+  // MOD 3: contatore serie
+  aggSerieTxt(CI <= ultComp);
+
+  // Descrizione unica
   const descU = lib ? (lib.desc_breve + (lib.desc_dettagliata ? ' — ' + lib.desc_dettagliata : '')) : '—';
   document.getElementById('desc-unica').textContent = descU;
 
@@ -456,7 +520,7 @@ function render() {
   document.getElementById('p-rf-m').value = p.rf_m;
   document.getElementById('p-rf-s').value = p.rf_s;
 
-  // Lock parametri: rosso = tutto bloccato
+  // MOD 7: rosso = parametri bloccati visibili gialli | verde = sbloccati
   const lockAll = CI <= ultComp;
   ['p-ser','p-rip','p-pn','p-pk','p-dm','p-ds','p-rs-m','p-rs-s','p-rf-m','p-rf-s']
     .forEach(id => document.getElementById(id).disabled = lockAll);
@@ -465,48 +529,33 @@ function render() {
     document.getElementById('p-rs-s').disabled = true;
   }
 
-  // Contatore serie — MOD 4: mai negativo
-  const stxt = document.getElementById('serie-txt');
-  if (CI <= ultComp)        stxt.textContent = 'SERIE: \u2713';
-  else if (CI === activeCI) stxt.textContent = 'SERIE: ' + Math.max(1, serR);
-  else                      stxt.textContent = 'SERIE: ' + p.ser;
-
   aggUI();
   renderStorico(sc.id);
 }
 
 // ══════════════════════════════════════════════════════════════
-// aggUI — macchina a stati completa
-// MOD 2: btn-avs ha tre testi + stato disattivo con testo ESERCIZIO
+// aggUI
 // ══════════════════════════════════════════════════════════════
 function aggUI() {
   const sullaAttiva  = (CI === activeCI);
   const completataCI = (CI <= ultComp);
   const p    = activeCI >= 0 ? PL[activeCI] : PL[CI];
-  const pCI  = PL[CI];
-  const hasDur = (p.dm > 0 || p.ds > 0);
-  const ser1   = parseInt(activeCI >= 0 ? PL[activeCI].ser : pCI.ser) === 1;
+  const ser1 = parseInt(activeCI >= 0 ? PL[activeCI].ser : PL[CI].ser) === 1;
 
-  // INDIETRO: sempre attivo (MOD 3)
+  // INDIETRO: sempre attivo
   setBtnNav('btn-prec', true, false);
-
-  // AVANTI: attivo sempre; lampeggia solo dopo completamento (MOD 3)
+  // AVANTI: attivo; lampeggia solo a scheda completata
   setBtnNav('btn-succ', true, fase === 'completata' && sullaAttiva);
 
-  // ── PULSANTE CENTRALE (btn-avs) — MOD 2 ──────────────────
-  // Tre testi: INIZIA ESERCIZIO | ESERCIZIO TERMINATO | ESERCIZIO (disattivo)
   const avs = document.getElementById('btn-avs');
 
   if (completataCI) {
-    // Scheda completata → disattivo testo ESERCIZIO
-    avs.disabled = true;
-    avs.classList.remove('lamp');
-    avs.textContent = 'ESERCIZIO';
-    return; // i timer sono già disabilitati implicitamente
+    avs.disabled = true; avs.classList.remove('lamp'); avs.textContent = 'ESERCIZIO';
+    setBtn('btn-td', false, false); setBtn('btn-trs', false, false); setBtn('btn-trf', false, false);
+    return;
   }
 
   if (activeCI === -1) {
-    // Nessuna scheda attiva
     const turno = (CI === ultComp + 1);
     const ceTurnoAltrove = (ultComp + 1 < J.sessioni[SI].schede.length);
     if (!turno && ceTurnoAltrove) {
@@ -516,20 +565,17 @@ function aggUI() {
       avs.textContent = 'INIZIA ESERCIZIO';
       avs.classList[turno ? 'add' : 'remove']('lamp');
     }
-    // Tutti i timer disabilitati
     setBtn('btn-td', false, false); setBtn('btn-trs', false, false); setBtn('btn-trf', false, false);
     return;
   }
 
-  // C'è una scheda attiva
   if (!sullaAttiva) {
-    // Stiamo visualizzando una scheda diversa da quella attiva
     avs.disabled = true; avs.classList.remove('lamp'); avs.textContent = 'ESERCIZIO';
     setBtn('btn-td', false, false); setBtn('btn-trs', false, false); setBtn('btn-trf', false, false);
     return;
   }
 
-  // Siamo sulla scheda attiva — gestione completa dei pulsanti
+  // Sulla scheda attiva
   if (fase === 'attesa_inizio') {
     avs.disabled = false; avs.textContent = 'INIZIA ESERCIZIO'; avs.classList.add('lamp');
     setBtn('btn-td', false, false); setBtn('btn-trs', false, false); setBtn('btn-trf', false, false);
@@ -576,75 +622,38 @@ function setBtnNav(id, attivo, lampeggia) {
 }
 
 // ══════════════════════════════════════════════════════════════
-// tapAvs — tap sul pulsante centrale (INIZIA ESERCIZIO o ESERCIZIO TERMINATO)
+// tapAvs
 // ══════════════════════════════════════════════════════════════
-function tapAvs() {
-  if (fase === 'attesa_inizio') {
-    // INIZIA ESERCIZIO premuto → avvia la scheda
-    avviaSchedaInterna();
+window.tapAvs = function() {
+  if (fase === 'attesa_inizio' || (activeCI === -1 && CI > ultComp)) {
+    iniziaEsercizioAction();
   } else if (fase === 'attesa_fine_esercizio') {
-    // ESERCIZIO TERMINATO premuto → passa a riposo
-    const p   = PL[activeCI];
-    const mod = modScheda(p);
-    if (mod === 'durata') {
-      // Dopo fine durata, ESERCIZIO TERMINATO porta al riposo opportuno
-      if (serR <= 1) { fase = 'attesa_rf'; }
-      else           { fase = 'attesa_rs'; }
-    } else {
-      // Solo pesi: dopo ESERCIZIO TERMINATO va a riposo
-      if (serR <= 1) { fase = 'attesa_rf'; }
-      else           { fase = 'attesa_rs'; }
-    }
+    if (serR >= PL[activeCI].ser) { fase = 'attesa_rf'; }
+    else                          { fase = 'attesa_rs'; }
     aggUI();
   }
-}
+};
 
-// Avvia internamente la scheda (comune a tap iniziale e al turno automatico)
-function avviaSchedaInterna() {
-  document.getElementById('id-badge').className = 'id-badge id-giallo';
-  const p   = PL[activeCI];
-  const mod = modScheda(p);
-  if (mod === 'durata') {
-    fase = 'attesa_durata';
-  } else {
-    // Solo pesi: primo passo è direttamente ESERCIZIO TERMINATO
-    fase = 'attesa_fine_esercizio';
-  }
-  aggUI();
-}
-
-// ══════════════════════════════════════════════════════════════
-// AVVIO SCHEDA (primo tap su INIZIA ESERCIZIO)
-// ══════════════════════════════════════════════════════════════
-function avviaScheda() {
-  // Questa funzione ora è gestita da tapAvs() + aggUI()
-  // Mantenuta per retrocompatibilità interna
-}
-
-// Prima di chiamare avviaSchedaInterna, impostiamo activeCI
 function iniziaEsercizioAction() {
   if (activeCI !== -1) return;
   if (CI <= ultComp)   return;
   activeCI = CI;
-  serR = Math.max(1, parseInt(PL[CI].ser) || 1);
-  document.getElementById('serie-txt').textContent = 'SERIE: ' + serR;
+  // MOD 3: serR parte da 1 (incrementale)
+  serR = 1;
+  aggSerieTxt(false);
   avviaSchedaInterna();
 }
 
-// tapAvs aggiornato per gestire anche il primo tap
-// (sovrascrive la versione sopra con logica completa)
-// Ridefinisco qui per chiarezza:
-window.tapAvs = function() {
-  if (fase === 'attesa_inizio' || (activeCI === -1 && CI > ultComp)) {
-    // Primo tap INIZIA ESERCIZIO
-    iniziaEsercizioAction();
-  } else if (fase === 'attesa_fine_esercizio') {
-    // ESERCIZIO TERMINATO
-    if (serR <= 1) { fase = 'attesa_rf'; }
-    else           { fase = 'attesa_rs'; }
-    aggUI();
+function avviaSchedaInterna() {
+  document.getElementById('id-badge').className = 'id-badge id-giallo';
+  const p = PL[activeCI];
+  if (modScheda(p) === 'durata') {
+    fase = 'attesa_durata';
+  } else {
+    fase = 'attesa_fine_esercizio';
   }
-};
+  aggUI();
+}
 
 // ══════════════════════════════════════════════════════════════
 // NAVIGAZIONE
@@ -665,7 +674,7 @@ function tornaUltimaScheda() {
 }
 
 // ══════════════════════════════════════════════════════════════
-// LONGPRESS (MOD 7): tap >5s → salta a 5s finali
+// LONGPRESS MOD 6
 // ══════════════════════════════════════════════════════════════
 function lpStart(tipo) {
   const btnId = tipo==='d' ? 'btn-td' : tipo==='rs' ? 'btn-trs' : 'btn-trf';
@@ -695,7 +704,7 @@ function saveP() {
   p.rs_s = parseInt(document.getElementById('p-rs-s').value) || 0;
   p.rf_m = parseInt(document.getElementById('p-rf-m').value) || 0;
   p.rf_s = parseInt(document.getElementById('p-rf-s').value) || 0;
-  if (CI !== activeCI) document.getElementById('serie-txt').textContent = 'SERIE: ' + p.ser;
+  if (CI !== activeCI) aggSerieTxt(false);
   const lockAll = CI <= ultComp;
   if (!lockAll) {
     const ser1 = p.ser === 1;
@@ -728,9 +737,7 @@ function startTimer(tipo) {
 }
 
 // ══════════════════════════════════════════════════════════════
-// onEnd — transizioni di stato dopo timer
-// MOD 2: dopo durata → attesa_fine_esercizio (ESERCIZIO TERMINATO)
-// MOD 4: serR mai negativo
+// onEnd — MOD 3: serR incrementale
 // ══════════════════════════════════════════════════════════════
 function onEnd(tipo) {
   timerInCorso = false; cdClear();
@@ -738,18 +745,16 @@ function onEnd(tipo) {
   const mod = modScheda(p);
 
   if (tipo === 'd') {
-    // Fine durata → lampeggia ESERCIZIO TERMINATO
     fase = 'attesa_fine_esercizio';
 
   } else if (tipo === 'rs') {
-    // Fine riposo serie → scala serR (mai sotto 1), poi INIZIA ESERCIZIO
-    if (serR > 1) serR--;
-    if (CI === activeCI) document.getElementById('serie-txt').textContent = 'SERIE: ' + Math.max(1, serR);
+    // Fine riposo serie → avanza serR (incrementale, mai oltre p.ser)
+    if (serR < p.ser) serR++;
+    if (CI === activeCI) aggSerieTxt(false);
     if (mod === 'durata') {
       fase = 'attesa_durata';
     } else {
-      // Solo pesi: dopo riposo serie → ESERCIZIO TERMINATO
-      fase = (serR <= 1) ? 'attesa_rf' : 'attesa_fine_esercizio';
+      fase = (serR >= p.ser) ? 'attesa_rf' : 'attesa_fine_esercizio';
     }
 
   } else if (tipo === 'rf') {
@@ -758,15 +763,6 @@ function onEnd(tipo) {
 
   aggUI();
 }
-
-// ══════════════════════════════════════════════════════════════
-// onEnd — correzione per durata: dopo riposo serie → INIZIA ESERCIZIO (non ESERCIZIO TERMINATO)
-// Il flusso corretto per modalità durata è:
-// INIZIA ESE → AVVIO DURATA → (fine) → ESE TERMINATO → AVVIO RIPOSO SERIE → (fine) → INIZIA ESE → ...
-// Quindi dopo 'rs' in modalità durata si torna a 'attesa_durata' (lampeggia AVVIO DURATA)
-// che poi richiede tap su AVVIO DURATA → fine → ESERCIZIO TERMINATO
-// Già implementato correttamente sopra: dopo rs → attesa_durata
-// ──────────────────────────────────────────────────────────────
 
 function completaScheda() {
   const idx = activeCI;
@@ -783,17 +779,17 @@ function completaScheda() {
   render();
   if (CI === idx) {
     document.getElementById('id-badge').className = 'id-badge id-rosso';
+    aggSerieTxt(true); // spunta rossa
     setBtnNav('btn-succ', true, true);
-    document.getElementById('btn-avs').disabled = true;
-    document.getElementById('btn-avs').classList.remove('lamp');
-    document.getElementById('btn-avs').textContent = 'ESERCIZIO';
+    const avs = document.getElementById('btn-avs');
+    avs.disabled = true; avs.classList.remove('lamp'); avs.textContent = 'ESERCIZIO';
     setBtn('btn-td', false, false); setBtn('btn-trs', false, false); setBtn('btn-trf', false, false);
   }
 }
 
 function cdShow(sec, tipo) {
   const m = Math.floor(sec/60), s = sec%60;
-  let lbl = tipo==='d' ? 'DURATA' : tipo==='rs' ? 'RIPOSO<br>SERIE' : 'RIPOSO<br>FINALE';
+  const lbl = tipo==='d' ? 'DURATA' : tipo==='rs' ? 'RIPOSO<br>SERIE' : 'RIPOSO<br>FINALE';
   document.getElementById('cd-num').style.display  = '';
   document.getElementById('cd-tipo').style.display = '';
   document.getElementById('cd-num').textContent    = m+':'+String(s).padStart(2,'0');
@@ -860,6 +856,7 @@ function salvaSessione() {
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a'); a.href=url; a.download=fn; a.click();
   URL.revokeObjectURL(url);
+  rilasciaWakeLock(); // MOD 8
   const bs = document.getElementById('btn-salva');
   bs.classList.remove('lamp-verde'); bs.disabled = true; bs.textContent = 'SALVATO';
   document.getElementById('fine-av').style.display = 'block';
@@ -867,7 +864,7 @@ function salvaSessione() {
 }
 function tornaInizio() {
   if (tInt) { clearInterval(tInt); tInt = null; }
-  lpEnd();
+  lpEnd(); rilasciaWakeLock();
   J=null; SI=-1; CI=0; PL=[]; ultComp=-1; activeCI=-1; serR=0; fase='idle'; timerInCorso=false;
   document.getElementById('info-prog').textContent = 'Nessun programma caricato';
   document.getElementById('lista-sess').innerHTML  = '';
