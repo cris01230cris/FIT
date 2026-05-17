@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26051620_FIT</title>
+<title>CL26051708_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --grigio2:#1a1a1a; --testo:#fff;
@@ -86,11 +86,11 @@
   .pinput{width:100%;background:transparent;border:none;border-bottom:1px solid #444;
     color:var(--giallo);font-family:'Arial Black',Arial,sans-serif;
     font-size:.88rem;font-weight:900;text-align:center;padding:2px 0;outline:none;}
-  .pinput:disabled{color:#333;border-bottom-color:#222;}
+  .pinput:disabled{color:var(--giallo);border-bottom-color:#555;opacity:0.55;}
   .pinput-kg{width:100%;background:transparent;border:none;border-bottom:1px solid #444;
     color:var(--giallo);font-family:'Arial Black',Arial,sans-serif;
     font-size:.88rem;font-weight:900;text-align:center;padding:2px 0;outline:none;}
-  .pinput-kg:disabled{color:#333;border-bottom-color:#222;}
+  .pinput-kg:disabled{color:var(--giallo);border-bottom-color:#555;opacity:0.55;}
 
   .pesi-row{display:flex;align-items:center;gap:3px;width:100%;}
   .pesi-row .pinput:first-child{width:22px;flex-shrink:0;}
@@ -135,7 +135,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26051620_FIT</span>
+    <span class="h-versione">CL26051708_FIT</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -151,7 +151,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26051620_FIT</span>
+    <span class="h-versione">CL26051708_FIT</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -177,11 +177,11 @@
              inputmode="numeric" oninput="sanitizeInt(this,1,50)" onchange="saveP()">
     </div>
     <div class="pitem">
-      <div class="plabel">1/2 x KG</div><!-- MOD 6 -->
+      <div class="plabel">0/1/2 x KG</div>
       <div class="pesi-row">
         <input class="pinput" id="p-pn" type="number" min="0" max="2" step="1"
                inputmode="numeric" oninput="sanitizeInt(this,0,2)" onchange="saveP()">
-        <span class="pesi-x">×</span>
+        <span class="pesi-x">x</span>
         <input class="pinput-kg" id="p-pk" type="text" inputmode="decimal"
                pattern="[0-9]*[,.]?[0-9]*" placeholder="0,0"
                oninput="cleanKg(this)" onchange="saveP()">
@@ -259,7 +259,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26051620_FIT</span>
+    <span class="h-versione">CL26051708_FIT</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
