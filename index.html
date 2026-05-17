@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26051708_FIT</title>
+<title>CL26051719_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --grigio2:#1a1a1a; --testo:#fff;
@@ -40,9 +40,13 @@
   .btn.lamp-verde{animation:btnLampVerde .7s infinite;background:var(--verde);color:var(--nero);box-shadow:0 4px 0 #008833;}
   .btn.lamp-verde:active{animation:none;transform:translateY(3px);box-shadow:0 1px 0 #008833;}
 
+  @keyframes btnLampRosso{0%,100%{opacity:1;}50%{opacity:.15;}}
+  .btn.lamp-rosso{animation:btnLampRosso .7s infinite;background:var(--rosso);color:#fff;box-shadow:0 4px 0 #990000;}
+  .btn.lamp-rosso:active{animation:none;transform:translateY(3px);box-shadow:0 1px 0 #990000;}
+
   .nav4{display:grid;grid-template-columns:1fr 2fr 1fr;gap:5px;margin-bottom:5px;}
   .btn-nav{display:block;width:100%;background:var(--giallo);color:var(--nero);border:none;border-radius:8px;
-    font-size:1.6rem;font-weight:900;line-height:1;padding:8px 2px;cursor:pointer;
+    font-size:1.9rem;font-weight:900;line-height:1;padding:11px 2px;cursor:pointer;
     transition:transform .07s,box-shadow .07s;-webkit-user-select:none;user-select:none;box-shadow:0 4px 0 #7a9900;}
   .btn-nav:active{transform:translateY(3px);box-shadow:0 1px 0 #7a9900;}
   .btn-nav:disabled{background:#2a2a2a;color:#333;cursor:not-allowed;transform:none;box-shadow:none;animation:none!important;}
@@ -69,28 +73,34 @@
   .id-verde {background:var(--verde);color:#000;}
   .id-giallo{background:var(--giallo);color:#000;}
 
-  /* MOD 7: stessa dimensione per pos-txt e serie-txt */
-  .pos-txt  {font-size:.78rem;font-weight:900;color:var(--giallo);white-space:nowrap;}
-  .serie-txt{font-size:.78rem;font-weight:900;color:var(--giallo);white-space:nowrap;}
-  .serie-done{font-size:1rem;font-weight:900;color:var(--rosso);white-space:nowrap;}
+  .pos-txt  {font-size:.78rem;font-weight:900;white-space:nowrap;}
+  .serie-txt{font-size:.78rem;font-weight:900;white-space:nowrap;}
+  .rosso-txt{color:var(--rosso);}
+  .verde-txt{color:var(--verde);}
+  .giallo-txt{color:var(--giallo);}
 
   /* MOD 3: descrizione unica con scrolling oltre 5 righe */
   .desc-box{background:var(--grigio2);border:1px solid #2a2a2a;border-radius:6px;
-    padding:8px 10px;margin-bottom:5px;max-height:calc(1.5em * 5 + 16px);overflow-y:auto;}
+    padding:8px 10px;margin-bottom:5px;max-height:calc(1.5em * 5 + 16px);overflow-y:auto;
+    -webkit-overflow-scrolling:touch;touch-action:pan-y;}
   .desc-unica{font-size:.78rem;color:var(--giallo);line-height:1.5;
     font-family:Arial,sans-serif;font-weight:700;}
 
   .pgrid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:5px;}
-  .pitem{background:var(--grigio2);border:1px solid #2a2a2a;border-radius:6px;padding:4px 5px;display:flex;flex-direction:column;align-items:center;}
-  .plabel{font-size:.50rem;color:var(--giallo);font-weight:900;text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px;white-space:nowrap;}
+  .pitem{background:var(--grigio2);border:1px solid #2a2a2a;border-radius:6px;padding:7px 5px;display:flex;flex-direction:column;align-items:center;}
+  .plabel{font-size:.50rem;color:var(--giallo);font-weight:900;text-transform:uppercase;letter-spacing:.03em;margin-bottom:3px;white-space:nowrap;}
   .pinput{width:100%;background:transparent;border:none;border-bottom:1px solid #444;
     color:var(--giallo);font-family:'Arial Black',Arial,sans-serif;
-    font-size:.88rem;font-weight:900;text-align:center;padding:2px 0;outline:none;}
+    font-size:1.15rem;font-weight:900;text-align:center;padding:3px 0;outline:none;}
   .pinput:disabled{color:var(--giallo);border-bottom-color:#555;opacity:0.55;}
+  .pinput.rosso-val{color:var(--rosso);}
+  .pinput.rosso-val:disabled{color:var(--rosso);opacity:0.7;}
   .pinput-kg{width:100%;background:transparent;border:none;border-bottom:1px solid #444;
     color:var(--giallo);font-family:'Arial Black',Arial,sans-serif;
-    font-size:.88rem;font-weight:900;text-align:center;padding:2px 0;outline:none;}
+    font-size:1.15rem;font-weight:900;text-align:center;padding:3px 0;outline:none;}
   .pinput-kg:disabled{color:var(--giallo);border-bottom-color:#555;opacity:0.55;}
+  .pinput-kg.rosso-val{color:var(--rosso);}
+  .pinput-kg.rosso-val:disabled{color:var(--rosso);opacity:0.7;}
 
   .pesi-row{display:flex;align-items:center;gap:3px;width:100%;}
   .pesi-row .pinput:first-child{width:22px;flex-shrink:0;}
@@ -108,14 +118,14 @@
   .cd-tipo{font-size:.58rem;color:var(--giallo);font-weight:900;text-transform:uppercase;
     letter-spacing:.06em;margin-left:7px;line-height:1.3;text-align:left;}
 
-  .tim3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:5px;}
 
   .stor-box{background:var(--grigio2);border:1px solid #2a2a2a;border-radius:6px;
-    padding:5px 8px;flex:1;overflow-y:auto;min-height:70px;max-height:150px;}
+    padding:5px 8px;flex:1;overflow-y:auto;min-height:70px;max-height:150px;
+    -webkit-overflow-scrolling:touch;touch-action:pan-y;}
   .stor-riga{font-size:.7rem;font-weight:700;padding:4px 0;border-bottom:1px solid #222;
-    display:flex;gap:14px;align-items:center;}
+    display:flex;gap:18px;align-items:center;}
   .stor-data{color:#fff;font-size:.62rem;min-width:54px;}
-  .stor-s{color:var(--verde);}  .stor-p{color:var(--giallo);}  .stor-t{color:#ff9900;}
+  .stor-s{color:var(--verde);}  .stor-p{color:var(--giallo);}  .stor-t{color:var(--rosso);}
   .stor-empty{color:#333;font-size:.68rem;font-style:italic;}
 
   .flash{position:fixed;inset:0;background:var(--giallo);opacity:0;pointer-events:none;z-index:9999;transition:opacity .08s;}
@@ -136,7 +146,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26051708_FIT</span>
+    <span class="h-versione">CL26051719_FIT</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -152,7 +162,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26051708_FIT</span>
+    <span class="h-versione">CL26051719_FIT</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -223,22 +233,6 @@
     </div>
   </div>
 
-  <!-- MOD 8: longpress 5s corretto -->
-  <div class="tim3">
-    <button class="btn sm" id="btn-td"  disabled
-            onpointerdown="lpStart('d')" onpointerup="lpEnd()" onpointerleave="lpEnd()">
-      AVVIO<br>DURATA
-    </button>
-    <button class="btn sm" id="btn-trs" disabled
-            onpointerdown="lpStart('rs')" onpointerup="lpEnd()" onpointerleave="lpEnd()">
-      AVVIO RIPOSO<br>SERIE
-    </button>
-    <button class="btn sm" id="btn-trf" disabled
-            onpointerdown="lpStart('rf')" onpointerup="lpEnd()" onpointerleave="lpEnd()">
-      AVVIO RIPOSO<br>FINALE
-    </button>
-  </div>
-
   <div class="cd-box">
     <span class="cd-num"  id="cd-num"  style="display:none">0:00</span>
     <span class="cd-tipo" id="cd-tipo" style="display:none"></span>
@@ -246,7 +240,9 @@
 
   <div class="nav4">
     <button class="btn-nav" id="btn-prec" onclick="goPrec()">&#x23EA;</button>
-    <button class="btn sm"  id="btn-avs"  onclick="tapAvs()" style="margin-bottom:0" disabled>ESERCIZIO</button>
+    <button class="btn sm"  id="btn-avs"  style="margin-bottom:0" disabled
+            onclick="tapAvs()"
+            onpointerdown="lpAvsStart()" onpointerup="lpEnd()" onpointerleave="lpEnd()">ESERCIZIO</button>
     <button class="btn-nav" id="btn-succ" onclick="goSucc()">&#x23E9;</button>
   </div>
 
@@ -260,7 +256,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26051708_FIT</span>
+    <span class="h-versione">CL26051719_FIT</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -276,7 +272,8 @@
 // ══════════════════════════════════════════════════════════════
 let J=null, SI=-1, CI=0, PL=[], ultComp=-1, activeCI=-1, serR=0;
 let tInt=null, tSec=0, timerInCorso=false, tTipo='';
-let fase='idle';   // idle|attesa_inizio|attesa_durata|attesa_fine_esercizio|attesa_rs|attesa_rf|completata
+// fasi: idle|attesa_inizio|attesa_durata|attesa_rs|attesa_rf|completata
+let fase='idle';
 let lpTimer=null, lpPointerDown=false;
 
 // WakeLock
@@ -330,13 +327,35 @@ function sanitizeInt(el,mn,mx){
 // ══════════════════════════════════════════════════════════════
 // CONTATORI
 // ══════════════════════════════════════════════════════════════
-function aggSerieTxt(completata){
+function aggSerieTxt(){
   const el=document.getElementById('serie-txt');
-  if(completata){el.className='serie-done';el.textContent='✔';return;}
-  el.className='serie-txt';
-  const p=CI===activeCI?PL[activeCI]:PL[CI];
+  const p=PL[CI];
   const tot=p?p.ser:0;
-  el.textContent=CI===activeCI?'SERIE '+serR+' DI '+tot:'SERIE 1 DI '+tot;
+  // Rosso: scheda completata (CI<=ultComp, ma non quella attiva in esecuzione)
+  if(CI<=ultComp && CI!==activeCI){
+    el.className='serie-txt rosso-txt';
+    el.textContent='SERIE '+tot+' DI '+tot;
+    return;
+  }
+  // Giallo: scheda in esecuzione (activeCI===CI)
+  if(CI===activeCI){
+    el.className='serie-txt giallo-txt';
+    el.textContent='SERIE '+serR+' DI '+tot;
+    return;
+  }
+  // Verde: scheda futura
+  el.className='serie-txt verde-txt';
+  el.textContent='SERIE 0 DI '+tot;
+}
+
+function aggPosTxt(){
+  const el=document.getElementById('pos-txt');
+  const nT=J.sessioni[SI].schede.length;
+  const txt='SESSIONE '+(CI+1)+' DI '+nT;
+  if(CI<=ultComp && CI!==activeCI){ el.className='pos-txt rosso-txt'; }
+  else if(CI===activeCI)           { el.className='pos-txt giallo-txt'; }
+  else                             { el.className='pos-txt verde-txt'; }
+  el.textContent=txt;
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -392,22 +411,20 @@ function avviaSessione(){
 // ══════════════════════════════════════════════════════════════
 function render(){
   const sess=J.sessioni[SI];
-  const nT=sess.schede.length;
   const sc=sess.schede[CI];
   const lib=J.libreria[sc.id];
   const p=PL[CI];
 
-  document.getElementById('pos-txt').textContent='SESSIONE '+(CI+1)+' DI '+nT;
+  aggPosTxt();
 
   const bd=document.getElementById('id-badge');
   bd.textContent=sc.id;
-  if(CI===activeCI&&fase!=='completata') bd.className='id-badge id-giallo';
-  else if(CI<=ultComp)                  bd.className='id-badge id-rosso';
-  else                                  bd.className='id-badge id-verde';
+  if(CI===activeCI)      bd.className='id-badge id-giallo';
+  else if(CI<=ultComp)   bd.className='id-badge id-rosso';
+  else                   bd.className='id-badge id-verde';
 
-  aggSerieTxt(CI<=ultComp);
+  aggSerieTxt();
 
-  // MOD 3: legge campo 'descrizione' (unico) o fallback su desc_breve + desc_dettagliata
   let descTxt='—';
   if(lib){
     if(lib.descrizione) descTxt=lib.descrizione;
@@ -415,23 +432,49 @@ function render(){
   }
   document.getElementById('desc-unica').textContent=descTxt;
 
-  document.getElementById('p-ser').value =p.ser;
-  document.getElementById('p-rip').value =p.rip;
-  document.getElementById('p-pn').value  =p.pn;
-  document.getElementById('p-pk').value  =fmtKg(p.pk);
-  document.getElementById('p-dm').value  =p.dm;
-  document.getElementById('p-ds').value  =p.ds;
-  document.getElementById('p-rs-m').value=p.rs_m;
-  document.getElementById('p-rs-s').value=p.rs_s;
-  document.getElementById('p-rf-m').value=p.rf_m;
-  document.getElementById('p-rf-s').value=p.rf_s;
+  // Determina colore valori: rosso=completata, giallo=attiva o futura
+  const isRosso=(CI<=ultComp && CI!==activeCI);
+  const cls=isRosso?'rosso-val':'';
 
-  const lockAll=CI<=ultComp;
-  ['p-ser','p-rip','p-pn','p-pk','p-dm','p-ds','p-rs-m','p-rs-s','p-rf-m','p-rf-s']
-    .forEach(id=>document.getElementById(id).disabled=lockAll);
-  if(!lockAll&&parseInt(p.ser)===1){
-    document.getElementById('p-rs-m').disabled=true;
-    document.getElementById('p-rs-s').disabled=true;
+  const ids=['p-ser','p-rip','p-pn','p-pk','p-dm','p-ds','p-rs-m','p-rs-s','p-rf-m','p-rf-s'];
+  ids.forEach(id=>{
+    const el=document.getElementById(id);
+    el.classList.remove('rosso-val');
+    if(cls)el.classList.add(cls);
+  });
+
+  document.getElementById('p-ser').value  =p.ser;
+  document.getElementById('p-rip').value  =p.rip;
+  document.getElementById('p-pn').value   =p.pn;
+  document.getElementById('p-pk').value   =fmtKg(p.pk);
+  document.getElementById('p-dm').value   =p.dm;
+  document.getElementById('p-ds').value   =p.ds;
+  document.getElementById('p-rs-m').value =p.rs_m;
+  document.getElementById('p-rs-s').value =p.rs_s;
+  document.getElementById('p-rf-m').value =p.rf_m;
+  document.getElementById('p-rf-s').value =p.rf_s;
+
+  // Lock: rosso=tutti bloccati; giallo=serie bloccata, altri sbloccati (eccetto rs se ser=1); verde=tutti sbloccati
+  if(isRosso){
+    // scheda rossa: tutto bloccato
+    ids.forEach(id=>document.getElementById(id).disabled=true);
+  } else if(CI===activeCI){
+    // scheda gialla: serie bloccata, altri sbloccati
+    ids.forEach(id=>document.getElementById(id).disabled=false);
+    document.getElementById('p-ser').disabled=true;
+    if(parseInt(p.ser)===1){
+      document.getElementById('p-rs-m').disabled=true;
+      document.getElementById('p-rs-s').disabled=true;
+    }
+  } else {
+    // scheda verde: tutto sbloccato eccetto rs se ser=1
+    ids.forEach(id=>document.getElementById(id).disabled=false);
+    if(parseInt(p.ser)===1){
+      document.getElementById('p-rs-m').disabled=true;
+      document.getElementById('p-rs-s').disabled=true;
+      document.getElementById('p-rs-m').value=0;
+      document.getElementById('p-rs-s').value=0;
+    }
   }
 
   aggUI();
@@ -439,59 +482,62 @@ function render(){
 }
 
 // ══════════════════════════════════════════════════════════════
-// aggUI
+// aggUI — gestisce il pulsante multifunzione e i nav
 // ══════════════════════════════════════════════════════════════
 function aggUI(){
-  const sullaAttiva=(CI===activeCI);
-  const completataCI=(CI<=ultComp);
-  const p=activeCI>=0?PL[activeCI]:PL[CI];
-  const ser1=parseInt(activeCI>=0?PL[activeCI].ser:PL[CI].ser)===1;
-
-  setBtnNav('btn-prec',true,false);
-  setBtnNav('btn-succ',true,fase==='completata'&&sullaAttiva);
-
+  if(!J)return;
+  const nT=J.sessioni[SI].schede.length;
   const avs=document.getElementById('btn-avs');
 
-  if(completataCI){
-    avs.disabled=true;avs.classList.remove('lamp');avs.textContent='ESERCIZIO';
-    setBtn('btn-td',false,false);setBtn('btn-trs',false,false);setBtn('btn-trf',false,false);return;
-  }
-  if(activeCI===-1){
-    const turno=(CI===ultComp+1);
-    const ceTurnoAltrove=(ultComp+1<J.sessioni[SI].schede.length);
-    if(!turno&&ceTurnoAltrove){avs.disabled=true;avs.classList.remove('lamp');avs.textContent='ESERCIZIO';}
-    else{avs.disabled=false;avs.textContent='INIZIA ESERCIZIO';avs.classList[turno?'add':'remove']('lamp');}
-    setBtn('btn-td',false,false);setBtn('btn-trs',false,false);setBtn('btn-trf',false,false);return;
-  }
-  if(!sullaAttiva){
-    avs.disabled=true;avs.classList.remove('lamp');avs.textContent='ESERCIZIO';
-    setBtn('btn-td',false,false);setBtn('btn-trs',false,false);setBtn('btn-trf',false,false);return;
+  // btn-prec: sempre attivo
+  setBtnNav('btn-prec',true,false);
+
+  // btn-succ: lampeggia solo quando scheda completata e ci troviamo su di essa
+  const succLamp=(CI===activeCI&&fase==='completata');
+  setBtnNav('btn-succ',true,succLamp);
+
+  // Scheda completata (rossa): multifunzione disattivo
+  if(CI<=ultComp && CI!==activeCI){
+    setAvs(false,false,'ESERCIZIO');
+    return;
   }
 
-  if(fase==='attesa_inizio'){
-    avs.disabled=false;avs.textContent='INIZIA ESERCIZIO';avs.classList.add('lamp');
-    setBtn('btn-td',false,false);setBtn('btn-trs',false,false);setBtn('btn-trf',false,false);
-  }else if(fase==='attesa_durata'){
-    avs.disabled=true;avs.classList.remove('lamp');avs.textContent='ESERCIZIO';
-    setBtn('btn-td',!timerInCorso,!timerInCorso);setBtn('btn-trs',false,false);setBtn('btn-trf',false,false);
-  }else if(fase==='attesa_fine_esercizio'){
-    avs.disabled=false;avs.textContent='ESERCIZIO TERMINATO';avs.classList.add('lamp');
-    setBtn('btn-td',false,false);setBtn('btn-trs',false,false);setBtn('btn-trf',false,false);
-  }else if(fase==='attesa_rs'){
-    avs.disabled=true;avs.classList.remove('lamp');avs.textContent='ESERCIZIO';
-    setBtn('btn-td',false,false);
-    setBtn('btn-trs',ser1?false:!timerInCorso,ser1?false:!timerInCorso);
-    setBtn('btn-trf',false,false);
-  }else if(fase==='attesa_rf'){
-    avs.disabled=true;avs.classList.remove('lamp');avs.textContent='ESERCIZIO';
-    setBtn('btn-td',false,false);setBtn('btn-trs',false,false);
-    setBtn('btn-trf',!timerInCorso,!timerInCorso);
-  }else if(fase==='completata'){
-    avs.disabled=true;avs.classList.remove('lamp');avs.textContent='ESERCIZIO';
-    setBtn('btn-td',false,false);setBtn('btn-trs',false,false);setBtn('btn-trf',false,false);
+  // Scheda attiva (gialla)
+  if(CI===activeCI){
+    if(fase==='attesa_inizio'){
+      setAvs(true,true,'INIZIA ESERCIZIO');
+    } else if(fase==='attesa_durata'){
+      // timer durata in corso o appena avviato → disattivo
+      setAvs(false,false,'ESERCIZIO');
+    } else if(fase==='attesa_rs'){
+      // riposo serie: mostra AVVIA RIPOSO SERIE lampeggiante
+      setAvs(true,true,'AVVIA RIPOSO SERIE');
+    } else if(fase==='attesa_rf'){
+      setAvs(true,true,'AVVIA RIPOSO FINALE');
+    } else if(fase==='completata'){
+      setAvs(false,false,'ESERCIZIO');
+    } else {
+      setAvs(false,false,'ESERCIZIO');
+    }
+    return;
+  }
+
+  // Scheda verde (futura): multifunzione lampeggia solo se è il suo turno
+  const turno=(CI===ultComp+1);
+  if(turno){
+    setAvs(true,true,'INIZIA ESERCIZIO');
+  } else {
+    setAvs(false,false,'ESERCIZIO');
   }
 }
 
+function setAvs(attivo,lampeggia,testo){
+  const avs=document.getElementById('btn-avs');
+  avs.textContent=testo;
+  avs.disabled=!attivo;
+  avs.classList.remove('lamp','lamp-rosso','lamp-verde');
+  if(attivo&&lampeggia) avs.classList.add('lamp');
+}
 function setBtn(id,attivo,lampeggia){
   const el=document.getElementById(id);el.disabled=!attivo;el.classList.remove('lamp');
   if(attivo&&lampeggia)el.classList.add('lamp');
@@ -502,62 +548,81 @@ function setBtnNav(id,attivo,lampeggia){
 }
 
 // ══════════════════════════════════════════════════════════════
-// tapAvs
+// tapAvs — multifunzione
 // ══════════════════════════════════════════════════════════════
 window.tapAvs=function(){
-  if(fase==='attesa_inizio'||(activeCI===-1&&CI>ultComp)){
+  const avs=document.getElementById('btn-avs');
+  if(avs.disabled)return;
+  const testo=avs.textContent.trim();
+
+  if(testo==='INIZIA ESERCIZIO'){
     iniziaEsercizioAction();
-  }else if(fase==='attesa_fine_esercizio'){
-    if(serR>=PL[activeCI].ser){fase='attesa_rf';}
-    else{fase='attesa_rs';}
-    aggUI();
+  } else if(testo==='AVVIA RIPOSO SERIE'){
+    // Avvia timer riposo serie leggendo l'input corrente
+    setAvs(false,false,'ESERCIZIO');
+    startTimer('rs');
+  } else if(testo==='AVVIA RIPOSO FINALE'){
+    setAvs(false,false,'ESERCIZIO');
+    startTimer('rf');
   }
 };
 
 function iniziaEsercizioAction(){
-  if(activeCI!==-1)return;if(CI<=ultComp)return;
-  activeCI=CI;serR=1;aggSerieTxt(false);
-  document.getElementById('id-badge').className='id-badge id-giallo';
-  const p=PL[activeCI];
-  fase=modScheda(p)==='durata'?'attesa_durata':'attesa_fine_esercizio';
-  aggUI();
+  if(CI<=ultComp)return;
+  const p=PL[CI];
+  // Prima INIZIA su questa scheda: activeCI non era CI
+  if(activeCI!==CI){
+    activeCI=CI;serR=0;
+    document.getElementById('id-badge').className='id-badge id-giallo';
+    render(); // aggiorna colori, lock p-ser
+  }
+  // Incrementa contatore serie
+  serR++;
+  aggSerieTxt();
+  aggPosTxt();
+
+  const mod=modScheda(p);
+  if(mod==='durata'){
+    fase='attesa_durata';
+    aggUI();
+    startTimer('d'); // parte subito leggendo input
+  } else {
+    // scheda pesi: dopo INIZIA ESERCIZIO → in attesa riposo serie (o finale se ultima)
+    fase='attesa_rs';
+    // Se è l'ultima serie → attesa_rf
+    if(serR>=p.ser) fase='attesa_rf';
+    aggUI();
+  }
 }
 
 // ══════════════════════════════════════════════════════════════
 // NAVIGAZIONE
 // ══════════════════════════════════════════════════════════════
-function goPrec(){if(CI===0){go('s1');return;}CI--;render();}
+function goPrec(){
+  if(CI===0){go('s1');return;}
+  CI--;render();
+}
 function goSucc(){
   const nT=J.sessioni[SI].schede.length;
-  if(CI===activeCI&&fase==='completata'){activeCI=-1;fase='idle';}
+  // Se siamo sulla scheda appena completata, azzera activeCI
+  if(CI===activeCI&&fase==='completata'){
+    activeCI=-1;fase='idle';
+  }
   if(CI>=nT-1){go('s3');return;}
   CI++;render();
 }
 function tornaUltimaScheda(){CI=J.sessioni[SI].schede.length-1;go('s2');render();}
 
 // ══════════════════════════════════════════════════════════════
-// MOD 8: LONGPRESS — tap >5s sul timer in funzione → salta a 5s finali
-// Corretto: distingue tap normale da longpress
+// LONGPRESS su multifunzione — 5s salta timer agli ultimi 5s
 // ══════════════════════════════════════════════════════════════
-function lpStart(tipo){
-  const btnId=tipo==='d'?'btn-td':tipo==='rs'?'btn-trs':'btn-trf';
-  const el=document.getElementById(btnId);
-  if(el.disabled)return;
+function lpAvsStart(){
+  const avs=document.getElementById('btn-avs');
+  if(avs.disabled)return;
   lpPointerDown=true;
-  if(!timerInCorso){
-    // Tap normale su pulsante non attivo timer: avvia timer
-    // Ma aspetta lpEnd per distinguere tap breve da longpress
-    lpTimer=setTimeout(()=>{
-      // Se ancora premuto dopo 5s e timer in corso → salta a 5s
-      if(lpPointerDown&&timerInCorso&&tSec>5){tSec=5;cdShow(tSec,tTipo);}
-      lpTimer=null;
-    },5000);
-    startTimer(tipo);
-    return;
-  }
-  // Timer già in corso: longpress per saltare a 5s
+  // Longpress 5s: salta timer in corso agli ultimi 5s
   lpTimer=setTimeout(()=>{
-    if(lpPointerDown&&tInt&&tSec>5){tSec=5;cdShow(tSec,tTipo);}
+    if(lpPointerDown&&timerInCorso&&tSec>5){tSec=5;cdShow(tSec,tTipo);}
     lpTimer=null;
   },5000);
 }
@@ -570,7 +635,7 @@ function lpEnd(){
 // PARAMETRI
 // ══════════════════════════════════════════════════════════════
 function saveP(){
-  if(CI<=ultComp)return;
+  if(CI<=ultComp && CI!==activeCI)return; // schede rosse: non si salva
   const p=PL[CI];
   p.ser =Math.max(1,parseInt(document.getElementById('p-ser').value)||1);
   p.rip =Math.max(1,parseInt(document.getElementById('p-rip').value)||1);
@@ -582,33 +647,51 @@ function saveP(){
   p.rs_s=parseInt(document.getElementById('p-rs-s').value)||0;
   p.rf_m=parseInt(document.getElementById('p-rf-m').value)||0;
   p.rf_s=parseInt(document.getElementById('p-rf-s').value)||0;
-  if(CI!==activeCI)aggSerieTxt(false);
-  const lockAll=CI<=ultComp;
-  if(!lockAll){const ser1=p.ser===1;
+
+  // Aggiorna contatore serie (denominatore) quando si cambia input serie (punto 4)
+  aggSerieTxt();
+
+  // Blocco rs se serie=1 (punto 5.3)
+  if(CI!==activeCI){ // solo schede verdi (non la gialla dove ser è bloccato)
+    const ser1=p.ser===1;
     document.getElementById('p-rs-m').disabled=ser1;
-    document.getElementById('p-rs-s').disabled=ser1;}
+    document.getElementById('p-rs-s').disabled=ser1;
+    if(ser1){document.getElementById('p-rs-m').value=0;document.getElementById('p-rs-s').value=0;p.rs_m=0;p.rs_s=0;}
+  }
   aggUI();
 }
 
 // ══════════════════════════════════════════════════════════════
-// TIMER
+// TIMER — legge input al momento dell'avvio (punto 5.1)
 // ══════════════════════════════════════════════════════════════
 function startTimer(tipo){
-  if(activeCI===-1)return;
   if(tInt){clearInterval(tInt);tInt=null;}
   timerInCorso=true;tTipo=tipo;
-  const p=PL[activeCI];
   let sec=0;
-  if(tipo==='d')  sec=(p.dm||0)*60+(p.ds||0);
-  if(tipo==='rs') sec=secRiposo(p,'rs');
-  if(tipo==='rf') sec=secRiposo(p,'rf');
-  aggUI();
-  // MOD 4/5: se sec===0 salta direttamente a onEnd senza timer
+  if(tipo==='d'){
+    // Legge input durata al momento del tap
+    const dm=parseInt(document.getElementById('p-dm').value)||0;
+    const ds=parseInt(document.getElementById('p-ds').value)||0;
+    sec=dm*60+ds;
+    // Salva in PL anche il valore letto
+    PL[activeCI].dm=dm;PL[activeCI].ds=ds;
+  } else if(tipo==='rs'){
+    const m=parseInt(document.getElementById('p-rs-m').value)||0;
+    const s=parseInt(document.getElementById('p-rs-s').value)||0;
+    sec=m*60+s;
+    PL[activeCI].rs_m=m;PL[activeCI].rs_s=s;
+  } else if(tipo==='rf'){
+    const m=parseInt(document.getElementById('p-rf-m').value)||0;
+    const s=parseInt(document.getElementById('p-rf-s').value)||0;
+    sec=m*60+s;
+    PL[activeCI].rf_m=m;PL[activeCI].rf_s=s;
+  }
+  // Se 0 → salta direttamente a onEnd
   if(sec<=0){timerInCorso=false;onEnd(tipo);return;}
   tSec=sec;cdShow(tSec,tipo);
   tInt=setInterval(()=>{
     tSec--;
-    if(tSec<=0){clearInterval(tInt);tInt=null;alert5();onEnd(tipo);}
+    if(tSec<=0){clearInterval(tInt);tInt=null;timerInCorso=false;alert5();onEnd(tipo);}
     else cdShow(tSec,tipo);
   },1000);
 }
@@ -617,26 +700,29 @@ function startTimer(tipo){
 // onEnd
 // ══════════════════════════════════════════════════════════════
 function onEnd(tipo){
-  timerInCorso=false;cdClear();
+  cdClear();
   const p=PL[activeCI];
   const mod=modScheda(p);
 
   if(tipo==='d'){
-    fase='attesa_fine_esercizio';
-  }else if(tipo==='rs'){
-    if(serR<p.ser)serR++;
-    if(CI===activeCI)aggSerieTxt(false);
-    fase=mod==='durata'?'attesa_durata':(serR>=p.ser?'attesa_rf':'attesa_fine_esercizio');
-  }else if(tipo==='rf'){
-    completaScheda();return;
+    // Fine durata: vai ad attesa_rs o attesa_rf
+    if(serR>=p.ser) fase='attesa_rf';
+    else            fase='attesa_rs';
+    aggUI();
+  } else if(tipo==='rs'){
+    // Fine riposo serie: torna a INIZIA ESERCIZIO
+    fase='attesa_inizio';
+    aggUI();
+  } else if(tipo==='rf'){
+    completaScheda();
   }
-  aggUI();
 }
 
 function completaScheda(){
   const idx=activeCI;
   const sc=J.sessioni[SI].schede[idx];
   const p=PL[idx];
+  // Storico: ultimi parametri usati (già aggiornati in startTimer)
   if(!J.storico[sc.id])J.storico[sc.id]=[];
   const d=new Date();
   const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -645,15 +731,7 @@ function completaScheda(){
   localStorage.setItem('fit_j',JSON.stringify(J));
   if(idx>ultComp)ultComp=idx;
   fase='completata';
-  render();
-  if(CI===idx){
-    document.getElementById('id-badge').className='id-badge id-rosso';
-    aggSerieTxt(true);
-    setBtnNav('btn-succ',true,true);
-    const avs=document.getElementById('btn-avs');
-    avs.disabled=true;avs.classList.remove('lamp');avs.textContent='ESERCIZIO';
-    setBtn('btn-td',false,false);setBtn('btn-trs',false,false);setBtn('btn-trf',false,false);
-  }
+  render(); // aggiorna badge a rosso, succ lampeggiante
 }
 
 function cdShow(sec,tipo){
