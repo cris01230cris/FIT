@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26051808_FIT</title>
+<title>CL26051809_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --grigio2:#1a1a1a; --testo:#fff;
@@ -83,7 +83,7 @@
   .verde-txt{color:var(--verde);}
   .giallo-txt{color:var(--giallo);}
 
-  /* MOD 3: descrizione unica con scrolling oltre 5 righe */
+
   .desc-box{background:var(--grigio2);border:1px solid #2a2a2a;border-radius:6px;
     padding:8px 10px;margin-bottom:5px;max-height:calc(1.5em * 5 + 16px);overflow-y:auto;
     -webkit-overflow-scrolling:touch;touch-action:pan-y;}
@@ -115,42 +115,45 @@
   .dur-row .pinput{width:38px;}
   .dur-sep{color:var(--giallo);font-size:.9rem;font-weight:900;}
 
-  /* Timer visivo: wrap esterno (banda gradiente) + ovale interno (sfondo nero) */
+  /* Timer visivo: contenitore flex colonna */
   .cd-wrap{
-    position:relative;
-    background:var(--nero);        /* area esterna nera quando timer fermo */
-    border-radius:12px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
     margin-bottom:5px;
-    padding:7px;                   /* spazio tra bordo e ovale = larghezza banda */
-    overflow:hidden;
     touch-action:none;
     -webkit-user-select:none;user-select:none;
+    gap:4px;
   }
-  /* Banda gradiente: riempie il wrap da sinistra, inizialmente larghezza 0 */
-  .cd-banda{
-    position:absolute;
-    top:0;left:0;height:100%;
-    width:0%;
-    background:linear-gradient(to right,var(--verde) 0%,var(--giallo) 50%,var(--rosso) 100%);
-    border-radius:12px;
-    pointer-events:none;
-    z-index:1;
-  }
-  /* Ovale interno: sempre sfondo nero, sopra la banda */
+  /* Ovale: solo quanto basta per contenere numero e testo */
   .cd-box{
-    position:relative;
-    z-index:2;
     background:var(--nero);
     border:2px solid #333;
     border-radius:999px;
-    padding:10px 22px;
-    min-height:54px;
-    display:flex;align-items:center;justify-content:center;
-    text-align:center;
+    padding:8px 28px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    min-width:0;
   }
-  .cd-num{font-size:2.1rem;font-weight:900;color:var(--giallo);letter-spacing:.05em;}
+  .cd-num{font-size:2.1rem;font-weight:900;color:var(--giallo);letter-spacing:.05em;white-space:nowrap;}
   .cd-tipo{font-size:.58rem;color:var(--giallo);font-weight:900;text-transform:uppercase;
-    letter-spacing:.06em;margin-left:7px;line-height:1.3;text-align:left;}
+    letter-spacing:.06em;line-height:1.3;text-align:left;white-space:nowrap;}
+  /* Banda gradiente: larghezza 100% del contenitore, altezza fissa */
+  .cd-banda-wrap{
+    width:100%;
+    height:8px;
+    background:var(--nero);
+    border-radius:4px;
+    overflow:hidden;
+  }
+  .cd-banda{
+    height:100%;
+    width:0%;
+    background:linear-gradient(to right,var(--verde) 0%,var(--giallo) 50%,var(--rosso) 100%);
+    border-radius:4px;
+  }
 
 
   .stor-box{background:var(--grigio2);border:1px solid #2a2a2a;border-radius:6px;
@@ -180,7 +183,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26051808_FIT</span>
+    <span class="h-versione">CL26051809_FIT</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -197,7 +200,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26051808_FIT</span>
+    <span class="h-versione">CL26051809_FIT</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -205,12 +208,12 @@
     <div class="serie-txt" id="serie-txt">SERIE — DI —</div>
   </div>
 
-  <!-- MOD 3: descrizione unica con scroll oltre 5 righe -->
+
   <div class="desc-box">
     <div class="desc-unica" id="desc-unica">—</div>
   </div>
 
-  <!-- MOD 6: 1/2 x KG -->
+
   <div class="pgrid3">
     <div class="pitem">
       <div class="plabel">SERIE</div>
@@ -268,20 +271,20 @@
     </div>
   </div>
 
-  <div class="cd-wrap" id="cd-wrap"
-       onpointerdown="lpTimerStart(event)" onpointerup="lpTimerEnd()" onpointermove="lpTimerMove(event)">
-    <div class="cd-banda" id="cd-banda"></div>
+  <div class="cd-wrap" id="cd-wrap" onclick="dblTapTimer()">
     <div class="cd-box" id="cd-box">
       <span class="cd-num"  id="cd-num"  style="display:none">0:00</span>
       <span class="cd-tipo" id="cd-tipo" style="display:none"></span>
+    </div>
+    <div class="cd-banda-wrap" id="cd-banda-wrap" style="display:none">
+      <div class="cd-banda" id="cd-banda"></div>
     </div>
   </div>
 
   <div class="nav4">
     <button class="btn-nav" id="btn-prec" onclick="goPrec()">&#x23EA;</button>
     <button class="btn sm"  id="btn-avs"  style="margin-bottom:0" disabled
-            onclick="tapAvs()"
-            onpointerdown="lpAvsStart()" onpointerup="lpEnd()" onpointerleave="lpEnd()">ESERCIZIO</button>
+            onclick="tapAvs()">ESERCIZIO</button>
     <button class="btn-nav" id="btn-succ" onclick="goSucc()">&#x23E9;</button>
   </div>
 
@@ -290,12 +293,12 @@
   </div>
 </div>
 
-<!-- S3 — MOD 2: header completo -->
+<!-- S3 -->
 <div class="schermata" id="s3">
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26051808_FIT</span>
+    <span class="h-versione">CL26051809_FIT</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -313,7 +316,6 @@ let J=null, SI=-1, CI=0, PL=[], ultComp=-1, activeCI=-1, serR=0;
 let tInt=null, tSec=0, timerInCorso=false, tTipo='';
 // fasi: idle|attesa_inizio|attesa_durata|attesa_rs|attesa_rf|completata
 let fase='idle';
-let lpTimer=null, lpPointerDown=false;
 
 // WakeLock
 let wakeLock=null;
@@ -332,11 +334,6 @@ document.addEventListener('visibilitychange',()=>{
 // UTILITY
 // ══════════════════════════════════════════════════════════════
 function modScheda(p){return(p.dm>0||p.ds>0)?'durata':'pesi';}
-function secRiposo(p,tipo){
-  if(tipo==='rs') return (p.rs_m||0)*60+(p.rs_s||0);
-  if(tipo==='rf') return (p.rf_m||0)*60+(p.rf_s||0);
-  return 0;
-}
 function leggiKg(id){
   const v=document.getElementById(id).value.replace(',','.');
   const n=parseFloat(v);
@@ -583,10 +580,6 @@ function setAvs(attivo,lampeggia,testo){
   avs.classList.remove('lamp','lamp-rosso','lamp-verde');
   if(attivo&&lampeggia) avs.classList.add('lamp');
 }
-function setBtn(id,attivo,lampeggia){
-  const el=document.getElementById(id);el.disabled=!attivo;el.classList.remove('lamp');
-  if(attivo&&lampeggia)el.classList.add('lamp');
-}
 function setBtnNav(id,attivo,lampeggia){
   const el=document.getElementById(id);el.disabled=!attivo;el.classList.remove('lamp');
   if(attivo&&lampeggia)el.classList.add('lamp');
@@ -659,45 +652,26 @@ function goSucc(){
 function tornaUltimaScheda(){CI=J.sessioni[SI].schede.length-1;go('s2');render();}
 
 // ══════════════════════════════════════════════════════════════
-// LONGPRESS su cd-wrap — 5s salta timer agli ultimi 5s (mod 3)
-// Usa setPointerCapture per non perdere il contatto su mobile
+
 // ══════════════════════════════════════════════════════════════
-let lpTimerPtr=null, lpTimerDown=false, lpStartX=0, lpStartY=0;
-function lpTimerStart(e){
+// DOPPIO TAP sull'ovale — salta timer a 5 secondi rimanenti
+// ══════════════════════════════════════════════════════════════
+let dblTapLast=0;
+function dblTapTimer(){
   if(!timerInCorso)return;
-  e.preventDefault();
-  // Cattura il pointer per ricevere eventi anche fuori elemento
-  try{e.target.setPointerCapture(e.pointerId);}catch(x){}
-  lpTimerDown=true;
-  lpStartX=e.clientX;lpStartY=e.clientY;
-  lpTimerPtr=setTimeout(()=>{
-    if(lpTimerDown&&timerInCorso&&tSec>5){
+  const ora=Date.now();
+  if(ora-dblTapLast<400){
+    // Secondo tap entro 400ms: salta a 5s
+    if(tSec>5){
       tSec=5;
       cdShow(tSec,tTipo);
       aggProgress(tSec,tTotSec);
-      if(navigator.vibrate)navigator.vibrate(80); // feedback tattile
+      if(navigator.vibrate)navigator.vibrate(80);
     }
-    lpTimerPtr=null;
-  },5000);
-}
-function lpTimerMove(e){
-  if(!lpTimerDown)return;
-  // Cancella solo se il dito si è spostato più di 20px
-  const dx=e.clientX-lpStartX, dy=e.clientY-lpStartY;
-  if(Math.sqrt(dx*dx+dy*dy)>20){lpTimerEnd();}
-}
-function lpTimerEnd(){
-  lpTimerDown=false;
-  if(lpTimerPtr){clearTimeout(lpTimerPtr);lpTimerPtr=null;}
-}
-
-// LONGPRESS sul multifunzione (tenuto per compatibilità)
-function lpAvsStart(){
-  // Non più usato per timer; tenuto per non rompere gli handler HTML
-}
-function lpEnd(){
-  lpPointerDown=false;
-  if(lpTimer){clearTimeout(lpTimer);lpTimer=null;}
+    dblTapLast=0;
+  } else {
+    dblTapLast=ora;
+  }
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -731,7 +705,7 @@ function saveP(){
 }
 
 // ══════════════════════════════════════════════════════════════
-// TIMER — legge e blocca input all'avvio, progress band (mod 4,5)
+// TIMER
 // ══════════════════════════════════════════════════════════════
 let tTotSec=0; // secondi totali per la progress bar
 
@@ -767,7 +741,7 @@ function startTimer(tipo){
   }
   if(sec<=0){timerInCorso=false;onEnd(tipo);return;}
   tSec=sec;tTotSec=sec;
-  lockTimerInputs(true); // mod 4: blocca input
+  lockTimerInputs(true);
   cdShow(tSec,tipo);
   aggProgress(tSec,tTotSec);
   tInt=setInterval(()=>{
@@ -823,16 +797,17 @@ function completaScheda(){
 
 function cdShow(sec,tipo){
   const m=Math.floor(sec/60),s=sec%60;
-  const lbl=tipo==='d'?'DURATA':tipo==='rs'?'RIPOSO<br>SERIE':'RIPOSO<br>FINALE';
+  const lbl=tipo==='d'?'DURATA':tipo==='rs'?'RIPOSO SERIE':'RIPOSO FINALE';
   document.getElementById('cd-num').style.display='';
   document.getElementById('cd-tipo').style.display='';
   document.getElementById('cd-num').textContent=m+':'+String(s).padStart(2,'0');
-  document.getElementById('cd-tipo').innerHTML=lbl;
+  document.getElementById('cd-tipo').textContent=lbl;
+  document.getElementById('cd-banda-wrap').style.display='block';
 }
 function cdClear(){
   document.getElementById('cd-num').style.display='none';
   document.getElementById('cd-tipo').style.display='none';
-  // Azzera banda senza transizione
+  document.getElementById('cd-banda-wrap').style.display='none';
   const b=document.getElementById('cd-banda');
   b.style.transition='none';
   b.style.width='0%';
@@ -910,7 +885,7 @@ function salvaSessione(){
 }
 function tornaInizio(){
   if(tInt){clearInterval(tInt);tInt=null;}
-  lpEnd();rilasciaWakeLock();
+  rilasciaWakeLock();
   J=null;SI=-1;CI=0;PL=[];ultComp=-1;activeCI=-1;serR=0;fase='idle';timerInCorso=false;
   document.getElementById('info-prog').textContent='Nessun programma caricato';
   document.getElementById('lista-sess').innerHTML='';
