@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26051719_FIT</title>
+<title>CL26051807_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --grigio2:#1a1a1a; --testo:#fff;
@@ -56,13 +56,17 @@
 
   /* S1 */
   .sez-label{font-size:.65rem;font-weight:900;color:#666;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;margin-top:12px;}
-  .info-box{background:var(--grigio2);border:1px solid #333;border-radius:7px;padding:11px;margin-bottom:7px;font-size:.78rem;color:#888;line-height:1.5;}
+  .info-box{background:var(--grigio2);border:1px solid #333;border-radius:7px;padding:11px;margin-bottom:7px;font-size:.78rem;color:var(--giallo);line-height:1.5;font-weight:900;}
   .lista-sessioni{display:flex;flex-direction:column;gap:7px;margin-bottom:12px;}
   .btn-sess{padding:13px 12px;background:var(--grigio2);border:2px solid #333;border-radius:8px;
     color:#ccc;font-family:'Arial Black',Arial,sans-serif;font-size:.85rem;font-weight:900;
     text-transform:uppercase;cursor:pointer;transition:transform .07s;text-align:left;letter-spacing:.04em;}
   .btn-sess:active{transform:scale(.97);}
-  .btn-sess.sel{border-color:var(--giallo);color:var(--giallo);}
+  .btn-sess.sel{border-color:var(--verde);color:var(--verde);}
+
+  /* Pulsante navigazione prima scheda in S1 */
+  #btn-vai-s2{display:none;}
+  #btn-vai-s2.visibile{display:block;}
 
   /* S2 */
   #s2{padding:6px;}
@@ -111,12 +115,18 @@
   .dur-row .pinput{width:38px;}
   .dur-sep{color:var(--giallo);font-size:.9rem;font-weight:900;}
 
-  .cd-box{background:var(--grigio2);border:2px solid #2a2a2a;border-radius:8px;
-    padding:7px 10px;text-align:center;margin-bottom:5px;min-height:50px;
-    display:flex;align-items:center;justify-content:center;}
-  .cd-num{font-size:2.1rem;font-weight:900;color:var(--giallo);letter-spacing:.05em;}
+  .cd-box{background:var(--nero);border:2px solid #333;border-radius:999px;
+    padding:10px 22px;text-align:center;margin-bottom:5px;min-height:54px;
+    display:flex;align-items:center;justify-content:center;
+    position:relative;overflow:hidden;cursor:pointer;touch-action:none;
+    -webkit-user-select:none;user-select:none;}
+  .cd-num{font-size:2.1rem;font-weight:900;color:var(--giallo);letter-spacing:.05em;position:relative;z-index:2;}
   .cd-tipo{font-size:.58rem;color:var(--giallo);font-weight:900;text-transform:uppercase;
-    letter-spacing:.06em;margin-left:7px;line-height:1.3;text-align:left;}
+    letter-spacing:.06em;margin-left:7px;line-height:1.3;text-align:left;position:relative;z-index:2;}
+  /* Banda progress timer: gradiente verde→giallo→rosso che si riduce da destra */
+  .cd-progress{position:absolute;top:0;left:0;height:100%;
+    background:linear-gradient(to right,var(--verde),var(--giallo),var(--rosso));
+    border-radius:999px;z-index:1;transition:width .9s linear;pointer-events:none;}
 
 
   .stor-box{background:var(--grigio2);border:1px solid #2a2a2a;border-radius:6px;
@@ -146,7 +156,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26051719_FIT</span>
+    <span class="h-versione">CL26051807_FIT</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -155,6 +165,7 @@
   <div class="sez-label">Sessione</div>
   <div class="lista-sessioni" id="lista-sess"></div>
   <button class="btn verde" id="btn-avvia" disabled onclick="avviaSessione()">AVVIA SESSIONE</button>
+  <button class="btn-nav" id="btn-vai-s2" onclick="vaiPrimaScheda()" style="margin-bottom:7px">&#x23E9;</button>
 </div>
 
 <!-- S2 -->
@@ -162,7 +173,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26051719_FIT</span>
+    <span class="h-versione">CL26051807_FIT</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -233,7 +244,8 @@
     </div>
   </div>
 
-  <div class="cd-box">
+  <div class="cd-box" id="cd-box"
+       onpointerdown="lpTimerStart(event)" onpointerup="lpTimerEnd()" onpointerleave="lpTimerEnd()">
     <span class="cd-num"  id="cd-num"  style="display:none">0:00</span>
     <span class="cd-tipo" id="cd-tipo" style="display:none"></span>
   </div>
@@ -256,7 +268,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26051719_FIT</span>
+    <span class="h-versione">CL26051807_FIT</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -403,7 +415,13 @@ function avviaSessione(){
   CI=0;ultComp=-1;activeCI=-1;serR=0;fase='idle';
   setH(J.programma,sess.nome);
   richiediWakeLock();
+  // Mostra pulsante navigazione prima scheda
+  document.getElementById('btn-vai-s2').classList.add('visibile');
   go('s2');render();
+}
+function vaiPrimaScheda(){
+  if(!J||SI<0||!PL.length)return;
+  CI=0;go('s2');render();
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -614,17 +632,30 @@ function goSucc(){
 function tornaUltimaScheda(){CI=J.sessioni[SI].schede.length-1;go('s2');render();}
 
 // ══════════════════════════════════════════════════════════════
-// LONGPRESS su multifunzione — 5s salta timer agli ultimi 5s
+// LONGPRESS su cd-box — 5s salta timer agli ultimi 5s (mod 3)
 // ══════════════════════════════════════════════════════════════
-function lpAvsStart(){
-  const avs=document.getElementById('btn-avs');
-  if(avs.disabled)return;
-  lpPointerDown=true;
-  // Longpress 5s: salta timer in corso agli ultimi 5s
-  lpTimer=setTimeout(()=>{
-    if(lpPointerDown&&timerInCorso&&tSec>5){tSec=5;cdShow(tSec,tTipo);}
-    lpTimer=null;
+let lpTimerPtr=null, lpTimerDown=false;
+function lpTimerStart(e){
+  if(!timerInCorso)return;
+  e.preventDefault();
+  lpTimerDown=true;
+  lpTimerPtr=setTimeout(()=>{
+    if(lpTimerDown&&timerInCorso&&tSec>5){
+      tSec=5;
+      cdShow(tSec,tTipo);
+      aggProgress(tSec,tTotSec);
+    }
+    lpTimerPtr=null;
   },5000);
+}
+function lpTimerEnd(){
+  lpTimerDown=false;
+  if(lpTimerPtr){clearTimeout(lpTimerPtr);lpTimerPtr=null;}
+}
+
+// LONGPRESS sul multifunzione (tenuto per compatibilità)
+function lpAvsStart(){
+  // Non più usato per timer; tenuto per non rompere gli handler HTML
 }
 function lpEnd(){
   lpPointerDown=false;
@@ -662,18 +693,32 @@ function saveP(){
 }
 
 // ══════════════════════════════════════════════════════════════
-// TIMER — legge input al momento dell'avvio (punto 5.1)
+// TIMER — legge e blocca input all'avvio, progress band (mod 4,5)
 // ══════════════════════════════════════════════════════════════
+let tTotSec=0; // secondi totali per la progress bar
+
+function lockTimerInputs(lock){
+  // Blocca/sblocca solo i 6 input di durata e riposi (non serie/rip/pesi)
+  ['p-dm','p-ds','p-rs-m','p-rs-s','p-rf-m','p-rf-s'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(lock){
+      el.dataset.wasDisabled=el.disabled?'1':'0';
+      el.disabled=true;
+    } else {
+      // Ripristina solo se non era già bloccato per altri motivi
+      // (render() si occuperà del lock corretto)
+    }
+  });
+}
+
 function startTimer(tipo){
   if(tInt){clearInterval(tInt);tInt=null;}
   timerInCorso=true;tTipo=tipo;
   let sec=0;
   if(tipo==='d'){
-    // Legge input durata al momento del tap
     const dm=parseInt(document.getElementById('p-dm').value)||0;
     const ds=parseInt(document.getElementById('p-ds').value)||0;
     sec=dm*60+ds;
-    // Salva in PL anche il valore letto
     PL[activeCI].dm=dm;PL[activeCI].ds=ds;
   } else if(tipo==='rs'){
     const m=parseInt(document.getElementById('p-rs-m').value)||0;
@@ -686,13 +731,22 @@ function startTimer(tipo){
     sec=m*60+s;
     PL[activeCI].rf_m=m;PL[activeCI].rf_s=s;
   }
-  // Se 0 → salta direttamente a onEnd
   if(sec<=0){timerInCorso=false;onEnd(tipo);return;}
-  tSec=sec;cdShow(tSec,tipo);
+  tSec=sec;tTotSec=sec;
+  lockTimerInputs(true); // mod 4: blocca input
+  cdShow(tSec,tipo);
+  aggProgress(tSec,tTotSec);
   tInt=setInterval(()=>{
     tSec--;
-    if(tSec<=0){clearInterval(tInt);tInt=null;timerInCorso=false;alert5();onEnd(tipo);}
-    else cdShow(tSec,tipo);
+    if(tSec<=0){
+      clearInterval(tInt);tInt=null;timerInCorso=false;
+      aggProgress(0,tTotSec);
+      alert5();
+      setTimeout(()=>{lockTimerInputs(false);onEnd(tipo);},200);
+    } else {
+      cdShow(tSec,tipo);
+      aggProgress(tSec,tTotSec);
+    }
   },1000);
 }
 
@@ -700,17 +754,16 @@ function startTimer(tipo){
 // onEnd
 // ══════════════════════════════════════════════════════════════
 function onEnd(tipo){
+  timerInCorso=false;
   cdClear();
+  lockTimerInputs(false); // mod 4: sblocca input
   const p=PL[activeCI];
-  const mod=modScheda(p);
 
   if(tipo==='d'){
-    // Fine durata: vai ad attesa_rs o attesa_rf
     if(serR>=p.ser) fase='attesa_rf';
     else            fase='attesa_rs';
     aggUI();
   } else if(tipo==='rs'){
-    // Fine riposo serie: torna a INIZIA ESERCIZIO
     fase='attesa_inizio';
     aggUI();
   } else if(tipo==='rf'){
@@ -737,14 +790,33 @@ function completaScheda(){
 function cdShow(sec,tipo){
   const m=Math.floor(sec/60),s=sec%60;
   const lbl=tipo==='d'?'DURATA':tipo==='rs'?'RIPOSO<br>SERIE':'RIPOSO<br>FINALE';
+  const box=document.getElementById('cd-box');
+  box.style.display='flex';
   document.getElementById('cd-num').style.display='';
   document.getElementById('cd-tipo').style.display='';
   document.getElementById('cd-num').textContent=m+':'+String(s).padStart(2,'0');
   document.getElementById('cd-tipo').innerHTML=lbl;
+  // Assicura che la progress bar esista
+  if(!document.getElementById('cd-prog')){
+    const p=document.createElement('div');
+    p.id='cd-prog';p.className='cd-progress';
+    box.insertBefore(p,box.firstChild);
+  }
 }
 function cdClear(){
   document.getElementById('cd-num').style.display='none';
   document.getElementById('cd-tipo').style.display='none';
+  const p=document.getElementById('cd-prog');
+  if(p)p.style.width='0%';
+}
+function aggProgress(rimasti,totali){
+  const p=document.getElementById('cd-prog');
+  if(!p)return;
+  const pct=totali>0?Math.round((rimasti/totali)*100):0;
+  p.style.width=pct+'%';
+  // Transizione fluida: se è il primo aggiornamento (pct==100) toglila, poi rimettila
+  if(pct>=100){p.style.transition='none';}
+  else{p.style.transition='width .9s linear';}
 }
 
 function alert5(){
@@ -809,6 +881,7 @@ function tornaInizio(){
   document.getElementById('info-prog').textContent='Nessun programma caricato';
   document.getElementById('lista-sess').innerHTML='';
   document.getElementById('btn-avvia').disabled=true;
+  document.getElementById('btn-vai-s2').classList.remove('visibile');
   document.getElementById('fine-av').style.display='none';
   const bs=document.getElementById('btn-salva');
   bs.disabled=false;bs.textContent='SALVA SESSIONE';bs.classList.add('lamp-verde');
