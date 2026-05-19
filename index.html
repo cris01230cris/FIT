@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26051809_FIT</title>
+<title>CL26051908_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --grigio2:#1a1a1a; --testo:#fff;
@@ -115,45 +115,53 @@
   .dur-row .pinput{width:38px;}
   .dur-sep{color:var(--giallo);font-size:.9rem;font-weight:900;}
 
-  /* Timer visivo: contenitore flex colonna */
+  /* Timer: rettangolo esterno nascosto finché non attivo */
   .cd-wrap{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    margin-bottom:5px;
-    touch-action:none;
-    -webkit-user-select:none;user-select:none;
-    gap:4px;
-  }
-  /* Ovale: solo quanto basta per contenere numero e testo */
-  .cd-box{
+    display:none;                  /* visibile solo durante il timer */
+    position:relative;
+    width:100%;
+    height:64px;
     background:var(--nero);
-    border:2px solid #333;
+    border-radius:10px;
+    overflow:hidden;
+    margin-bottom:5px;
+    -webkit-user-select:none;user-select:none;
+  }
+  .cd-wrap.attivo{display:block;}
+  /* Banda colorata: riempie il rettangolo esterno da sinistra, inizialmente 0 */
+  .cd-banda{
+    position:absolute;
+    top:0;left:0;
+    height:100%;width:0%;
+    background:linear-gradient(to right,
+      var(--verde)  0%,
+      var(--verde)  33%,
+      var(--giallo) 50%,
+      var(--rosso)  67%,
+      var(--rosso)  100%);
+    border-radius:10px;
+    pointer-events:none;
+    z-index:1;
+  }
+  /* Ovale centrato, sfondo nero garantito, sopra la banda */
+  .cd-box{
+    position:absolute;
+    top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    z-index:2;
+    background:var(--nero);
+    border:2px solid #444;
     border-radius:999px;
-    padding:8px 28px;
-    display:inline-flex;
+    padding:6px 20px;
+    display:flex;
     align-items:center;
     justify-content:center;
-    gap:8px;
-    min-width:0;
+    gap:7px;
+    white-space:nowrap;
   }
-  .cd-num{font-size:2.1rem;font-weight:900;color:var(--giallo);letter-spacing:.05em;white-space:nowrap;}
-  .cd-tipo{font-size:.58rem;color:var(--giallo);font-weight:900;text-transform:uppercase;
-    letter-spacing:.06em;line-height:1.3;text-align:left;white-space:nowrap;}
-  /* Banda gradiente: larghezza 100% del contenitore, altezza fissa */
-  .cd-banda-wrap{
-    width:100%;
-    height:8px;
-    background:var(--nero);
-    border-radius:4px;
-    overflow:hidden;
-  }
-  .cd-banda{
-    height:100%;
-    width:0%;
-    background:linear-gradient(to right,var(--verde) 0%,var(--giallo) 50%,var(--rosso) 100%);
-    border-radius:4px;
-  }
+  .cd-num{font-size:2.0rem;font-weight:900;color:var(--giallo);letter-spacing:.04em;}
+  .cd-tipo{font-size:.55rem;color:var(--giallo);font-weight:900;text-transform:uppercase;
+    letter-spacing:.06em;line-height:1.25;text-align:left;}
 
 
   .stor-box{background:var(--grigio2);border:1px solid #2a2a2a;border-radius:6px;
@@ -183,7 +191,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26051809_FIT</span>
+    <span class="h-versione">CL26051908_FIT</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -200,7 +208,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26051809_FIT</span>
+    <span class="h-versione">CL26051908_FIT</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -272,12 +280,10 @@
   </div>
 
   <div class="cd-wrap" id="cd-wrap" onclick="dblTapTimer()">
+    <div class="cd-banda" id="cd-banda"></div>
     <div class="cd-box" id="cd-box">
-      <span class="cd-num"  id="cd-num"  style="display:none">0:00</span>
-      <span class="cd-tipo" id="cd-tipo" style="display:none"></span>
-    </div>
-    <div class="cd-banda-wrap" id="cd-banda-wrap" style="display:none">
-      <div class="cd-banda" id="cd-banda"></div>
+      <span class="cd-num"  id="cd-num"></span>
+      <span class="cd-tipo" id="cd-tipo"></span>
     </div>
   </div>
 
@@ -298,7 +304,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26051809_FIT</span>
+    <span class="h-versione">CL26051908_FIT</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -379,7 +385,7 @@ function aggSerieTxt(){
     el.textContent='SERIE '+serR+' DI '+tot;
     return;
   }
-  // Verde: scheda futura
+
   el.className='serie-txt verde-txt';
   el.textContent='SERIE 0 DI '+tot;
 }
@@ -496,12 +502,9 @@ function render(){
   document.getElementById('p-rf-m').value =p.rf_m;
   document.getElementById('p-rf-s').value =p.rf_s;
 
-  // Lock: rosso=tutti bloccati; giallo=serie bloccata, altri sbloccati (eccetto rs se ser=1); verde=tutti sbloccati
   if(isRosso){
-    // scheda rossa: tutto bloccato
     ids.forEach(id=>document.getElementById(id).disabled=true);
   } else if(CI===activeCI){
-    // scheda gialla: serie bloccata, altri sbloccati
     ids.forEach(id=>document.getElementById(id).disabled=false);
     document.getElementById('p-ser').disabled=true;
     if(parseInt(p.ser)===1){
@@ -509,7 +512,6 @@ function render(){
       document.getElementById('p-rs-s').disabled=true;
     }
   } else {
-    // scheda verde: tutto sbloccato eccetto rs se ser=1
     ids.forEach(id=>document.getElementById(id).disabled=false);
     if(parseInt(p.ser)===1){
       document.getElementById('p-rs-m').disabled=true;
@@ -531,40 +533,30 @@ function aggUI(){
   const nT=J.sessioni[SI].schede.length;
   const avs=document.getElementById('btn-avs');
 
-  // btn-prec: sempre attivo
   setBtnNav('btn-prec',true,false);
 
-  // btn-succ: lampeggia solo quando scheda completata e ci troviamo su di essa
   const succLamp=(CI===activeCI&&fase==='completata');
   setBtnNav('btn-succ',true,succLamp);
 
-  // Scheda completata (rossa): multifunzione disattivo
   if(CI<=ultComp && CI!==activeCI){
     setAvs(false,false,'ESERCIZIO');
     return;
   }
 
-  // Scheda attiva (gialla)
   if(CI===activeCI){
     if(fase==='attesa_inizio'){
       setAvs(true,true,'INIZIA ESERCIZIO');
     } else if(fase==='attesa_durata'){
-      // timer durata in corso o appena avviato → disattivo
       setAvs(false,false,'ESERCIZIO');
     } else if(fase==='attesa_rs'){
-      // riposo serie: mostra AVVIA RIPOSO SERIE lampeggiante
       setAvs(true,true,'AVVIA RIPOSO SERIE');
     } else if(fase==='attesa_rf'){
       setAvs(true,true,'AVVIA RIPOSO FINALE');
-    } else if(fase==='completata'){
-      setAvs(false,false,'ESERCIZIO');
     } else {
       setAvs(false,false,'ESERCIZIO');
     }
     return;
   }
-
-  // Scheda verde (futura): multifunzione lampeggia solo se è il suo turno
   const turno=(CI===ultComp+1);
   if(turno){
     setAvs(true,true,'INIZIA ESERCIZIO');
@@ -652,8 +644,6 @@ function goSucc(){
 function tornaUltimaScheda(){CI=J.sessioni[SI].schede.length-1;go('s2');render();}
 
 // ══════════════════════════════════════════════════════════════
-
-// ══════════════════════════════════════════════════════════════
 // DOPPIO TAP sull'ovale — salta timer a 5 secondi rimanenti
 // ══════════════════════════════════════════════════════════════
 let dblTapLast=0;
@@ -691,11 +681,9 @@ function saveP(){
   p.rf_m=parseInt(document.getElementById('p-rf-m').value)||0;
   p.rf_s=parseInt(document.getElementById('p-rf-s').value)||0;
 
-  // Aggiorna contatore serie (denominatore) quando si cambia input serie (punto 4)
   aggSerieTxt();
 
-  // Blocco rs se serie=1 (punto 5.3)
-  if(CI!==activeCI){ // solo schede verdi (non la gialla dove ser è bloccato)
+  if(CI!==activeCI){
     const ser1=p.ser===1;
     document.getElementById('p-rs-m').disabled=ser1;
     document.getElementById('p-rs-s').disabled=ser1;
@@ -770,7 +758,7 @@ function onEnd(tipo){
   if(tipo==='d'){
     if(serR>=p.ser) fase='attesa_rf';
     else            fase='attesa_rs';
-    render(); // render ri-applica lock corretto per scheda gialla
+    render();
   } else if(tipo==='rs'){
     fase='attesa_inizio';
     render();
@@ -783,7 +771,6 @@ function completaScheda(){
   const idx=activeCI;
   const sc=J.sessioni[SI].schede[idx];
   const p=PL[idx];
-  // Storico: ultimi parametri usati (già aggiornati in startTimer)
   if(!J.storico[sc.id])J.storico[sc.id]=[];
   const d=new Date();
   const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -792,22 +779,22 @@ function completaScheda(){
   localStorage.setItem('fit_j',JSON.stringify(J));
   if(idx>ultComp)ultComp=idx;
   fase='completata';
-  render(); // aggiorna badge a rosso, succ lampeggiante
+  render();
 }
 
 function cdShow(sec,tipo){
   const m=Math.floor(sec/60),s=sec%60;
-  const lbl=tipo==='d'?'DURATA':tipo==='rs'?'RIPOSO SERIE':'RIPOSO FINALE';
-  document.getElementById('cd-num').style.display='';
-  document.getElementById('cd-tipo').style.display='';
+  // Testo su due righe: RIPOSO\nSERIE o RIPOSO\nFINALE
+  const lbl=tipo==='d'?'DURATA':tipo==='rs'?'RIPOSO\nSERIE':'RIPOSO\nFINALE';
   document.getElementById('cd-num').textContent=m+':'+String(s).padStart(2,'0');
-  document.getElementById('cd-tipo').textContent=lbl;
-  document.getElementById('cd-banda-wrap').style.display='block';
+  const tipoEl=document.getElementById('cd-tipo');
+  // Usa innerText per rispettare \n come <br>
+  tipoEl.style.whiteSpace='pre';
+  tipoEl.textContent=lbl;
+  document.getElementById('cd-wrap').classList.add('attivo');
 }
 function cdClear(){
-  document.getElementById('cd-num').style.display='none';
-  document.getElementById('cd-tipo').style.display='none';
-  document.getElementById('cd-banda-wrap').style.display='none';
+  document.getElementById('cd-wrap').classList.remove('attivo');
   const b=document.getElementById('cd-banda');
   b.style.transition='none';
   b.style.width='0%';
@@ -817,11 +804,9 @@ function aggProgress(rimasti,totali){
   if(!b)return;
   const pct=totali>0?(rimasti/totali)*100:0;
   if(rimasti===totali){
-    // Primo tick: imposta senza transizione al 100%
     b.style.transition='none';
     b.style.width='100%';
-    // Forza reflow poi applica transizione per i tick successivi
-    b.offsetWidth; // eslint-disable-line
+    b.offsetWidth; // forza reflow
   } else {
     b.style.transition='width 1s linear';
     b.style.width=Math.max(0,pct)+'%';
