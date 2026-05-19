@@ -128,11 +128,11 @@
     -webkit-user-select:none;user-select:none;
   }
   .cd-wrap.attivo{display:block;}
-  /* Banda colorata: riempie il rettangolo esterno da sinistra, inizialmente 0 */
+  /* Banda colorata: larghezza sempre 100%, si rivela da sinistra via clip-path */
   .cd-banda{
     position:absolute;
     top:0;left:0;
-    height:100%;width:0%;
+    height:100%;width:100%;
     background:linear-gradient(to right,
       var(--verde)  0%,
       var(--verde)  33%,
@@ -142,6 +142,7 @@
     border-radius:10px;
     pointer-events:none;
     z-index:1;
+    clip-path:inset(0 100% 0 0);
   }
   /* Ovale centrato, sfondo nero garantito, sopra la banda */
   .cd-box{
@@ -797,19 +798,24 @@ function cdClear(){
   document.getElementById('cd-wrap').classList.remove('attivo');
   const b=document.getElementById('cd-banda');
   b.style.transition='none';
-  b.style.width='0%';
+  b.style.clipPath='inset(0 100% 0 0)';
 }
 function aggProgress(rimasti,totali){
   const b=document.getElementById('cd-banda');
   if(!b)return;
-  const pct=totali>0?(rimasti/totali)*100:0;
+  // pct = percentuale di tempo TRASCORSO (0=inizio, 100=fine)
+  // clip-path rivela la banda da sinistra: inset(0 destra% 0 0)
+  // destra parte da 100% (tutto nascosto) e scende a 0% (tutto visibile)
+  const trascorso=totali>0?((totali-rimasti)/totali)*100:0;
+  const nascondi=Math.max(0,100-trascorso);
   if(rimasti===totali){
+    // Inizio: tutto nascosto, senza transizione
     b.style.transition='none';
-    b.style.width='100%';
+    b.style.clipPath='inset(0 100% 0 0)';
     b.offsetWidth; // forza reflow
   } else {
-    b.style.transition='width 1s linear';
-    b.style.width=Math.max(0,pct)+'%';
+    b.style.transition='clip-path 1s linear';
+    b.style.clipPath='inset(0 '+nascondi.toFixed(2)+'% 0 0)';
   }
 }
 
