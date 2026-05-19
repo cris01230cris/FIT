@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26051908_FIT</title>
+<title>CL26051910_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --grigio2:#1a1a1a; --testo:#fff;
@@ -192,7 +192,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26051908_FIT</span>
+    <span class="h-versione">CL26051910_FIT</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -209,7 +209,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26051908_FIT</span>
+    <span class="h-versione">CL26051910_FIT</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -305,7 +305,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26051908_FIT</span>
+    <span class="h-versione">CL26051910_FIT</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -550,9 +550,9 @@ function aggUI(){
     } else if(fase==='attesa_durata'){
       setAvs(false,false,'ESERCIZIO');
     } else if(fase==='attesa_rs'){
-      setAvs(true,true,'AVVIA RIPOSO SERIE');
+      setAvs(true,true,'FATTO? AVVIA RIPOSO SERIE');
     } else if(fase==='attesa_rf'){
-      setAvs(true,true,'AVVIA RIPOSO FINALE');
+      setAvs(true,true,'FATTO? AVVIA RIPOSO FINALE');
     } else {
       setAvs(false,false,'ESERCIZIO');
     }
@@ -588,11 +588,11 @@ window.tapAvs=function(){
 
   if(testo==='INIZIA ESERCIZIO'){
     iniziaEsercizioAction();
-  } else if(testo==='AVVIA RIPOSO SERIE'){
+  } else if(testo==='FATTO? AVVIA RIPOSO SERIE'){
     // Avvia timer riposo serie leggendo l'input corrente
     setAvs(false,false,'ESERCIZIO');
     startTimer('rs');
-  } else if(testo==='AVVIA RIPOSO FINALE'){
+  } else if(testo==='FATTO? AVVIA RIPOSO FINALE'){
     setAvs(false,false,'ESERCIZIO');
     startTimer('rf');
   }
@@ -618,7 +618,7 @@ function iniziaEsercizioAction(){
     aggUI();
     startTimer('d'); // parte subito leggendo input
   } else {
-    // scheda pesi: dopo INIZIA ESERCIZIO → in attesa riposo serie (o finale se ultima)
+
     fase='attesa_rs';
     // Se è l'ultima serie → attesa_rf
     if(serR>=p.ser) fase='attesa_rf';
@@ -703,7 +703,7 @@ function lockTimerInputs(lock){
   if(lock){
     timerIds.forEach(id=>document.getElementById(id).disabled=true);
   } else {
-    // Sblocca tutti i timer input: render() poi ri-applica il lock corretto per lo stato della scheda
+
     timerIds.forEach(id=>document.getElementById(id).disabled=false);
   }
 }
