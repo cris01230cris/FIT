@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26051910_FIT</title>
+<title>CL26052008_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --grigio2:#1a1a1a; --testo:#fff;
@@ -87,7 +87,7 @@
   .desc-box{background:var(--grigio2);border:1px solid #2a2a2a;border-radius:6px;
     padding:8px 10px;margin-bottom:5px;max-height:calc(1.5em * 5 + 16px);overflow-y:auto;
     -webkit-overflow-scrolling:touch;touch-action:pan-y;}
-  .desc-unica{font-size:.78rem;color:var(--giallo);line-height:1.5;
+  .desc-unica{font-size:.92rem;color:var(--giallo);line-height:1.5;
     font-family:Arial,sans-serif;font-weight:700;}
 
   .pgrid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:5px;}
@@ -192,7 +192,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26051910_FIT</span>
+    <span class="h-versione">CL26052008_FIT</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -209,7 +209,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26051910_FIT</span>
+    <span class="h-versione">CL26052008_FIT</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -305,7 +305,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26051910_FIT</span>
+    <span class="h-versione">CL26052008_FIT</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -317,14 +317,18 @@
 
 <script>
 // ══════════════════════════════════════════════════════════════
-// STATO
+// STATO — oggetto unico
 // ══════════════════════════════════════════════════════════════
-let J=null, SI=-1, CI=0, PL=[], ultComp=-1, activeCI=-1, serR=0;
-let tInt=null, tSec=0, timerInCorso=false, tTipo='';
-// fasi: idle|attesa_inizio|attesa_durata|attesa_rs|attesa_rf|completata
-let fase='idle';
+const S = {
+  J:null, SI:-1, CI:0, PL:[], ultComp:-1, activeCI:-1, serR:0,
+  fase:'idle',          // idle|attesa_inizio|attesa_durata|attesa_rs|attesa_rf|completata
+  tInt:null, tSec:0, tTotSec:0, timerInCorso:false, tTipo:'',
+  dblTapLast:0
+};
 
-// WakeLock
+// ══════════════════════════════════════════════════════════════
+// WAKELOCK
+// ══════════════════════════════════════════════════════════════
 let wakeLock=null;
 async function richiediWakeLock(){
   if('wakeLock' in navigator){try{wakeLock=await navigator.wakeLock.request('screen');
@@ -340,6 +344,9 @@ document.addEventListener('visibilitychange',()=>{
 // ══════════════════════════════════════════════════════════════
 // UTILITY
 // ══════════════════════════════════════════════════════════════
+// Mod 6: campo assente nel JSON = 0
+function gp(s,k){return s[k]!==undefined?s[k]:0;}
+
 function modScheda(p){return(p.dm>0||p.ds>0)?'durata':'pesi';}
 function leggiKg(id){
   const v=document.getElementById(id).value.replace(',','.');
@@ -367,37 +374,62 @@ function sanitizeInt(el,mn,mx){
   el.value=v;
 }
 
+// Mod 4: calcola secondi totali di una sessione
+// 3s per ripetizione, durata esplicita se scheda durata,
+// riposo serie × (serie-1), riposo finale
+function calcolaTempoSessione(sess){
+  let tot=0;
+  sess.schede.forEach(s=>{
+    const ser=gp(s,'serie')||1;
+    const rip=gp(s,'ripetizioni');
+    const dm=gp(s,'durata_min'); const ds=gp(s,'durata_sec');
+    const rsm=gp(s,'riposo_serie_min')||gp(s,'rs_m');
+    const rss=gp(s,'riposo_serie_sec')||gp(s,'rs_s');
+    const rfm=gp(s,'riposo_finale_min')||gp(s,'rf_m');
+    const rfs=gp(s,'riposo_finale_sec')||gp(s,'rf_s');
+    const isDur=(dm>0||ds>0);
+    const esSec=isDur?ser*(dm*60+ds):ser*rip*3;
+    const rsSec=(ser-1)*(rsm*60+rss);
+    const rfSec=rfm*60+rfs;
+    tot+=esSec+rsSec+rfSec;
+  });
+  return tot;
+}
+function fmtTempo(sec){
+  const h=Math.floor(sec/3600);
+  const m=Math.floor((sec%3600)/60);
+  if(h>0&&m>0) return h+'ora'+(h>1?'e':'')+' '+m+'min';
+  if(h>0)      return h+'ora'+(h>1?'e':'');
+  return m+'min';
+}
+
 // ══════════════════════════════════════════════════════════════
 // CONTATORI
 // ══════════════════════════════════════════════════════════════
 function aggSerieTxt(){
   const el=document.getElementById('serie-txt');
-  const p=PL[CI];
+  const p=S.PL[S.CI];
   const tot=p?p.ser:0;
-  // Rosso: scheda completata (CI<=ultComp, ma non quella attiva in esecuzione)
-  if(CI<=ultComp && CI!==activeCI){
+  if(S.CI<=S.ultComp && S.CI!==S.activeCI){
     el.className='serie-txt rosso-txt';
     el.textContent='SERIE '+tot+' DI '+tot;
     return;
   }
-  // Giallo: scheda in esecuzione (activeCI===CI)
-  if(CI===activeCI){
+  if(S.CI===S.activeCI){
     el.className='serie-txt giallo-txt';
-    el.textContent='SERIE '+serR+' DI '+tot;
+    el.textContent='SERIE '+S.serR+' DI '+tot;
     return;
   }
-
   el.className='serie-txt verde-txt';
   el.textContent='SERIE 0 DI '+tot;
 }
-
 function aggPosTxt(){
   const el=document.getElementById('pos-txt');
-  const nT=J.sessioni[SI].schede.length;
-  const txt='SESSIONE '+(CI+1)+' DI '+nT;
-  if(CI<=ultComp && CI!==activeCI){ el.className='pos-txt rosso-txt'; }
-  else if(CI===activeCI)           { el.className='pos-txt giallo-txt'; }
-  else                             { el.className='pos-txt verde-txt'; }
+  const nT=S.J.sessioni[S.SI].schede.length;
+  const txt='SESSIONE '+(S.CI+1)+' DI '+nT;
+  if(S.CI<=S.ultComp && S.CI!==S.activeCI) el.className='pos-txt rosso-txt';
+  else if(S.CI===S.activeCI)               el.className='pos-txt giallo-txt';
+  else                                     el.className='pos-txt verde-txt';
   el.textContent=txt;
 }
 
@@ -409,8 +441,9 @@ function leggiJSON(e){
   const r=new FileReader();
   r.onload=ev=>{
     try{
-      J=JSON.parse(ev.target.result);
-      document.getElementById('info-prog').textContent=J.programma;
+      S.J=JSON.parse(ev.target.result);
+      if(!S.J.storico)S.J.storico={};
+      document.getElementById('info-prog').textContent=S.J.programma;
       mostraSessioni();
     }catch(err){alert('JSON non valido: '+err.message);}
   };
@@ -418,59 +451,64 @@ function leggiJSON(e){
 }
 function mostraSessioni(){
   const el=document.getElementById('lista-sess');
-  el.innerHTML='';SI=-1;
+  el.innerHTML='';S.SI=-1;
   document.getElementById('btn-avvia').disabled=true;
-  J.sessioni.forEach((s,i)=>{
+  S.J.sessioni.forEach((s,i)=>{
+    const sec=calcolaTempoSessione(s);
+    const tempoTxt=fmtTempo(sec);
     const b=document.createElement('button');
     b.className='btn-sess';
-    b.textContent=s.nome+'  ('+s.schede.length+' schede)';
+    b.textContent=s.nome+'  ('+s.schede.length+' schede, ~'+tempoTxt+')';
     b.onclick=()=>{
       document.querySelectorAll('.btn-sess').forEach(x=>x.classList.remove('sel'));
-      b.classList.add('sel');SI=i;
+      b.classList.add('sel');S.SI=i;
       document.getElementById('btn-avvia').disabled=false;
     };
     el.appendChild(b);
   });
 }
 function avviaSessione(){
-  if(SI<0)return;
-  const sess=J.sessioni[SI];
-  PL=sess.schede.map(s=>({
-    ser:s.serie,rip:s.ripetizioni,pn:s.pesi_num,pk:s.pesi_kg,
-    dm:s.durata_min,ds:s.durata_sec,
-    rs_m:s.riposo_serie_min!==undefined?s.riposo_serie_min:(s.rs_m||0),
-    rs_s:s.riposo_serie_sec!==undefined?s.riposo_serie_sec:(s.rs_s||0),
-    rf_m:s.riposo_finale_min!==undefined?s.riposo_finale_min:(s.rf_m||0),
-    rf_s:s.riposo_finale_sec!==undefined?s.riposo_finale_sec:(s.rf_s||0)
+  if(S.SI<0)return;
+  const sess=S.J.sessioni[S.SI];
+  S.PL=sess.schede.map(s=>({
+    ser:gp(s,'serie')||1,
+    rip:gp(s,'ripetizioni')||1,
+    pn:gp(s,'pesi_num'),
+    pk:gp(s,'pesi_kg'),
+    dm:gp(s,'durata_min'),
+    ds:gp(s,'durata_sec'),
+    rs_m:s.riposo_serie_min!==undefined?s.riposo_serie_min:gp(s,'rs_m'),
+    rs_s:s.riposo_serie_sec!==undefined?s.riposo_serie_sec:gp(s,'rs_s'),
+    rf_m:s.riposo_finale_min!==undefined?s.riposo_finale_min:gp(s,'rf_m'),
+    rf_s:s.riposo_finale_sec!==undefined?s.riposo_finale_sec:gp(s,'rf_s')
   }));
-  CI=0;ultComp=-1;activeCI=-1;serR=0;fase='idle';
-  setH(J.programma,sess.nome);
+  S.CI=0;S.ultComp=-1;S.activeCI=-1;S.serR=0;S.fase='idle';
+  setH(S.J.programma,sess.nome);
   richiediWakeLock();
-  // Mostra pulsante navigazione prima scheda
   document.getElementById('btn-vai-s2').classList.add('visibile');
   go('s2');render();
 }
 function vaiPrimaScheda(){
-  if(!J||SI<0||!PL.length)return;
-  CI=0;go('s2');render();
+  if(!S.J||S.SI<0||!S.PL.length)return;
+  S.CI=0;go('s2');render();
 }
 
 // ══════════════════════════════════════════════════════════════
 // RENDER
 // ══════════════════════════════════════════════════════════════
 function render(){
-  const sess=J.sessioni[SI];
-  const sc=sess.schede[CI];
-  const lib=J.libreria[sc.id];
-  const p=PL[CI];
+  const sess=S.J.sessioni[S.SI];
+  const sc=sess.schede[S.CI];
+  const lib=S.J.libreria[sc.id];
+  const p=S.PL[S.CI];
 
   aggPosTxt();
 
   const bd=document.getElementById('id-badge');
   bd.textContent=sc.id;
-  if(CI===activeCI)      bd.className='id-badge id-giallo';
-  else if(CI<=ultComp)   bd.className='id-badge id-rosso';
-  else                   bd.className='id-badge id-verde';
+  if(S.CI===S.activeCI)      bd.className='id-badge id-giallo';
+  else if(S.CI<=S.ultComp)   bd.className='id-badge id-rosso';
+  else                       bd.className='id-badge id-verde';
 
   aggSerieTxt();
 
@@ -481,10 +519,8 @@ function render(){
   }
   document.getElementById('desc-unica').textContent=descTxt;
 
-  // Determina colore valori: rosso=completata, giallo=attiva o futura
-  const isRosso=(CI<=ultComp && CI!==activeCI);
+  const isRosso=(S.CI<=S.ultComp && S.CI!==S.activeCI);
   const cls=isRosso?'rosso-val':'';
-
   const ids=['p-ser','p-rip','p-pn','p-pk','p-dm','p-ds','p-rs-m','p-rs-s','p-rf-m','p-rf-s'];
   ids.forEach(id=>{
     const el=document.getElementById(id);
@@ -505,7 +541,7 @@ function render(){
 
   if(isRosso){
     ids.forEach(id=>document.getElementById(id).disabled=true);
-  } else if(CI===activeCI){
+  } else if(S.CI===S.activeCI){
     ids.forEach(id=>document.getElementById(id).disabled=false);
     document.getElementById('p-ser').disabled=true;
     if(parseInt(p.ser)===1){
@@ -527,51 +563,32 @@ function render(){
 }
 
 // ══════════════════════════════════════════════════════════════
-// aggUI — gestisce il pulsante multifunzione e i nav
+// aggUI
 // ══════════════════════════════════════════════════════════════
 function aggUI(){
-  if(!J)return;
-  const nT=J.sessioni[SI].schede.length;
-  const avs=document.getElementById('btn-avs');
-
+  if(!S.J)return;
   setBtnNav('btn-prec',true,false);
+  setBtnNav('btn-succ',true,(S.CI===S.activeCI&&S.fase==='completata'));
 
-  const succLamp=(CI===activeCI&&fase==='completata');
-  setBtnNav('btn-succ',true,succLamp);
-
-  if(CI<=ultComp && CI!==activeCI){
-    setAvs(false,false,'ESERCIZIO');
+  if(S.CI<=S.ultComp && S.CI!==S.activeCI){
+    setAvs(false,false,'ESERCIZIO');return;
+  }
+  if(S.CI===S.activeCI){
+    if(S.fase==='attesa_inizio')     setAvs(true,true,'PRONTO? INIZIA ESERCIZIO');
+    else if(S.fase==='attesa_durata')setAvs(false,false,'ESERCIZIO');
+    else if(S.fase==='attesa_rs')    setAvs(true,true,'FATTO? AVVIA RIPOSO SERIE');
+    else if(S.fase==='attesa_rf')    setAvs(true,true,'FATTO? AVVIA RIPOSO FINALE');
+    else                             setAvs(false,false,'ESERCIZIO');
     return;
   }
-
-  if(CI===activeCI){
-    if(fase==='attesa_inizio'){
-      setAvs(true,true,'INIZIA ESERCIZIO');
-    } else if(fase==='attesa_durata'){
-      setAvs(false,false,'ESERCIZIO');
-    } else if(fase==='attesa_rs'){
-      setAvs(true,true,'FATTO? AVVIA RIPOSO SERIE');
-    } else if(fase==='attesa_rf'){
-      setAvs(true,true,'FATTO? AVVIA RIPOSO FINALE');
-    } else {
-      setAvs(false,false,'ESERCIZIO');
-    }
-    return;
-  }
-  const turno=(CI===ultComp+1);
-  if(turno){
-    setAvs(true,true,'INIZIA ESERCIZIO');
-  } else {
-    setAvs(false,false,'ESERCIZIO');
-  }
+  if(S.CI===S.ultComp+1) setAvs(true,true,'PRONTO? INIZIA ESERCIZIO');
+  else                   setAvs(false,false,'ESERCIZIO');
 }
-
 function setAvs(attivo,lampeggia,testo){
   const avs=document.getElementById('btn-avs');
-  avs.textContent=testo;
-  avs.disabled=!attivo;
+  avs.textContent=testo;avs.disabled=!attivo;
   avs.classList.remove('lamp','lamp-rosso','lamp-verde');
-  if(attivo&&lampeggia) avs.classList.add('lamp');
+  if(attivo&&lampeggia)avs.classList.add('lamp');
 }
 function setBtnNav(id,attivo,lampeggia){
   const el=document.getElementById(id);el.disabled=!attivo;el.classList.remove('lamp');
@@ -585,11 +602,9 @@ window.tapAvs=function(){
   const avs=document.getElementById('btn-avs');
   if(avs.disabled)return;
   const testo=avs.textContent.trim();
-
-  if(testo==='INIZIA ESERCIZIO'){
+  if(testo==='PRONTO? INIZIA ESERCIZIO'){
     iniziaEsercizioAction();
   } else if(testo==='FATTO? AVVIA RIPOSO SERIE'){
-    // Avvia timer riposo serie leggendo l'input corrente
     setAvs(false,false,'ESERCIZIO');
     startTimer('rs');
   } else if(testo==='FATTO? AVVIA RIPOSO FINALE'){
@@ -599,29 +614,20 @@ window.tapAvs=function(){
 };
 
 function iniziaEsercizioAction(){
-  if(CI<=ultComp)return;
-  const p=PL[CI];
-  // Prima INIZIA su questa scheda: activeCI non era CI
-  if(activeCI!==CI){
-    activeCI=CI;serR=0;
+  if(S.CI<=S.ultComp)return;
+  const p=S.PL[S.CI];
+  if(S.activeCI!==S.CI){
+    S.activeCI=S.CI;S.serR=0;
     document.getElementById('id-badge').className='id-badge id-giallo';
-    render(); // aggiorna colori, lock p-ser
+    render();
   }
-  // Incrementa contatore serie
-  serR++;
-  aggSerieTxt();
-  aggPosTxt();
-
+  S.serR++;
+  aggSerieTxt();aggPosTxt();
   const mod=modScheda(p);
   if(mod==='durata'){
-    fase='attesa_durata';
-    aggUI();
-    startTimer('d'); // parte subito leggendo input
+    S.fase='attesa_durata';aggUI();startTimer('d');
   } else {
-
-    fase='attesa_rs';
-    // Se è l'ultima serie → attesa_rf
-    if(serR>=p.ser) fase='attesa_rf';
+    S.fase=(S.serR>=p.ser)?'attesa_rf':'attesa_rs';
     aggUI();
   }
 }
@@ -630,38 +636,33 @@ function iniziaEsercizioAction(){
 // NAVIGAZIONE
 // ══════════════════════════════════════════════════════════════
 function goPrec(){
-  if(CI===0){go('s1');return;}
-  CI--;render();
+  if(S.CI===0){go('s1');return;}
+  S.CI--;render();
 }
 function goSucc(){
-  const nT=J.sessioni[SI].schede.length;
-  // Se siamo sulla scheda appena completata, azzera activeCI
-  if(CI===activeCI&&fase==='completata'){
-    activeCI=-1;fase='idle';
-  }
-  if(CI>=nT-1){go('s3');return;}
-  CI++;render();
+  const nT=S.J.sessioni[S.SI].schede.length;
+  if(S.CI===S.activeCI&&S.fase==='completata'){S.activeCI=-1;S.fase='idle';}
+  if(S.CI>=nT-1){go('s3');return;}
+  S.CI++;render();
 }
-function tornaUltimaScheda(){CI=J.sessioni[SI].schede.length-1;go('s2');render();}
+function tornaUltimaScheda(){S.CI=S.J.sessioni[S.SI].schede.length-1;go('s2');render();}
 
 // ══════════════════════════════════════════════════════════════
-// DOPPIO TAP sull'ovale — salta timer a 5 secondi rimanenti
+// DOPPIO TAP — salta timer a 5 secondi
 // ══════════════════════════════════════════════════════════════
-let dblTapLast=0;
 function dblTapTimer(){
-  if(!timerInCorso)return;
+  if(!S.timerInCorso)return;
   const ora=Date.now();
-  if(ora-dblTapLast<400){
-    // Secondo tap entro 400ms: salta a 5s
-    if(tSec>5){
-      tSec=5;
-      cdShow(tSec,tTipo);
-      aggProgress(tSec,tTotSec);
+  if(ora-S.dblTapLast<400){
+    if(S.tSec>5){
+      S.tSec=5;
+      cdShow(S.tSec,S.tTipo);
+      aggProgress(S.tSec,S.tTotSec);
       if(navigator.vibrate)navigator.vibrate(80);
     }
-    dblTapLast=0;
+    S.dblTapLast=0;
   } else {
-    dblTapLast=ora;
+    S.dblTapLast=ora;
   }
 }
 
@@ -669,8 +670,8 @@ function dblTapTimer(){
 // PARAMETRI
 // ══════════════════════════════════════════════════════════════
 function saveP(){
-  if(CI<=ultComp && CI!==activeCI)return; // schede rosse: non si salva
-  const p=PL[CI];
+  if(S.CI<=S.ultComp && S.CI!==S.activeCI)return;
+  const p=S.PL[S.CI];
   p.ser =Math.max(1,parseInt(document.getElementById('p-ser').value)||1);
   p.rip =Math.max(1,parseInt(document.getElementById('p-rip').value)||1);
   p.pn  =parseInt(document.getElementById('p-pn').value)||0;
@@ -681,10 +682,8 @@ function saveP(){
   p.rs_s=parseInt(document.getElementById('p-rs-s').value)||0;
   p.rf_m=parseInt(document.getElementById('p-rf-m').value)||0;
   p.rf_s=parseInt(document.getElementById('p-rf-s').value)||0;
-
   aggSerieTxt();
-
-  if(CI!==activeCI){
+  if(S.CI!==S.activeCI){
     const ser1=p.ser===1;
     document.getElementById('p-rs-m').disabled=ser1;
     document.getElementById('p-rs-s').disabled=ser1;
@@ -696,100 +695,86 @@ function saveP(){
 // ══════════════════════════════════════════════════════════════
 // TIMER
 // ══════════════════════════════════════════════════════════════
-let tTotSec=0; // secondi totali per la progress bar
-
 function lockTimerInputs(lock){
-  const timerIds=['p-dm','p-ds','p-rs-m','p-rs-s','p-rf-m','p-rf-s'];
-  if(lock){
-    timerIds.forEach(id=>document.getElementById(id).disabled=true);
-  } else {
-
-    timerIds.forEach(id=>document.getElementById(id).disabled=false);
-  }
+  ['p-dm','p-ds','p-rs-m','p-rs-s','p-rf-m','p-rf-s']
+    .forEach(id=>document.getElementById(id).disabled=lock);
 }
-
 function startTimer(tipo){
-  if(tInt){clearInterval(tInt);tInt=null;}
-  timerInCorso=true;tTipo=tipo;
+  if(S.tInt){clearInterval(S.tInt);S.tInt=null;}
+  S.timerInCorso=true;S.tTipo=tipo;
   let sec=0;
   if(tipo==='d'){
     const dm=parseInt(document.getElementById('p-dm').value)||0;
     const ds=parseInt(document.getElementById('p-ds').value)||0;
     sec=dm*60+ds;
-    PL[activeCI].dm=dm;PL[activeCI].ds=ds;
+    S.PL[S.activeCI].dm=dm;S.PL[S.activeCI].ds=ds;
   } else if(tipo==='rs'){
     const m=parseInt(document.getElementById('p-rs-m').value)||0;
     const s=parseInt(document.getElementById('p-rs-s').value)||0;
     sec=m*60+s;
-    PL[activeCI].rs_m=m;PL[activeCI].rs_s=s;
+    S.PL[S.activeCI].rs_m=m;S.PL[S.activeCI].rs_s=s;
   } else if(tipo==='rf'){
     const m=parseInt(document.getElementById('p-rf-m').value)||0;
     const s=parseInt(document.getElementById('p-rf-s').value)||0;
     sec=m*60+s;
-    PL[activeCI].rf_m=m;PL[activeCI].rf_s=s;
+    S.PL[S.activeCI].rf_m=m;S.PL[S.activeCI].rf_s=s;
   }
-  if(sec<=0){timerInCorso=false;onEnd(tipo);return;}
-  tSec=sec;tTotSec=sec;
+  if(sec<=0){S.timerInCorso=false;onEnd(tipo);return;}
+  S.tSec=sec;S.tTotSec=sec;
   lockTimerInputs(true);
-  cdShow(tSec,tipo);
-  aggProgress(tSec,tTotSec);
-  tInt=setInterval(()=>{
-    tSec--;
-    if(tSec<=0){
-      clearInterval(tInt);tInt=null;timerInCorso=false;
-      aggProgress(0,tTotSec);
+  cdShow(S.tSec,tipo);
+  aggProgress(S.tSec,S.tTotSec);
+  S.tInt=setInterval(()=>{
+    S.tSec--;
+    if(S.tSec<=0){
+      clearInterval(S.tInt);S.tInt=null;S.timerInCorso=false;
+      aggProgress(0,S.tTotSec);
       alert5();
       setTimeout(()=>{lockTimerInputs(false);onEnd(tipo);},200);
     } else {
-      cdShow(tSec,tipo);
-      aggProgress(tSec,tTotSec);
+      cdShow(S.tSec,tipo);
+      aggProgress(S.tSec,S.tTotSec);
     }
   },1000);
 }
-
-// ══════════════════════════════════════════════════════════════
-// onEnd
-// ══════════════════════════════════════════════════════════════
 function onEnd(tipo){
-  timerInCorso=false;
+  S.timerInCorso=false;
   cdClear();
-  lockTimerInputs(false); // sblocca tutto
-  const p=PL[activeCI];
-
+  lockTimerInputs(false);
+  const p=S.PL[S.activeCI];
   if(tipo==='d'){
-    if(serR>=p.ser) fase='attesa_rf';
-    else            fase='attesa_rs';
+    S.fase=(S.serR>=p.ser)?'attesa_rf':'attesa_rs';
     render();
   } else if(tipo==='rs'){
-    fase='attesa_inizio';
+    S.fase='attesa_inizio';
     render();
   } else if(tipo==='rf'){
     completaScheda();
   }
 }
-
 function completaScheda(){
-  const idx=activeCI;
-  const sc=J.sessioni[SI].schede[idx];
-  const p=PL[idx];
-  if(!J.storico[sc.id])J.storico[sc.id]=[];
+  const idx=S.activeCI;
+  const sc=S.J.sessioni[S.SI].schede[idx];
+  const p=S.PL[idx];
+  if(!S.J.storico[sc.id])S.J.storico[sc.id]=[];
   const d=new Date();
   const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-  J.storico[sc.id].unshift({data:ds,ser:p.ser,rip:p.rip,pn:p.pn,pk:p.pk,dm:p.dm,ds:p.ds});
-  if(J.storico[sc.id].length>10)J.storico[sc.id].length=10;
-  localStorage.setItem('fit_j',JSON.stringify(J));
-  if(idx>ultComp)ultComp=idx;
-  fase='completata';
+  S.J.storico[sc.id].unshift({data:ds,ser:p.ser,rip:p.rip,pn:p.pn,pk:p.pk,dm:p.dm,ds:p.ds});
+  if(S.J.storico[sc.id].length>10)S.J.storico[sc.id].length=10;
+  localStorage.setItem('fit_j',JSON.stringify(S.J));
+  if(idx>S.ultComp)S.ultComp=idx;
+  S.fase='completata';
   render();
 }
 
+// ══════════════════════════════════════════════════════════════
+// TIMER VISIVO
+// ══════════════════════════════════════════════════════════════
 function cdShow(sec,tipo){
   const m=Math.floor(sec/60),s=sec%60;
-  // Testo su due righe: RIPOSO\nSERIE o RIPOSO\nFINALE
   const lbl=tipo==='d'?'DURATA':tipo==='rs'?'RIPOSO\nSERIE':'RIPOSO\nFINALE';
   document.getElementById('cd-num').textContent=m+':'+String(s).padStart(2,'0');
   const tipoEl=document.getElementById('cd-tipo');
-  // Usa innerText per rispettare \n come <br>
   tipoEl.style.whiteSpace='pre';
   tipoEl.textContent=lbl;
   document.getElementById('cd-wrap').classList.add('attivo');
@@ -803,22 +788,21 @@ function cdClear(){
 function aggProgress(rimasti,totali){
   const b=document.getElementById('cd-banda');
   if(!b)return;
-  // pct = percentuale di tempo TRASCORSO (0=inizio, 100=fine)
-  // clip-path rivela la banda da sinistra: inset(0 destra% 0 0)
-  // destra parte da 100% (tutto nascosto) e scende a 0% (tutto visibile)
   const trascorso=totali>0?((totali-rimasti)/totali)*100:0;
   const nascondi=Math.max(0,100-trascorso);
   if(rimasti===totali){
-    // Inizio: tutto nascosto, senza transizione
     b.style.transition='none';
     b.style.clipPath='inset(0 100% 0 0)';
-    b.offsetWidth; // forza reflow
+    b.offsetWidth;
   } else {
     b.style.transition='clip-path 1s linear';
     b.style.clipPath='inset(0 '+nascondi.toFixed(2)+'% 0 0)';
   }
 }
 
+// ══════════════════════════════════════════════════════════════
+// ALERT — vibrazione, flash, 5 beep
+// ══════════════════════════════════════════════════════════════
 function alert5(){
   const fl=document.getElementById('fl');
   for(let i=0;i<5;i++){const t=i*340;
@@ -839,7 +823,7 @@ function alert5(){
 // STORICO
 // ══════════════════════════════════════════════════════════════
 function renderStorico(id){
-  const righe=(J&&J.storico&&J.storico[id])?J.storico[id]:[];
+  const righe=(S.J&&S.J.storico&&S.J.storico[id])?S.J.storico[id]:[];
   const el=document.getElementById('stor-list');
   if(!righe.length){el.innerHTML='<div class="stor-empty">Nessuna prestazione registrata</div>';return;}
   el.innerHTML=righe.map(r=>{
@@ -855,16 +839,16 @@ function renderStorico(id){
 // S3
 // ══════════════════════════════════════════════════════════════
 function salvaSessione(){
-  const sess=J.sessioni[SI];
-  sess.schede.forEach((s,i)=>{const p=PL[i];
+  const sess=S.J.sessioni[S.SI];
+  sess.schede.forEach((s,i)=>{const p=S.PL[i];
     s.serie=p.ser;s.ripetizioni=p.rip;s.pesi_num=p.pn;s.pesi_kg=p.pk;
     s.durata_min=p.dm;s.durata_sec=p.ds;
     s.riposo_serie_min=p.rs_m;s.riposo_serie_sec=p.rs_s;
     s.riposo_finale_min=p.rf_m;s.riposo_finale_sec=p.rf_s;});
-  localStorage.setItem('fit_j',JSON.stringify(J));
+  localStorage.setItem('fit_j',JSON.stringify(S.J));
   const d=new Date();
-  const fn=J.programma+'_'+d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'.json';
-  const blob=new Blob([JSON.stringify(J,null,2)],{type:'application/json'});
+  const fn=S.J.programma+'_'+d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'.json';
+  const blob=new Blob([JSON.stringify(S.J,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download=fn;a.click();
   URL.revokeObjectURL(url);
@@ -875,9 +859,9 @@ function salvaSessione(){
   document.getElementById('fine-i').textContent='File: '+fn;
 }
 function tornaInizio(){
-  if(tInt){clearInterval(tInt);tInt=null;}
+  if(S.tInt){clearInterval(S.tInt);S.tInt=null;}
   rilasciaWakeLock();
-  J=null;SI=-1;CI=0;PL=[];ultComp=-1;activeCI=-1;serR=0;fase='idle';timerInCorso=false;
+  S.J=null;S.SI=-1;S.CI=0;S.PL=[];S.ultComp=-1;S.activeCI=-1;S.serR=0;S.fase='idle';S.timerInCorso=false;
   document.getElementById('info-prog').textContent='Nessun programma caricato';
   document.getElementById('lista-sess').innerHTML='';
   document.getElementById('btn-avvia').disabled=true;
