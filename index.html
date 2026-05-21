@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26052008_FIT</title>
+<title>CL26052012_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --grigio2:#1a1a1a; --testo:#fff;
@@ -192,7 +192,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26052008_FIT</span>
+    <span class="h-versione">CL26052012_FIT</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -209,7 +209,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26052008_FIT</span>
+    <span class="h-versione">CL26052012_FIT</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -305,7 +305,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26052008_FIT</span>
+    <span class="h-versione">CL26052012_FIT</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -380,13 +380,15 @@ function sanitizeInt(el,mn,mx){
 function calcolaTempoSessione(sess){
   let tot=0;
   sess.schede.forEach(s=>{
-    const ser=gp(s,'serie')||1;
-    const rip=gp(s,'ripetizioni');
-    const dm=gp(s,'durata_min'); const ds=gp(s,'durata_sec');
-    const rsm=gp(s,'riposo_serie_min')||gp(s,'rs_m');
-    const rss=gp(s,'riposo_serie_sec')||gp(s,'rs_s');
-    const rfm=gp(s,'riposo_finale_min')||gp(s,'rf_m');
-    const rfs=gp(s,'riposo_finale_sec')||gp(s,'rf_s');
+    // Supporta sia nomi JSON lunghi che nomi corti di S.PL
+    const ser=(s.ser!==undefined?s.ser:gp(s,'serie'))||1;
+    const rip= s.rip!==undefined?s.rip:gp(s,'ripetizioni');
+    const dm=  s.dm !==undefined?s.dm :gp(s,'durata_min');
+    const ds=  s.ds !==undefined?s.ds :gp(s,'durata_sec');
+    const rsm= s.rs_m!==undefined?s.rs_m:(s.riposo_serie_min!==undefined?s.riposo_serie_min:gp(s,'rs_m'));
+    const rss= s.rs_s!==undefined?s.rs_s:(s.riposo_serie_sec!==undefined?s.riposo_serie_sec:gp(s,'rs_s'));
+    const rfm= s.rf_m!==undefined?s.rf_m:(s.riposo_finale_min!==undefined?s.riposo_finale_min:gp(s,'rf_m'));
+    const rfs= s.rf_s!==undefined?s.rf_s:(s.riposo_finale_sec!==undefined?s.riposo_finale_sec:gp(s,'rf_s'));
     const isDur=(dm>0||ds>0);
     const esSec=isDur?ser*(dm*60+ds):ser*rip*3;
     const rsSec=(ser-1)*(rsm*60+rss);
@@ -453,12 +455,17 @@ function mostraSessioni(){
   const el=document.getElementById('lista-sess');
   el.innerHTML='';S.SI=-1;
   document.getElementById('btn-avvia').disabled=true;
-  S.J.sessioni.forEach((s,i)=>{
-    const sec=calcolaTempoSessione(s);
+  S.J.sessioni.forEach((sess,i)=>{
+    // Se S.PL è popolato per questa sessione usa i valori correnti, altrimenti usa il JSON
+    const schede=sess.schede.map((s,idx)=>{
+      if(S.PL.length>idx && S.SI===i) return S.PL[idx];
+      return s;
+    });
+    const sec=calcolaTempoSessione({schede});
     const tempoTxt=fmtTempo(sec);
     const b=document.createElement('button');
     b.className='btn-sess';
-    b.textContent=s.nome+'  ('+s.schede.length+' schede, ~'+tempoTxt+')';
+    b.textContent=sess.nome+'  ('+sess.schede.length+' schede, ~'+tempoTxt+')';
     b.onclick=()=>{
       document.querySelectorAll('.btn-sess').forEach(x=>x.classList.remove('sel'));
       b.classList.add('sel');S.SI=i;
@@ -636,7 +643,10 @@ function iniziaEsercizioAction(){
 // NAVIGAZIONE
 // ══════════════════════════════════════════════════════════════
 function goPrec(){
-  if(S.CI===0){go('s1');return;}
+  if(S.CI===0){
+    if(S.J)mostraSessioni(); // ricalcola tempi con valori aggiornati
+    go('s1');return;
+  }
   S.CI--;render();
 }
 function goSucc(){
@@ -861,6 +871,8 @@ function salvaSessione(){
 function tornaInizio(){
   if(S.tInt){clearInterval(S.tInt);S.tInt=null;}
   rilasciaWakeLock();
+  // Ricalcola tempi con eventuali modifiche fatte in sessione prima di tornare
+  if(S.J)mostraSessioni();
   S.J=null;S.SI=-1;S.CI=0;S.PL=[];S.ultComp=-1;S.activeCI=-1;S.serR=0;S.fase='idle';S.timerInCorso=false;
   document.getElementById('info-prog').textContent='Nessun programma caricato';
   document.getElementById('lista-sess').innerHTML='';
