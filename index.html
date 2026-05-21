@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26052012_FIT</title>
+<title>CL26052122_FIT</title>
 <style>
   :root {
-    --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --grigio2:#1a1a1a; --testo:#fff;
+    --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --blu:#00aaff; --grigio2:#1a1a1a; --testo:#fff;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
   body{background:var(--nero);color:var(--testo);font-family:'Arial Black',Arial,sans-serif;min-height:100vh;}
@@ -43,6 +43,12 @@
   @keyframes btnLampRosso{0%,100%{opacity:1;}50%{opacity:.15;}}
   .btn.lamp-rosso{animation:btnLampRosso .7s infinite;background:var(--rosso);color:#fff;box-shadow:0 4px 0 #990000;}
   .btn.lamp-rosso:active{animation:none;transform:translateY(3px);box-shadow:0 1px 0 #990000;}
+
+  @keyframes btnLampBlu{0%,100%{opacity:1;}50%{opacity:.15;}}
+  .btn.lamp-blu{animation:btnLampBlu .7s infinite;background:var(--blu);color:#fff;box-shadow:0 4px 0 #005588;}
+  .btn.lamp-blu:active{animation:none;transform:translateY(3px);box-shadow:0 1px 0 #005588;}
+  .btn.blu{background:var(--blu);color:#fff;box-shadow:0 4px 0 #005588;}
+  .btn.blu:active{box-shadow:0 1px 0 #005588;}
 
   .nav4{display:grid;grid-template-columns:1fr 2fr 1fr;gap:5px;margin-bottom:5px;}
   .btn-nav{display:block;width:100%;background:var(--giallo);color:var(--nero);border:none;border-radius:8px;
@@ -192,7 +198,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26052012_FIT</span>
+    <span class="h-versione">CL26052122_FIT</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -209,7 +215,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26052012_FIT</span>
+    <span class="h-versione">CL26052122_FIT</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -305,7 +311,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26052012_FIT</span>
+    <span class="h-versione">CL26052122_FIT</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -321,9 +327,9 @@
 // ══════════════════════════════════════════════════════════════
 const S = {
   J:null, SI:-1, CI:0, PL:[], ultComp:-1, activeCI:-1, serR:0,
-  fase:'idle',          // idle|attesa_inizio|attesa_durata|attesa_rs|attesa_rf|completata
+  fase:'idle',
   tInt:null, tSec:0, tTotSec:0, timerInCorso:false, tTipo:'',
-  dblTapLast:0
+  dblTapLast:0, pausaInt:null
 };
 
 // ══════════════════════════════════════════════════════════════
@@ -577,12 +583,17 @@ function aggUI(){
   setBtnNav('btn-prec',true,false);
   setBtnNav('btn-succ',true,(S.CI===S.activeCI&&S.fase==='completata'));
 
+  if(S.timerInCorso){
+    setAvs(false,false,'ESERCIZIO');return;
+  }
+
   if(S.CI<=S.ultComp && S.CI!==S.activeCI){
     setAvs(false,false,'ESERCIZIO');return;
   }
   if(S.CI===S.activeCI){
     if(S.fase==='attesa_inizio')     setAvs(true,true,'PRONTO? INIZIA ESERCIZIO');
     else if(S.fase==='attesa_durata')setAvs(false,false,'ESERCIZIO');
+    else if(S.fase==='pausa_pesi')   setAvs(false,false,'ESERCIZIO');
     else if(S.fase==='attesa_rs')    setAvs(true,true,'FATTO? AVVIA RIPOSO SERIE');
     else if(S.fase==='attesa_rf')    setAvs(true,true,'FATTO? AVVIA RIPOSO FINALE');
     else                             setAvs(false,false,'ESERCIZIO');
@@ -593,9 +604,17 @@ function aggUI(){
 }
 function setAvs(attivo,lampeggia,testo){
   const avs=document.getElementById('btn-avs');
-  avs.textContent=testo;avs.disabled=!attivo;
-  avs.classList.remove('lamp','lamp-rosso','lamp-verde');
-  if(attivo&&lampeggia)avs.classList.add('lamp');
+  avs.disabled=!attivo;
+  avs.classList.remove('lamp','lamp-rosso','lamp-verde','lamp-blu','blu');
+  if(testo.includes('INIZIA')){
+    avs.innerHTML='🔥 '+testo;
+    if(attivo&&lampeggia) avs.classList.add('lamp');
+  } else if(testo.includes('RIPOSO')){
+    avs.innerHTML='💤 '+testo;
+    if(attivo&&lampeggia) avs.classList.add('lamp-blu');
+  } else {
+    avs.textContent=testo;
+  }
 }
 function setBtnNav(id,attivo,lampeggia){
   const el=document.getElementById(id);el.disabled=!attivo;el.classList.remove('lamp');
@@ -634,8 +653,16 @@ function iniziaEsercizioAction(){
   if(mod==='durata'){
     S.fase='attesa_durata';aggUI();startTimer('d');
   } else {
-    S.fase=(S.serR>=p.ser)?'attesa_rf':'attesa_rs';
-    aggUI();
+    const faseProssima=(S.serR>=p.ser)?'attesa_rf':'attesa_rs';
+    // 5 secondi di blocco prima di mostrare il pulsante riposo
+    S.fase='pausa_pesi';
+    setAvs(false,false,'ESERCIZIO');
+    if(S.pausaInt)clearTimeout(S.pausaInt);
+    S.pausaInt=setTimeout(()=>{
+      S.pausaInt=null;
+      S.fase=faseProssima;
+      aggUI();
+    },5000);
   }
 }
 
@@ -651,7 +678,18 @@ function goPrec(){
 }
 function goSucc(){
   const nT=S.J.sessioni[S.SI].schede.length;
-  if(S.CI===S.activeCI&&S.fase==='completata'){S.activeCI=-1;S.fase='idle';}
+  if(S.CI===S.activeCI&&S.fase==='completata'){
+    // Scrivi storico al tap su avanti
+    const sc=S.J.sessioni[S.SI].schede[S.CI];
+    const p=S.PL[S.CI];
+    if(!S.J.storico[sc.id])S.J.storico[sc.id]=[];
+    const d=new Date();
+    const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    S.J.storico[sc.id].unshift({data:ds,ser:p.ser,rip:p.rip,pn:p.pn,pk:p.pk,dm:p.dm,ds:p.ds});
+    if(S.J.storico[sc.id].length>10)S.J.storico[sc.id].length=10;
+    localStorage.setItem('fit_j',JSON.stringify(S.J));
+    S.activeCI=-1;S.fase='idle';
+  }
   if(S.CI>=nT-1){go('s3');return;}
   S.CI++;render();
 }
@@ -764,14 +802,6 @@ function onEnd(tipo){
 }
 function completaScheda(){
   const idx=S.activeCI;
-  const sc=S.J.sessioni[S.SI].schede[idx];
-  const p=S.PL[idx];
-  if(!S.J.storico[sc.id])S.J.storico[sc.id]=[];
-  const d=new Date();
-  const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-  S.J.storico[sc.id].unshift({data:ds,ser:p.ser,rip:p.rip,pn:p.pn,pk:p.pk,dm:p.dm,ds:p.ds});
-  if(S.J.storico[sc.id].length>10)S.J.storico[sc.id].length=10;
-  localStorage.setItem('fit_j',JSON.stringify(S.J));
   if(idx>S.ultComp)S.ultComp=idx;
   S.fase='completata';
   render();
@@ -870,6 +900,7 @@ function salvaSessione(){
 }
 function tornaInizio(){
   if(S.tInt){clearInterval(S.tInt);S.tInt=null;}
+  if(S.pausaInt){clearTimeout(S.pausaInt);S.pausaInt=null;}
   rilasciaWakeLock();
   // Ricalcola tempi con eventuali modifiche fatte in sessione prima di tornare
   if(S.J)mostraSessioni();
