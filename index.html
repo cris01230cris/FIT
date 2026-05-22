@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26052122_FIT</title>
+<title>CL26052209_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --blu:#00aaff; --grigio2:#1a1a1a; --testo:#fff;
@@ -91,10 +91,24 @@
 
 
   .desc-box{background:var(--grigio2);border:1px solid #2a2a2a;border-radius:6px;
-    padding:8px 10px;margin-bottom:5px;max-height:calc(1.5em * 5 + 16px);overflow-y:auto;
+    padding:6px 10px;margin-bottom:5px;
+    height:calc(1.5em * 4 + 12px);overflow-y:auto;
     -webkit-overflow-scrolling:touch;touch-action:pan-y;}
   .desc-unica{font-size:.92rem;color:var(--giallo);line-height:1.5;
     font-family:Arial,sans-serif;font-weight:700;}
+
+  /* Prossima scheda — solo scheda gialla */
+  .nxt-box{display:none;border-top:1px solid #1e3a1e;padding:4px 0 0 0;margin-top:2px;}
+  .nxt-box.visibile{display:block;}
+  .nxt-desc-wrap{overflow:hidden;white-space:nowrap;cursor:pointer;margin-bottom:3px;
+    -webkit-user-select:none;user-select:none;}
+  .nxt-desc{display:inline-block;font-size:.78rem;color:var(--verde);font-weight:700;
+    font-family:Arial,sans-serif;white-space:nowrap;}
+  @keyframes ticker{0%{transform:translateX(0);}100%{transform:translateX(var(--tx));}}
+  .nxt-desc.scorri{animation:ticker var(--dur) linear infinite;}
+  .nxt-par{display:flex;gap:12px;font-size:.70rem;font-weight:900;}
+  .nxt-s{color:var(--verde);} .nxt-p{color:var(--giallo);} .nxt-t{color:var(--rosso);}
+  .nxt-ultima{font-size:.75rem;font-weight:900;color:#ff9900;letter-spacing:.06em;padding:3px 0;}
 
   .pgrid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:5px;}
   .pitem{background:var(--grigio2);border:1px solid #2a2a2a;border-radius:6px;padding:7px 5px;display:flex;flex-direction:column;align-items:center;}
@@ -172,7 +186,8 @@
 
 
   .stor-box{background:var(--grigio2);border:1px solid #2a2a2a;border-radius:6px;
-    padding:5px 8px;flex:1;overflow-y:auto;min-height:70px;max-height:150px;
+    padding:5px 8px;overflow-y:auto;
+    max-height:calc(1.7rem * 5 + 10px);
     -webkit-overflow-scrolling:touch;touch-action:pan-y;}
   .stor-riga{font-size:.7rem;font-weight:700;padding:4px 0;border-bottom:1px solid #222;
     display:flex;gap:18px;align-items:center;}
@@ -198,7 +213,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26052122_FIT</span>
+    <span class="h-versione">CL26052209_FIT</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -215,7 +230,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26052122_FIT</span>
+    <span class="h-versione">CL26052209_FIT</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -304,6 +319,13 @@
   <div class="stor-box">
     <div id="stor-list"><div class="stor-empty">Nessuna prestazione registrata</div></div>
   </div>
+
+  <div class="nxt-box" id="nxt-box">
+    <div class="nxt-desc-wrap" id="nxt-desc-wrap" onclick="toggleTicker()">
+      <span class="nxt-desc" id="nxt-desc"></span>
+    </div>
+    <div class="nxt-par" id="nxt-par"></div>
+  </div>
 </div>
 
 <!-- S3 -->
@@ -311,7 +333,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26052122_FIT</span>
+    <span class="h-versione">CL26052209_FIT</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -573,11 +595,17 @@ function render(){
 
   aggUI();
   renderStorico(sc.id);
+  stopTicker();
+  renderNxt();
 }
 
 // ══════════════════════════════════════════════════════════════
 // aggUI
 // ══════════════════════════════════════════════════════════════
+function setBtnNav(id,attivo,lampeggia){
+  const el=document.getElementById(id);el.disabled=!attivo;el.classList.remove('lamp');
+  if(attivo&&lampeggia)el.classList.add('lamp');
+}
 function aggUI(){
   if(!S.J)return;
   setBtnNav('btn-prec',true,false);
@@ -606,19 +634,16 @@ function setAvs(attivo,lampeggia,testo){
   const avs=document.getElementById('btn-avs');
   avs.disabled=!attivo;
   avs.classList.remove('lamp','lamp-rosso','lamp-verde','lamp-blu','blu');
+  avs.dataset.azione=testo; // chiave per tapAvs, non dipende da innerHTML
   if(testo.includes('INIZIA')){
-    avs.innerHTML='🔥 '+testo;
+    avs.innerHTML='<span style="font-size:1.5em;line-height:1;vertical-align:middle">🔥</span> '+testo;
     if(attivo&&lampeggia) avs.classList.add('lamp');
   } else if(testo.includes('RIPOSO')){
-    avs.innerHTML='💤 '+testo;
+    avs.innerHTML='<span style="font-size:1.5em;line-height:1;vertical-align:middle">💤</span> '+testo;
     if(attivo&&lampeggia) avs.classList.add('lamp-blu');
   } else {
     avs.textContent=testo;
   }
-}
-function setBtnNav(id,attivo,lampeggia){
-  const el=document.getElementById(id);el.disabled=!attivo;el.classList.remove('lamp');
-  if(attivo&&lampeggia)el.classList.add('lamp');
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -627,13 +652,13 @@ function setBtnNav(id,attivo,lampeggia){
 window.tapAvs=function(){
   const avs=document.getElementById('btn-avs');
   if(avs.disabled)return;
-  const testo=avs.textContent.trim();
-  if(testo==='PRONTO? INIZIA ESERCIZIO'){
+  const azione=avs.dataset.azione||'';
+  if(azione.includes('INIZIA')){
     iniziaEsercizioAction();
-  } else if(testo==='FATTO? AVVIA RIPOSO SERIE'){
+  } else if(azione.includes('RIPOSO SERIE')){
     setAvs(false,false,'ESERCIZIO');
     startTimer('rs');
-  } else if(testo==='FATTO? AVVIA RIPOSO FINALE'){
+  } else if(azione.includes('RIPOSO FINALE')){
     setAvs(false,false,'ESERCIZIO');
     startTimer('rf');
   }
@@ -860,7 +885,69 @@ function alert5(){
 }
 
 // ══════════════════════════════════════════════════════════════
-// STORICO
+// PROSSIMA SCHEDA
+// ══════════════════════════════════════════════════════════════
+let tickerAttivo=false;
+
+function renderNxt(){
+  const box=document.getElementById('nxt-box');
+  // Visibile solo sulla scheda gialla
+  if(S.CI!==S.activeCI){box.classList.remove('visibile');return;}
+  box.classList.add('visibile');
+  const nT=S.J.sessioni[S.SI].schede.length;
+  const nextIdx=S.CI+1;
+  const descEl=document.getElementById('nxt-desc');
+  const parEl=document.getElementById('nxt-par');
+  stopTicker();
+  if(nextIdx>=nT){
+    descEl.textContent='QUESTA È L\'ULTIMA SCHEDA';
+    descEl.style.color='#ff9900';
+    parEl.innerHTML='';
+    return;
+  }
+  descEl.style.color='var(--verde)';
+  const sc=S.J.sessioni[S.SI].schede[nextIdx];
+  const lib=S.J.libreria[sc.id];
+  const p=S.PL[nextIdx];
+  let desc='—';
+  if(lib){
+    if(lib.descrizione) desc=lib.descrizione;
+    else desc=(lib.desc_breve||'')+(lib.desc_dettagliata?' — '+lib.desc_dettagliata:'');
+  }
+  descEl.textContent=desc;
+  // Parametri nel formato storico
+  let pt=[];
+  if(p.ser>0||p.rip>0) pt.push('<span class="nxt-s">'+p.ser+'x'+p.rip+'</span>');
+  if(p.pn>0||p.pk>0)   pt.push('<span class="nxt-p">'+p.pn+'x'+fmtKg(p.pk)+'kg</span>');
+  if(p.dm>0||p.ds>0)   pt.push('<span class="nxt-t">'+p.dm+'m:'+String(p.ds).padStart(2,'0')+'s</span>');
+  const rfTot=p.rf_m*60+p.rf_s;
+  if(rfTot>0) pt.push('<span style="color:#555">rf '+p.rf_m+':'+String(p.rf_s).padStart(2,'0')+'</span>');
+  parEl.innerHTML=pt.join('');
+}
+
+function toggleTicker(){
+  const el=document.getElementById('nxt-desc');
+  if(tickerAttivo){stopTicker();return;}
+  // Misura se il testo è più largo del contenitore
+  const wrap=document.getElementById('nxt-desc-wrap');
+  const tw=el.scrollWidth;
+  const cw=wrap.clientWidth;
+  if(tw<=cw){return;} // testo corto: non serve scorrere
+  tickerAttivo=true;
+  // Velocità: ~60px al secondo → dur = tw/60 secondi
+  const dur=Math.max(4,tw/60);
+  el.style.setProperty('--tx','-'+tw+'px');
+  el.style.setProperty('--dur',dur+'s');
+  el.classList.add('scorri');
+}
+function stopTicker(){
+  tickerAttivo=false;
+  const el=document.getElementById('nxt-desc');
+  el.classList.remove('scorri');
+  el.style.animation='none';
+  el.offsetWidth; // forza reflow
+  el.style.animation='';
+}
 // ══════════════════════════════════════════════════════════════
 function renderStorico(id){
   const righe=(S.J&&S.J.storico&&S.J.storico[id])?S.J.storico[id]:[];
