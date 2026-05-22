@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26052209_FIT</title>
+<title>CL26052211_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --blu:#00aaff; --grigio2:#1a1a1a; --testo:#fff;
@@ -43,12 +43,6 @@
   @keyframes btnLampRosso{0%,100%{opacity:1;}50%{opacity:.15;}}
   .btn.lamp-rosso{animation:btnLampRosso .7s infinite;background:var(--rosso);color:#fff;box-shadow:0 4px 0 #990000;}
   .btn.lamp-rosso:active{animation:none;transform:translateY(3px);box-shadow:0 1px 0 #990000;}
-
-  @keyframes btnLampBlu{0%,100%{opacity:1;}50%{opacity:.15;}}
-  .btn.lamp-blu{animation:btnLampBlu .7s infinite;background:var(--blu);color:#fff;box-shadow:0 4px 0 #005588;}
-  .btn.lamp-blu:active{animation:none;transform:translateY(3px);box-shadow:0 1px 0 #005588;}
-  .btn.blu{background:var(--blu);color:#fff;box-shadow:0 4px 0 #005588;}
-  .btn.blu:active{box-shadow:0 1px 0 #005588;}
 
   .nav4{display:grid;grid-template-columns:1fr 2fr 1fr;gap:5px;margin-bottom:5px;}
   .btn-nav{display:block;width:100%;background:var(--giallo);color:var(--nero);border:none;border-radius:8px;
@@ -91,8 +85,7 @@
 
 
   .desc-box{background:var(--grigio2);border:1px solid #2a2a2a;border-radius:6px;
-    padding:6px 10px;margin-bottom:5px;
-    height:calc(1.5em * 4 + 12px);overflow-y:auto;
+    padding:6px 10px;margin-bottom:5px;overflow-y:auto;
     -webkit-overflow-scrolling:touch;touch-action:pan-y;}
   .desc-unica{font-size:.92rem;color:var(--giallo);line-height:1.5;
     font-family:Arial,sans-serif;font-weight:700;}
@@ -187,7 +180,6 @@
 
   .stor-box{background:var(--grigio2);border:1px solid #2a2a2a;border-radius:6px;
     padding:5px 8px;overflow-y:auto;
-    max-height:calc(1.7rem * 5 + 10px);
     -webkit-overflow-scrolling:touch;touch-action:pan-y;}
   .stor-riga{font-size:.7rem;font-weight:700;padding:4px 0;border-bottom:1px solid #222;
     display:flex;gap:18px;align-items:center;}
@@ -213,7 +205,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26052209_FIT</span>
+    <span class="h-versione">CL26052211_FIT</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -230,7 +222,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26052209_FIT</span>
+    <span class="h-versione">CL26052211_FIT</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -333,7 +325,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26052209_FIT</span>
+    <span class="h-versione">CL26052211_FIT</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -529,6 +521,32 @@ function vaiPrimaScheda(){
 }
 
 // ══════════════════════════════════════════════════════════════
+// ALTEZZE DINAMICHE desc-box e stor-box
+// ══════════════════════════════════════════════════════════════
+function aggAltezze(){
+  // desc-box: max 4 righe
+  const descBox=document.getElementById('desc-unica').parentElement;
+  const descEl=document.getElementById('desc-unica');
+  const descLH=parseFloat(getComputedStyle(descEl).lineHeight)||1.5*parseFloat(getComputedStyle(descEl).fontSize)||20;
+  const descPad=12; // padding top+bottom
+  const descMax=descLH*4+descPad;
+  descBox.style.maxHeight=descMax+'px';
+  descBox.style.height=''; // lascia che si adatti al contenuto fino al max
+
+  // stor-box: max 5 righe
+  const storBox=document.getElementById('stor-list').parentElement;
+  const storRighe=storBox.querySelectorAll('.stor-riga');
+  const storEmpty=storBox.querySelector('.stor-empty');
+  const rigaH=28; // altezza approssimativa di una riga storico (font .7rem + padding)
+  if(storEmpty){
+    storBox.style.maxHeight=(rigaH+10)+'px';
+  } else {
+    const nRighe=Math.min(storRighe.length,5);
+    storBox.style.maxHeight=(nRighe*rigaH+10)+'px';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
 // RENDER
 // ══════════════════════════════════════════════════════════════
 function render(){
@@ -595,6 +613,7 @@ function render(){
 
   aggUI();
   renderStorico(sc.id);
+  aggAltezze();
   stopTicker();
   renderNxt();
 }
@@ -634,15 +653,23 @@ function setAvs(attivo,lampeggia,testo){
   const avs=document.getElementById('btn-avs');
   avs.disabled=!attivo;
   avs.classList.remove('lamp','lamp-rosso','lamp-verde','lamp-blu','blu');
-  avs.dataset.azione=testo; // chiave per tapAvs, non dipende da innerHTML
+  avs.dataset.azione=testo;
   if(testo.includes('INIZIA')){
-    avs.innerHTML='<span style="font-size:1.5em;line-height:1;vertical-align:middle">🔥</span> '+testo;
-    if(attivo&&lampeggia) avs.classList.add('lamp');
+    // Verde fluo, icona fuoco grande
+    avs.innerHTML='<span style="font-size:2em;line-height:1;vertical-align:middle;display:block;margin-bottom:1px">🔥</span>'+testo;
+    avs.style.lineHeight='1.15';
+    if(attivo&&lampeggia) avs.classList.add('lamp-verde');
   } else if(testo.includes('RIPOSO')){
-    avs.innerHTML='<span style="font-size:1.5em;line-height:1;vertical-align:middle">💤</span> '+testo;
-    if(attivo&&lampeggia) avs.classList.add('lamp-blu');
+    // Giallo fluo, icona zzz grande, testo su due righe
+    const parti=testo.replace('FATTO? AVVIA ','');
+    // "RIPOSO SERIE" → "FATTO? AVVIA\nRIPOSO SERIE"
+    avs.innerHTML='<span style="font-size:2em;line-height:1;vertical-align:middle;display:block;margin-bottom:1px">💤</span>'
+      +'FATTO? AVVIA<br>'+parti;
+    avs.style.lineHeight='1.15';
+    if(attivo&&lampeggia) avs.classList.add('lamp');
   } else {
-    avs.textContent=testo;
+    avs.innerHTML=testo;
+    avs.style.lineHeight='';
   }
 }
 
@@ -906,6 +933,7 @@ function renderNxt(){
     return;
   }
   descEl.style.color='var(--verde)';
+  descEl.dataset.testo='';
   const sc=S.J.sessioni[S.SI].schede[nextIdx];
   const lib=S.J.libreria[sc.id];
   const p=S.PL[nextIdx];
@@ -915,28 +943,39 @@ function renderNxt(){
     else desc=(lib.desc_breve||'')+(lib.desc_dettagliata?' — '+lib.desc_dettagliata:'');
   }
   descEl.textContent=desc;
+  descEl.dataset.testo=desc;
   // Parametri nel formato storico
   let pt=[];
   if(p.ser>0||p.rip>0) pt.push('<span class="nxt-s">'+p.ser+'x'+p.rip+'</span>');
   if(p.pn>0||p.pk>0)   pt.push('<span class="nxt-p">'+p.pn+'x'+fmtKg(p.pk)+'kg</span>');
   if(p.dm>0||p.ds>0)   pt.push('<span class="nxt-t">'+p.dm+'m:'+String(p.ds).padStart(2,'0')+'s</span>');
-  const rfTot=p.rf_m*60+p.rf_s;
-  if(rfTot>0) pt.push('<span style="color:#555">rf '+p.rf_m+':'+String(p.rf_s).padStart(2,'0')+'</span>');
   parEl.innerHTML=pt.join('');
 }
 
 function toggleTicker(){
-  const el=document.getElementById('nxt-desc');
   if(tickerAttivo){stopTicker();return;}
-  // Misura se il testo è più largo del contenitore
   const wrap=document.getElementById('nxt-desc-wrap');
+  const el=document.getElementById('nxt-desc');
+  // Testo originale (senza duplicato)
+  const testoOrig=el.dataset.testo||el.textContent;
+  el.dataset.testo=testoOrig;
+  const SEP=' ····· ';
+  // Misura larghezza testo originale (senza duplicato)
+  el.textContent=testoOrig;
+  el.style.animation='none';
+  el.offsetWidth;
   const tw=el.scrollWidth;
   const cw=wrap.clientWidth;
-  if(tw<=cw){return;} // testo corto: non serve scorrere
+  if(tw<=cw){return;} // testo corto: non serve
+  // Seamless loop: duplica con separatore
+  el.textContent=testoOrig+SEP+testoOrig+SEP;
+  el.offsetWidth;
+  const fullW=el.scrollWidth;
+  // La distanza da percorrere è esattamente la larghezza del primo segmento (testo+sep)
+  const segW=tw + SEP.length * (parseFloat(getComputedStyle(el).fontSize)||12) * 0.52;
   tickerAttivo=true;
-  // Velocità: ~60px al secondo → dur = tw/60 secondi
-  const dur=Math.max(4,tw/60);
-  el.style.setProperty('--tx','-'+tw+'px');
+  const dur=Math.max(4,segW/60);
+  el.style.setProperty('--tx','-'+segW+'px');
   el.style.setProperty('--dur',dur+'s');
   el.classList.add('scorri');
 }
@@ -945,8 +984,10 @@ function stopTicker(){
   const el=document.getElementById('nxt-desc');
   el.classList.remove('scorri');
   el.style.animation='none';
-  el.offsetWidth; // forza reflow
+  el.offsetWidth;
   el.style.animation='';
+  // Ripristina testo originale
+  if(el.dataset.testo) el.textContent=el.dataset.testo;
 }
 // ══════════════════════════════════════════════════════════════
 function renderStorico(id){
