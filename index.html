@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26052211_FIT</title>
+<title>CL26052309_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --blu:#00aaff; --grigio2:#1a1a1a; --testo:#fff;
@@ -205,7 +205,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26052211_FIT</span>
+    <span class="h-versione">CL26052309_FIT</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -214,7 +214,7 @@
   <div class="sez-label">Sessione</div>
   <div class="lista-sessioni" id="lista-sess"></div>
   <button class="btn verde" id="btn-avvia" disabled onclick="avviaSessione()">AVVIA SESSIONE</button>
-  <button class="btn-nav" id="btn-vai-s2" onclick="vaiPrimaScheda()" style="margin-bottom:7px">&#x23E9;</button>
+  <button class="btn-nav" id="btn-vai-s2" onclick="vaiPrimaScheda()" style="margin-bottom:7px">&#x25B6;</button>
 </div>
 
 <!-- S2 -->
@@ -222,7 +222,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26052211_FIT</span>
+    <span class="h-versione">CL26052309_FIT</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -302,10 +302,10 @@
   </div>
 
   <div class="nav4">
-    <button class="btn-nav" id="btn-prec" onclick="goPrec()">&#x23EA;</button>
+    <button class="btn-nav" id="btn-prec" onclick="goPrec()">&#x25C0;</button>
     <button class="btn sm"  id="btn-avs"  style="margin-bottom:0" disabled
             onclick="tapAvs()">ESERCIZIO</button>
-    <button class="btn-nav" id="btn-succ" onclick="goSucc()">&#x23E9;</button>
+    <button class="btn-nav" id="btn-succ" onclick="goSucc()">&#x25B6;</button>
   </div>
 
   <div class="stor-box">
@@ -325,14 +325,14 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26052211_FIT</span>
+    <span class="h-versione">CL26052309_FIT</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
   <div class="fine-i" id="fine-i"></div>
   <button class="btn verde lamp-verde" id="btn-salva" onclick="salvaSessione()">SALVA SESSIONE</button>
-  <button class="btn grigio" style="margin-top:6px" onclick="tornaInizio()">TORNA ALL'INIZIO</button>
-  <button class="btn-nav" style="margin-top:6px;box-shadow:0 4px 0 #7a9900" onclick="tornaUltimaScheda()">&#x23EA;</button>
+  <button class="btn-nav" style="margin-top:6px;box-shadow:0 4px 0 #7a9900" onclick="tornaInizio()">&#x23EA;</button>
+  <button class="btn-nav" style="margin-top:6px;box-shadow:0 4px 0 #7a9900" onclick="tornaUltimaScheda()">&#x25C0;</button>
 </div>
 
 <script>
@@ -952,31 +952,42 @@ function renderNxt(){
   parEl.innerHTML=pt.join('');
 }
 
+function misuraTesto(testo, el){
+  // Misura la larghezza reale del testo creando un elemento fuori dal DOM
+  const ghost=document.createElement('span');
+  const cs=getComputedStyle(el);
+  ghost.style.cssText='position:fixed;top:-9999px;left:-9999px;white-space:nowrap;visibility:hidden;'
+    +'font-size:'+cs.fontSize+';font-family:'+cs.fontFamily+';font-weight:'+cs.fontWeight+';'
+    +'letter-spacing:'+cs.letterSpacing+';';
+  ghost.textContent=testo;
+  document.body.appendChild(ghost);
+  const w=ghost.getBoundingClientRect().width;
+  document.body.removeChild(ghost);
+  return w;
+}
+
 function toggleTicker(){
   if(tickerAttivo){stopTicker();return;}
   const wrap=document.getElementById('nxt-desc-wrap');
   const el=document.getElementById('nxt-desc');
-  // Testo originale (senza duplicato)
   const testoOrig=el.dataset.testo||el.textContent;
   el.dataset.testo=testoOrig;
-  const SEP=' ····· ';
-  // Misura larghezza testo originale (senza duplicato)
-  el.textContent=testoOrig;
-  el.style.animation='none';
-  el.offsetWidth;
-  const tw=el.scrollWidth;
-  const cw=wrap.clientWidth;
+  // Non scorrere il messaggio ultima scheda
+  if(!testoOrig||testoOrig==='QUESTA È L\'ULTIMA SCHEDA') return;
+  const SEP='  ─────  ';
+  const cw=wrap.getBoundingClientRect().width;
+  const tw=misuraTesto(testoOrig,el);
+  const sw=misuraTesto(SEP,el);
   if(tw<=cw){return;} // testo corto: non serve
-  // Seamless loop: duplica con separatore
-  el.textContent=testoOrig+SEP+testoOrig+SEP;
-  el.offsetWidth;
-  const fullW=el.scrollWidth;
-  // La distanza da percorrere è esattamente la larghezza del primo segmento (testo+sep)
-  const segW=tw + SEP.length * (parseFloat(getComputedStyle(el).fontSize)||12) * 0.52;
+  // Seamless: testo + sep + testo + sep
+  // L'animazione scorre di tw+sw (un segmento) e poi ricomincia identica
+  const segW=tw+sw;
+  const fullTesto=testoOrig+SEP+testoOrig+SEP;
   tickerAttivo=true;
-  const dur=Math.max(4,segW/60);
-  el.style.setProperty('--tx','-'+segW+'px');
-  el.style.setProperty('--dur',dur+'s');
+  el.textContent=fullTesto;
+  const dur=Math.max(5,segW/55); // ~55px/s
+  el.style.setProperty('--tx','-'+segW.toFixed(1)+'px');
+  el.style.setProperty('--dur',dur.toFixed(2)+'s');
   el.classList.add('scorri');
 }
 function stopTicker(){
@@ -986,7 +997,6 @@ function stopTicker(){
   el.style.animation='none';
   el.offsetWidth;
   el.style.animation='';
-  // Ripristina testo originale
   if(el.dataset.testo) el.textContent=el.dataset.testo;
 }
 // ══════════════════════════════════════════════════════════════
