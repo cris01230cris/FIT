@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26052309_FIT</title>
+<title>CL26052314_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --blu:#00aaff; --grigio2:#1a1a1a; --testo:#fff;
@@ -205,7 +205,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26052309_FIT</span>
+    <span class="h-versione">CL26052314_FIT</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -222,7 +222,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26052309_FIT</span>
+    <span class="h-versione">CL26052314_FIT</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -325,7 +325,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26052309_FIT</span>
+    <span class="h-versione">CL26052314_FIT</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -1018,15 +1018,29 @@ function renderStorico(id){
 // ══════════════════════════════════════════════════════════════
 function salvaSessione(){
   const sess=S.J.sessioni[S.SI];
-  sess.schede.forEach((s,i)=>{const p=S.PL[i];
-    s.serie=p.ser;s.ripetizioni=p.rip;s.pesi_num=p.pn;s.pesi_kg=p.pk;
-    s.durata_min=p.dm;s.durata_sec=p.ds;
-    s.riposo_serie_min=p.rs_m;s.riposo_serie_sec=p.rs_s;
-    s.riposo_finale_min=p.rf_m;s.riposo_finale_sec=p.rf_s;});
-  localStorage.setItem('fit_j',JSON.stringify(S.J));
+  // Aggiorna i valori della sessione corrente con quelli modificati in S.PL
+  sess.schede.forEach((s,i)=>{
+    const p=S.PL[i];
+    s.ser=p.ser; s.rip=p.rip; s.pn=p.pn; s.pk=p.pk;
+    s.dm=p.dm;   s.ds=p.ds;
+    s.rs_m=p.rs_m; s.rs_s=p.rs_s;
+    s.rf_m=p.rf_m; s.rf_s=p.rf_s;
+    // Rimuove i vecchi nomi lunghi se presenti
+    ['serie','ripetizioni','pesi_num','pesi_kg',
+     'durata_min','durata_sec',
+     'riposo_serie_min','riposo_serie_sec',
+     'riposo_finale_min','riposo_finale_sec'].forEach(k=>delete s[k]);
+  });
+
+  // Costruisce il JSON nel nuovo formato
+  const out = buildJSON();
+  localStorage.setItem('fit_j', JSON.stringify(S.J));
+
   const d=new Date();
-  const fn=S.J.programma+'_'+d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'.json';
-  const blob=new Blob([JSON.stringify(S.J,null,2)],{type:'application/json'});
+  const fn=S.J.programma+'_'
+    +d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')
+    +String(d.getDate()).padStart(2,'0')+'.json';
+  const blob=new Blob([out],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download=fn;a.click();
   URL.revokeObjectURL(url);
@@ -1035,6 +1049,88 @@ function salvaSessione(){
   bs.classList.remove('lamp-verde');bs.disabled=true;bs.textContent='SALVATO';
   document.getElementById('fine-av').style.display='block';
   document.getElementById('fine-i').textContent='File: '+fn;
+}
+
+function buildJSON(){
+  const J=S.J;
+  const lines=[];
+  lines.push('{ "programma": "'+J.programma+'",');
+  lines.push('');
+  lines.push('"libreria":');
+  lines.push('{');
+  const libKeys=Object.keys(J.libreria);
+  libKeys.forEach((k,i)=>{
+    const comma=i<libKeys.length-1?',':'';
+    const desc=(J.libreria[k].descrizione||'').replace(/"/g,'\\"');
+    lines.push('    "'+k+'": { "descrizione": "'+desc+'" }'+comma);
+  });
+  lines.push('},');
+  lines.push('');
+  lines.push('"sessioni":');
+  lines.push('[');
+  J.sessioni.forEach((sess,si)=>{
+    const lastSess=si===J.sessioni.length-1;
+    lines.push('{ "nome": "'+sess.nome+'", "schede": [');
+    sess.schede.forEach((s,idx)=>{
+      const last=idx===sess.schede.length-1;
+      const ser  = s.ser  !==undefined?s.ser  :(s.serie||0);
+      const rip  = s.rip  !==undefined?s.rip  :(s.ripetizioni||0);
+      const pn   = s.pn   !==undefined?s.pn   :(s.pesi_num||0);
+      const pk   = s.pk   !==undefined?s.pk   :(s.pesi_kg||0);
+      const dm   = s.dm   !==undefined?s.dm   :(s.durata_min||0);
+      const ds   = s.ds   !==undefined?s.ds   :(s.durata_sec||0);
+      const rs_m = s.rs_m !==undefined?s.rs_m :(s.riposo_serie_min||0);
+      const rs_s = s.rs_s !==undefined?s.rs_s :(s.riposo_serie_sec||0);
+      const rf_m = s.rf_m !==undefined?s.rf_m :(s.riposo_finale_min||0);
+      const rf_s = s.rf_s !==undefined?s.rf_s :(s.riposo_finale_sec||0);
+      const pkFmt=Number.isInteger(pk)?pk+'.0':pk;
+      lines.push('        { "id": "'+s.id
+        +'", "ser": '+ser
+        +', "rip": '+rip
+        +', "pn": '+pn
+        +', "pk": '+pkFmt
+        +', "dm": '+dm
+        +', "ds": '+ds
+        +', "rs_m": '+rs_m
+        +', "rs_s": '+rs_s
+        +', "rf_m": '+rf_m
+        +', "rf_s": '+rf_s
+        +' }'+(last?'':','));
+    });
+    lines.push('] }'+(lastSess?'':','));
+    if(!lastSess) lines.push('');
+  });
+  lines.push('],');
+  lines.push('');
+  lines.push('"storico":');
+  lines.push('{');
+  const storKeys=Object.keys(J.storico||{});
+  storKeys.forEach((k,ki)=>{
+    const lastKey=ki===storKeys.length-1;
+    const righe=J.storico[k];
+    if(!righe||righe.length===0){
+      lines.push('"'+k+'": []'+(lastKey?'':','));
+    } else {
+      lines.push('"'+k+'": [');
+      righe.forEach((r,ri)=>{
+        const last=ri===righe.length-1;
+        const pkr=Number.isInteger(r.pk)?r.pk+'.0':r.pk;
+        lines.push('{\"data\": \"'+r.data
+          +'\", "ser": '+r.ser
+          +', "rip": '+r.rip
+          +', "pn": '+r.pn
+          +', "pk": '+pkr
+          +', "dm": '+r.dm
+          +', "ds": '+r.ds
+          +' }'+(last?'':','));
+      });
+      lines.push(']'+(lastKey?'':','));
+    }
+  });
+  lines.push('}');
+  lines.push('');
+  lines.push('}');
+  return lines.join('\n');
 }
 function tornaInizio(){
   if(S.tInt){clearInterval(S.tInt);S.tInt=null;}
