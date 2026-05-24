@@ -866,6 +866,7 @@ function completaScheda(){
 // TIMER VISIVO
 // ══════════════════════════════════════════════════════════════
 function cdShow(sec,tipo){
+  if(S.CI!==S.activeCI)return;
   const m=Math.floor(sec/60),s=sec%60;
   const lbl=tipo==='d'?'DURATA':tipo==='rs'?'RIPOSO\nSERIE':'RIPOSO\nFINALE';
   document.getElementById('cd-num').textContent=m+':'+String(s).padStart(2,'0');
