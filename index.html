@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26052318_FIT</title>
+<title>CL26052410_FIT</title>
 <style>
   :root {
-    --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --blu:#00aaff; --grigio2:#1a1a1a; --testo:#fff;
+    --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --grigio2:#1a1a1a; --testo:#fff;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
   body{background:var(--nero);color:var(--testo);font-family:'Arial Black',Arial,sans-serif;min-height:100vh;}
@@ -29,9 +29,6 @@
   .btn.sm{padding:11px 4px;font-size:.72rem;line-height:1.2;}
   .btn.verde{background:var(--verde);box-shadow:0 4px 0 #008833;}
   .btn.verde:active{box-shadow:0 1px 0 #008833;}
-  .btn.grigio{background:#2a2a2a;color:#777;box-shadow:0 4px 0 #111;}
-  .btn.grigio:active{box-shadow:0 1px 0 #111;}
-
   @keyframes btnLamp{0%,100%{opacity:1;}50%{opacity:.15;}}
   .btn.lamp{animation:btnLamp .7s infinite;background:var(--giallo);color:var(--nero);box-shadow:0 4px 0 #7a9900;}
   .btn.lamp:active{animation:none;transform:translateY(3px);box-shadow:0 1px 0 #7a9900;}
@@ -87,7 +84,7 @@
   .desc-box{background:var(--grigio2);border:1px solid #2a2a2a;border-radius:6px;
     padding:6px 10px;margin-bottom:5px;overflow-y:auto;
     -webkit-overflow-scrolling:touch;touch-action:pan-y;}
-  .desc-unica{font-size:.92rem;color:var(--giallo);line-height:1.5;
+  .desc-unica{font-size:.92rem;line-height:1.5;
     font-family:Arial,sans-serif;font-weight:700;}
 
   /* Prossima scheda — solo scheda gialla */
@@ -209,7 +206,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26052318_FIT</span>
+    <span class="h-versione">CL26052410_FIT</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -226,7 +223,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26052318_FIT</span>
+    <span class="h-versione">CL26052410_FIT</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -329,7 +326,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26052318_FIT</span>
+    <span class="h-versione">CL26052410_FIT</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -341,7 +338,7 @@
 
 <script>
 // ══════════════════════════════════════════════════════════════
-// STATO — oggetto unico
+
 // ══════════════════════════════════════════════════════════════
 const S = {
   J:null, SI:-1, CI:0, PL:[], ultComp:-1, activeCI:-1, serR:0,
@@ -368,7 +365,7 @@ document.addEventListener('visibilitychange',()=>{
 // ══════════════════════════════════════════════════════════════
 // UTILITY
 // ══════════════════════════════════════════════════════════════
-// Mod 6: campo assente nel JSON = 0
+
 function gp(s,k){return s[k]!==undefined?s[k]:0;}
 
 function modScheda(p){return(p.dm>0||p.ds>0)?'durata':'pesi';}
@@ -398,13 +395,13 @@ function sanitizeInt(el,mn,mx){
   el.value=v;
 }
 
-// Mod 4: calcola secondi totali di una sessione
+
 // 3s per ripetizione, durata esplicita se scheda durata,
-// riposo serie × (serie-1), riposo finale
+
 function calcolaTempoSessione(sess){
   let tot=0;
   sess.schede.forEach(s=>{
-    // Supporta sia nomi JSON lunghi che nomi corti di S.PL
+
     const ser=(s.ser!==undefined?s.ser:gp(s,'serie'))||1;
     const rip= s.rip!==undefined?s.rip:gp(s,'ripetizioni');
     const dm=  s.dm !==undefined?s.dm :gp(s,'durata_min');
@@ -480,7 +477,7 @@ function mostraSessioni(){
   el.innerHTML='';S.SI=-1;
   document.getElementById('btn-avvia').disabled=true;
   S.J.sessioni.forEach((sess,i)=>{
-    // Se S.PL è popolato per questa sessione usa i valori correnti, altrimenti usa il JSON
+
     const schede=sess.schede.map((s,idx)=>{
       if(S.PL.length>idx && S.SI===i) return S.PL[idx];
       return s;
@@ -528,20 +525,20 @@ function vaiPrimaScheda(){
 // ALTEZZE DINAMICHE desc-box e stor-box
 // ══════════════════════════════════════════════════════════════
 function aggAltezze(){
-  // desc-box: max 4 righe
+
   const descBox=document.getElementById('desc-unica').parentElement;
   const descEl=document.getElementById('desc-unica');
   const descLH=parseFloat(getComputedStyle(descEl).lineHeight)||1.5*parseFloat(getComputedStyle(descEl).fontSize)||20;
-  const descPad=12; // padding top+bottom
+  const descPad=12;
   const descMax=descLH*4+descPad;
   descBox.style.maxHeight=descMax+'px';
-  descBox.style.height=''; // lascia che si adatti al contenuto fino al max
+  descBox.style.height='';
 
-  // stor-box: max 5 righe
+
   const storBox=document.getElementById('stor-list').parentElement;
   const storRighe=storBox.querySelectorAll('.stor-riga');
   const storEmpty=storBox.querySelector('.stor-empty');
-  const rigaH=28; // altezza approssimativa di una riga storico (font .7rem + padding)
+  const rigaH=28;
   if(storEmpty){
     storBox.style.maxHeight=(rigaH+10)+'px';
   } else {
@@ -574,10 +571,11 @@ function render(){
     if(lib.descrizione) descTxt=lib.descrizione;
     else descTxt=(lib.desc_breve||'')+(lib.desc_dettagliata?' — '+lib.desc_dettagliata:'');
   }
-  document.getElementById('desc-unica').textContent=descTxt;
-
+  const descEl=document.getElementById('desc-unica');
+  descEl.textContent=descTxt;
   const isRosso=(S.CI<=S.ultComp && S.CI!==S.activeCI);
   const isVerde=(S.CI>S.ultComp && S.CI!==S.activeCI);
+  descEl.style.color=isRosso?'var(--rosso)':isVerde?'var(--verde)':'var(--giallo)';
   const cls=isRosso?'rosso-val':isVerde?'verde-val':'';
   const ids=['p-ser','p-rip','p-pn','p-pk','p-dm','p-ds','p-rs-m','p-rs-s','p-rf-m','p-rf-s'];
   ids.forEach(id=>{
@@ -619,6 +617,8 @@ function render(){
   aggUI();
   renderStorico(sc.id);
   aggAltezze();
+
+  if(S.CI!==S.activeCI) document.getElementById('cd-wrap').classList.remove('attivo');
   stopTicker();
   renderNxt();
 }
@@ -660,14 +660,14 @@ function setAvs(attivo,lampeggia,testo){
   avs.classList.remove('lamp','lamp-rosso','lamp-verde','lamp-blu','blu');
   avs.dataset.azione=testo;
   if(testo.includes('INIZIA')){
-    // Verde fluo, icona fuoco grande
+
     avs.innerHTML='<span style="font-size:2em;line-height:1;vertical-align:middle;display:block;margin-bottom:1px">🔥</span>'+testo;
     avs.style.lineHeight='1.15';
     if(attivo&&lampeggia) avs.classList.add('lamp-verde');
   } else if(testo.includes('RIPOSO')){
-    // Giallo fluo, icona zzz grande, testo su due righe
+
     const parti=testo.replace('FATTO? AVVIA ','');
-    // "RIPOSO SERIE" → "FATTO? AVVIA\nRIPOSO SERIE"
+
     avs.innerHTML='<span style="font-size:2em;line-height:1;vertical-align:middle;display:block;margin-bottom:1px">💤</span>'
       +'FATTO? AVVIA<br>'+parti;
     avs.style.lineHeight='1.15';
@@ -711,7 +711,6 @@ function iniziaEsercizioAction(){
     S.fase='attesa_durata';aggUI();startTimer('d');
   } else {
     const faseProssima=(S.serR>=p.ser)?'attesa_rf':'attesa_rs';
-    // 5 secondi di blocco prima di mostrare il pulsante riposo
     S.fase='pausa_pesi';
     setAvs(false,false,'ESERCIZIO');
     if(S.pausaInt)clearTimeout(S.pausaInt);
@@ -728,7 +727,7 @@ function iniziaEsercizioAction(){
 // ══════════════════════════════════════════════════════════════
 function goPrec(){
   if(S.CI===0){
-    if(S.J)mostraSessioni(); // ricalcola tempi con valori aggiornati
+    if(S.J)mostraSessioni();
     go('s1');return;
   }
   S.CI--;render();
@@ -736,7 +735,6 @@ function goPrec(){
 function goSucc(){
   const nT=S.J.sessioni[S.SI].schede.length;
   if(S.CI===S.activeCI&&S.fase==='completata'){
-    // Scrivi storico al tap su avanti
     const sc=S.J.sessioni[S.SI].schede[S.CI];
     const p=S.PL[S.CI];
     if(!S.J.storico[sc.id])S.J.storico[sc.id]=[];
@@ -949,7 +947,6 @@ function renderNxt(){
   }
   descEl.textContent=desc;
   descEl.dataset.testo=desc;
-  // Parametri nel formato storico
   let pt=[];
   if(p.ser>0||p.rip>0) pt.push('<span class="nxt-s">'+p.ser+'x'+p.rip+'</span>');
   if(p.pn>0||p.pk>0)   pt.push('<span class="nxt-p">'+p.pn+'x'+fmtKg(p.pk)+'kg</span>');
@@ -1005,6 +1002,8 @@ function stopTicker(){
   if(el.dataset.testo) el.textContent=el.dataset.testo;
 }
 // ══════════════════════════════════════════════════════════════
+// STORICO
+// ══════════════════════════════════════════════════════════════
 function renderStorico(id){
   const righe=(S.J&&S.J.storico&&S.J.storico[id])?S.J.storico[id]:[];
   const el=document.getElementById('stor-list');
@@ -1030,16 +1029,13 @@ function salvaSessione(){
     s.dm=p.dm;   s.ds=p.ds;
     s.rs_m=p.rs_m; s.rs_s=p.rs_s;
     s.rf_m=p.rf_m; s.rf_s=p.rf_s;
-    // Rimuove i vecchi nomi lunghi se presenti
     ['serie','ripetizioni','pesi_num','pesi_kg',
      'durata_min','durata_sec',
      'riposo_serie_min','riposo_serie_sec',
      'riposo_finale_min','riposo_finale_sec'].forEach(k=>delete s[k]);
   });
-
-  // Costruisce il JSON nel nuovo formato
-  const out = buildJSON();
-  localStorage.setItem('fit_j', JSON.stringify(S.J));
+  const out=buildJSON();
+  localStorage.setItem('fit_j',JSON.stringify(S.J));
 
   const d=new Date();
   const fn=S.J.programma+'_'
@@ -1141,7 +1137,6 @@ function tornaInizio(){
   if(S.tInt){clearInterval(S.tInt);S.tInt=null;}
   if(S.pausaInt){clearTimeout(S.pausaInt);S.pausaInt=null;}
   rilasciaWakeLock();
-  // Ricalcola tempi con eventuali modifiche fatte in sessione prima di tornare
   if(S.J)mostraSessioni();
   S.J=null;S.SI=-1;S.CI=0;S.PL=[];S.ultComp=-1;S.activeCI=-1;S.serR=0;S.fase='idle';S.timerInCorso=false;
   document.getElementById('info-prog').textContent='Nessun programma caricato';
