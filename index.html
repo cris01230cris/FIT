@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26052410_FIT</title>
+<title>CL26052612_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --grigio2:#1a1a1a; --testo:#fff;
@@ -206,12 +206,14 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26052410_FIT</span>
+    <span class="h-versione">CL26052612_FIT</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
-  <button class="btn" onclick="document.getElementById('finput').click()">CARICA PROGRAMMA JSON</button>
-  <input type="file" id="finput" accept=".json" style="display:none" onchange="leggiJSON(event)">
+  <label for="finput" class="btn">CARICA PROGRAMMA JSON</label>
+  <input type="file" id="finput" accept=".json"
+         style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;"
+         onchange="leggiJSON(event)">
   <div class="sez-label">Sessione</div>
   <div class="lista-sessioni" id="lista-sess"></div>
   <button class="btn verde" id="btn-avvia" disabled onclick="avviaSessione()">AVVIA SESSIONE</button>
@@ -223,7 +225,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26052410_FIT</span>
+    <span class="h-versione">CL26052612_FIT</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -326,7 +328,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26052410_FIT</span>
+    <span class="h-versione">CL26052612_FIT</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -338,7 +340,7 @@
 
 <script>
 // ══════════════════════════════════════════════════════════════
-
+// STATO
 // ══════════════════════════════════════════════════════════════
 const S = {
   J:null, SI:-1, CI:0, PL:[], ultComp:-1, activeCI:-1, serR:0,
@@ -365,9 +367,7 @@ document.addEventListener('visibilitychange',()=>{
 // ══════════════════════════════════════════════════════════════
 // UTILITY
 // ══════════════════════════════════════════════════════════════
-
 function gp(s,k){return s[k]!==undefined?s[k]:0;}
-
 function modScheda(p){return(p.dm>0||p.ds>0)?'durata':'pesi';}
 function leggiKg(id){
   const v=document.getElementById(id).value.replace(',','.');
@@ -395,21 +395,17 @@ function sanitizeInt(el,mn,mx){
   el.value=v;
 }
 
-
-// 3s per ripetizione, durata esplicita se scheda durata,
-
 function calcolaTempoSessione(sess){
   let tot=0;
   sess.schede.forEach(s=>{
-
     const ser=(s.ser!==undefined?s.ser:gp(s,'serie'))||1;
-    const rip= s.rip!==undefined?s.rip:gp(s,'ripetizioni');
-    const dm=  s.dm !==undefined?s.dm :gp(s,'durata_min');
-    const ds=  s.ds !==undefined?s.ds :gp(s,'durata_sec');
-    const rsm= s.rs_m!==undefined?s.rs_m:(s.riposo_serie_min!==undefined?s.riposo_serie_min:gp(s,'rs_m'));
-    const rss= s.rs_s!==undefined?s.rs_s:(s.riposo_serie_sec!==undefined?s.riposo_serie_sec:gp(s,'rs_s'));
-    const rfm= s.rf_m!==undefined?s.rf_m:(s.riposo_finale_min!==undefined?s.riposo_finale_min:gp(s,'rf_m'));
-    const rfs= s.rf_s!==undefined?s.rf_s:(s.riposo_finale_sec!==undefined?s.riposo_finale_sec:gp(s,'rf_s'));
+    const rip=s.rip!==undefined?s.rip:gp(s,'ripetizioni');
+    const dm=s.dm!==undefined?s.dm:gp(s,'durata_min');
+    const ds=s.ds!==undefined?s.ds:gp(s,'durata_sec');
+    const rsm=s.rs_m!==undefined?s.rs_m:(s.riposo_serie_min!==undefined?s.riposo_serie_min:gp(s,'rs_m'));
+    const rss=s.rs_s!==undefined?s.rs_s:(s.riposo_serie_sec!==undefined?s.riposo_serie_sec:gp(s,'rs_s'));
+    const rfm=s.rf_m!==undefined?s.rf_m:(s.riposo_finale_min!==undefined?s.riposo_finale_min:gp(s,'rf_m'));
+    const rfs=s.rf_s!==undefined?s.rf_s:(s.riposo_finale_sec!==undefined?s.riposo_finale_sec:gp(s,'rf_s'));
     const isDur=(dm>0||ds>0);
     const esSec=isDur?ser*(dm*60+ds):ser*rip*3;
     const rsSec=(ser-1)*(rsm*60+rss);
@@ -421,9 +417,9 @@ function calcolaTempoSessione(sess){
 function fmtTempo(sec){
   const h=Math.floor(sec/3600);
   const m=Math.floor((sec%3600)/60);
-  if(h>0&&m>0) return h+'ora'+(h>1?'e':'')+' '+m+'min';
-  if(h>0)      return h+'ora'+(h>1?'e':'');
-  return m+'min';
+  if(h>0&&m>0) return h+' ora'+(h>1?'e':'')+' '+m+' min';
+  if(h>0)      return h+' ora'+(h>1?'e':'');
+  return m+' min';
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -466,9 +462,13 @@ function leggiJSON(e){
     try{
       S.J=JSON.parse(ev.target.result);
       if(!S.J.storico)S.J.storico={};
+      if(!S.J.libreria)S.J.libreria={};
+      localStorage.setItem('fit_j',JSON.stringify(S.J));
       document.getElementById('info-prog').textContent=S.J.programma;
       mostraSessioni();
-    }catch(err){alert('JSON non valido: '+err.message);}
+    }catch(err){
+      document.getElementById('info-prog').textContent='⚠ JSON non valido: '+err.message;
+    }
   };
   r.readAsText(f);
 }
@@ -477,7 +477,6 @@ function mostraSessioni(){
   el.innerHTML='';S.SI=-1;
   document.getElementById('btn-avvia').disabled=true;
   S.J.sessioni.forEach((sess,i)=>{
-
     const schede=sess.schede.map((s,idx)=>{
       if(S.PL.length>idx && S.SI===i) return S.PL[idx];
       return s;
@@ -499,19 +498,21 @@ function avviaSessione(){
   if(S.SI<0)return;
   const sess=S.J.sessioni[S.SI];
   S.PL=sess.schede.map(s=>({
-    ser:gp(s,'serie')||1,
-    rip:gp(s,'ripetizioni')||1,
-    pn:gp(s,'pesi_num'),
-    pk:gp(s,'pesi_kg'),
-    dm:gp(s,'durata_min'),
-    ds:gp(s,'durata_sec'),
-    rs_m:s.riposo_serie_min!==undefined?s.riposo_serie_min:gp(s,'rs_m'),
-    rs_s:s.riposo_serie_sec!==undefined?s.riposo_serie_sec:gp(s,'rs_s'),
-    rf_m:s.riposo_finale_min!==undefined?s.riposo_finale_min:gp(s,'rf_m'),
-    rf_s:s.riposo_finale_sec!==undefined?s.riposo_finale_sec:gp(s,'rf_s')
+    id:s.id,
+    ser:s.ser!==undefined?s.ser:(gp(s,'serie')||1),
+    rip:s.rip!==undefined?s.rip:(gp(s,'ripetizioni')||1),
+    pn:s.pn!==undefined?s.pn:gp(s,'pesi_num'),
+    pk:s.pk!==undefined?s.pk:gp(s,'pesi_kg'),
+    dm:s.dm!==undefined?s.dm:gp(s,'durata_min'),
+    ds:s.ds!==undefined?s.ds:gp(s,'durata_sec'),
+    rs_m:s.rs_m!==undefined?s.rs_m:(s.riposo_serie_min!==undefined?s.riposo_serie_min:gp(s,'rs_m')),
+    rs_s:s.rs_s!==undefined?s.rs_s:(s.riposo_serie_sec!==undefined?s.riposo_serie_sec:gp(s,'rs_s')),
+    rf_m:s.rf_m!==undefined?s.rf_m:(s.riposo_finale_min!==undefined?s.riposo_finale_min:gp(s,'rf_m')),
+    rf_s:s.rf_s!==undefined?s.rf_s:(s.riposo_finale_sec!==undefined?s.riposo_finale_sec:gp(s,'rf_s'))
   }));
   S.CI=0;S.ultComp=-1;S.activeCI=-1;S.serR=0;S.fase='idle';
   setH(S.J.programma,sess.nome);
+  salvaLocale();
   richiediWakeLock();
   document.getElementById('btn-vai-s2').classList.add('visibile');
   go('s2');render();
@@ -522,29 +523,37 @@ function vaiPrimaScheda(){
 }
 
 // ══════════════════════════════════════════════════════════════
-// ALTEZZE DINAMICHE desc-box e stor-box
+// LOCALSTORAGE — deposito temporaneo sessione
+// ══════════════════════════════════════════════════════════════
+function salvaLocale(){
+  if(!S.J)return;
+  const snap={
+    J:S.J,
+    SI:S.SI,
+    PL:S.PL,
+    ultComp:S.ultComp,
+    activeCI:S.activeCI,
+    serR:S.serR,
+    fase:S.fase
+  };
+  localStorage.setItem('fit_j',JSON.stringify(snap));
+}
+
+// ══════════════════════════════════════════════════════════════
+// ALTEZZE DINAMICHE
 // ══════════════════════════════════════════════════════════════
 function aggAltezze(){
-
   const descBox=document.getElementById('desc-unica').parentElement;
   const descEl=document.getElementById('desc-unica');
-  const descLH=parseFloat(getComputedStyle(descEl).lineHeight)||1.5*parseFloat(getComputedStyle(descEl).fontSize)||20;
-  const descPad=12;
-  const descMax=descLH*4+descPad;
+  const descLH=parseFloat(getComputedStyle(descEl).lineHeight)||20;
+  const descMax=descLH*4+12;
   descBox.style.maxHeight=descMax+'px';
   descBox.style.height='';
-
-
   const storBox=document.getElementById('stor-list').parentElement;
   const storRighe=storBox.querySelectorAll('.stor-riga');
   const storEmpty=storBox.querySelector('.stor-empty');
   const rigaH=28;
-  if(storEmpty){
-    storBox.style.maxHeight=(rigaH+10)+'px';
-  } else {
-    const nRighe=Math.min(storRighe.length,5);
-    storBox.style.maxHeight=(nRighe*rigaH+10)+'px';
-  }
+  storBox.style.maxHeight=storEmpty?(rigaH+10)+'px':(Math.min(storRighe.length,5)*rigaH+10)+'px';
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -553,8 +562,9 @@ function aggAltezze(){
 function render(){
   const sess=S.J.sessioni[S.SI];
   const sc=sess.schede[S.CI];
-  const lib=S.J.libreria[sc.id];
+  const lib=S.J.libreria?.[sc.id];
   const p=S.PL[S.CI];
+  if(!p)return;
 
   aggPosTxt();
 
@@ -576,6 +586,7 @@ function render(){
   const isRosso=(S.CI<=S.ultComp && S.CI!==S.activeCI);
   const isVerde=(S.CI>S.ultComp && S.CI!==S.activeCI);
   descEl.style.color=isRosso?'var(--rosso)':isVerde?'var(--verde)':'var(--giallo)';
+
   const cls=isRosso?'rosso-val':isVerde?'verde-val':'';
   const ids=['p-ser','p-rip','p-pn','p-pk','p-dm','p-ds','p-rs-m','p-rs-s','p-rf-m','p-rf-s'];
   ids.forEach(id=>{
@@ -617,7 +628,6 @@ function render(){
   aggUI();
   renderStorico(sc.id);
   aggAltezze();
-
   if(S.CI!==S.activeCI) document.getElementById('cd-wrap').classList.remove('attivo');
   stopTicker();
   renderNxt();
@@ -635,47 +645,20 @@ function aggUI(){
   setBtnNav('btn-prec',true,false);
   setBtnNav('btn-succ',true,(S.CI===S.activeCI&&S.fase==='completata'));
 
-  if(S.timerInCorso){
-    setAvs(false,false,'ESERCIZIO');return;
-  }
+  if(S.timerInCorso){setAvs(false,false,'ESERCIZIO');return;}
+  if(S.CI<=S.ultComp && S.CI!==S.activeCI){setAvs(false,false,'ESERCIZIO');return;}
 
-  if(S.CI<=S.ultComp && S.CI!==S.activeCI){
-    setAvs(false,false,'ESERCIZIO');return;
-  }
   if(S.CI===S.activeCI){
     if(S.fase==='attesa_inizio')     setAvs(true,true,'PRONTO? INIZIA ESERCIZIO');
     else if(S.fase==='attesa_durata')setAvs(false,false,'ESERCIZIO');
     else if(S.fase==='pausa_pesi')   setAvs(false,false,'ESERCIZIO');
     else if(S.fase==='attesa_rs')    setAvs(true,true,'FATTO? AVVIA RIPOSO SERIE');
-    else if(S.fase==='attesa_rf')    setAvs(true,true,'FATTO? AVVIA RIPOSO FINALE');
+    else if(S.fase==='attesa_rf')    setAvs(true,true,'FATTO? REGISTRA STORICO E AVVIA RIPOSO FINALE');
     else                             setAvs(false,false,'ESERCIZIO');
     return;
   }
   if(S.CI===S.ultComp+1) setAvs(true,true,'PRONTO? INIZIA ESERCIZIO');
   else                   setAvs(false,false,'ESERCIZIO');
-}
-function setAvs(attivo,lampeggia,testo){
-  const avs=document.getElementById('btn-avs');
-  avs.disabled=!attivo;
-  avs.classList.remove('lamp','lamp-rosso','lamp-verde','lamp-blu','blu');
-  avs.dataset.azione=testo;
-  if(testo.includes('INIZIA')){
-
-    avs.innerHTML='<span style="font-size:2em;line-height:1;vertical-align:middle;display:block;margin-bottom:1px">🔥</span>'+testo;
-    avs.style.lineHeight='1.15';
-    if(attivo&&lampeggia) avs.classList.add('lamp-verde');
-  } else if(testo.includes('RIPOSO')){
-
-    const parti=testo.replace('FATTO? AVVIA ','');
-
-    avs.innerHTML='<span style="font-size:2em;line-height:1;vertical-align:middle;display:block;margin-bottom:1px">💤</span>'
-      +'FATTO? AVVIA<br>'+parti;
-    avs.style.lineHeight='1.15';
-    if(attivo&&lampeggia) avs.classList.add('lamp');
-  } else {
-    avs.innerHTML=testo;
-    avs.style.lineHeight='';
-  }
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -691,10 +674,33 @@ window.tapAvs=function(){
     setAvs(false,false,'ESERCIZIO');
     startTimer('rs');
   } else if(azione.includes('RIPOSO FINALE')){
+    // Mod 5: registra storico al tap RIPOSO FINALE
+    registraStorico();
     setAvs(false,false,'ESERCIZIO');
     startTimer('rf');
   }
 };
+
+function registraStorico(){
+  const idx=S.activeCI;
+  const sc=S.J.sessioni[S.SI].schede[idx];
+  const p=S.PL[idx];
+  if(!S.J.storico[sc.id])S.J.storico[sc.id]=[];
+  const d=new Date();
+  const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  S.J.storico[sc.id].unshift({data:ds,ser:p.ser,rip:p.rip,pn:p.pn,pk:p.pk,dm:p.dm,ds:p.ds});
+  if(S.J.storico[sc.id].length>10)S.J.storico[sc.id].length=10;
+  // Propaga storico aggiornato a tutte le schede verdi con stesso id (Mod 7)
+  propagaStorico(sc.id);
+  salvaLocale();
+  renderStorico(sc.id);
+  aggAltezze();
+}
+
+function propagaStorico(id){
+  // Rende disponibile lo storico aggiornato a renderStorico per schede future con stesso id
+  // (il rendering lo legge direttamente da S.J.storico, nessuna azione extra necessaria)
+}
 
 function iniziaEsercizioAction(){
   if(S.CI<=S.ultComp)return;
@@ -735,18 +741,23 @@ function goPrec(){
 function goSucc(){
   const nT=S.J.sessioni[S.SI].schede.length;
   if(S.CI===S.activeCI&&S.fase==='completata'){
-    const sc=S.J.sessioni[S.SI].schede[S.CI];
-    const p=S.PL[S.CI];
-    if(!S.J.storico[sc.id])S.J.storico[sc.id]=[];
-    const d=new Date();
-    const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-    S.J.storico[sc.id].unshift({data:ds,ser:p.ser,rip:p.rip,pn:p.pn,pk:p.pk,dm:p.dm,ds:p.ds});
-    if(S.J.storico[sc.id].length>10)S.J.storico[sc.id].length=10;
-    localStorage.setItem('fit_j',JSON.stringify(S.J));
+    // Mod 5: salva parametri sessione nel JSON e localStorage al tap avanti
+    aggiornaSessioneJSON();
     S.activeCI=-1;S.fase='idle';
   }
   if(S.CI>=nT-1){go('s3');return;}
   S.CI++;render();
+}
+function aggiornaSessioneJSON(){
+  const sess=S.J.sessioni[S.SI];
+  sess.schede.forEach((s,i)=>{
+    const p=S.PL[i];
+    s.ser=p.ser;s.rip=p.rip;s.pn=p.pn;s.pk=p.pk;
+    s.dm=p.dm;s.ds=p.ds;
+    s.rs_m=p.rs_m;s.rs_s=p.rs_s;
+    s.rf_m=p.rf_m;s.rf_s=p.rf_s;
+  });
+  salvaLocale();
 }
 function tornaUltimaScheda(){S.CI=S.J.sessioni[S.SI].schede.length-1;go('s2');render();}
 
@@ -756,7 +767,7 @@ function tornaUltimaScheda(){S.CI=S.J.sessioni[S.SI].schede.length-1;go('s2');re
 function dblTapTimer(){
   if(!S.timerInCorso)return;
   const ora=Date.now();
-  if(ora-S.dblTapLast<400){
+  if(ora-S.dblTapLast<600){
     if(S.tSec>5){
       S.tSec=5;
       cdShow(S.tSec,S.tTipo);
@@ -792,7 +803,25 @@ function saveP(){
     document.getElementById('p-rs-s').disabled=ser1;
     if(ser1){document.getElementById('p-rs-m').value=0;document.getElementById('p-rs-s').value=0;p.rs_m=0;p.rs_s=0;}
   }
+  // Mod 7: propaga parametri a schede verdi con stesso id
+  propagaParametri(S.CI,p);
+  salvaLocale();
   aggUI();
+}
+
+function propagaParametri(idx,p){
+  const idScheda=S.PL[idx].id||S.J.sessioni[S.SI].schede[idx].id;
+  S.PL.forEach((q,i)=>{
+    if(i===idx)return;
+    const idQ=q.id||S.J.sessioni[S.SI].schede[i].id;
+    if(idQ!==idScheda)return;
+    // Propaga solo su schede non ancora completate (verdi)
+    if(i<=S.ultComp)return;
+    q.ser=p.ser;q.rip=p.rip;q.pn=p.pn;q.pk=p.pk;
+    q.dm=p.dm;q.ds=p.ds;
+    q.rs_m=p.rs_m;q.rs_s=p.rs_s;
+    q.rf_m=p.rf_m;q.rf_s=p.rf_s;
+  });
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -802,6 +831,14 @@ function lockTimerInputs(lock){
   ['p-dm','p-ds','p-rs-m','p-rs-s','p-rf-m','p-rf-s']
     .forEach(id=>document.getElementById(id).disabled=lock);
 }
+
+// Mod 2: AudioContext singleton
+let audioCtx=null;
+function getAudio(){
+  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+
 function startTimer(tipo){
   if(S.tInt){clearInterval(S.tInt);S.tInt=null;}
   S.timerInCorso=true;S.tTipo=tipo;
@@ -904,7 +941,7 @@ function alert5(){
   for(let i=0;i<5;i++){const t=i*340;
     setTimeout(()=>{fl.classList.add('on');setTimeout(()=>fl.classList.remove('on'),180);},t);}
   try{
-    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const ctx=getAudio();
     for(let i=0;i<5;i++){const t=i*0.34;
       const o=ctx.createOscillator(),g=ctx.createGain();
       o.connect(g);g.connect(ctx.destination);o.frequency.value=900;
@@ -922,7 +959,6 @@ let tickerAttivo=false;
 
 function renderNxt(){
   const box=document.getElementById('nxt-box');
-  // Visibile solo sulla scheda gialla
   if(S.CI!==S.activeCI){box.classList.remove('visibile');return;}
   box.classList.add('visibile');
   const nT=S.J.sessioni[S.SI].schede.length;
@@ -939,8 +975,9 @@ function renderNxt(){
   descEl.style.color='var(--verde)';
   descEl.dataset.testo='';
   const sc=S.J.sessioni[S.SI].schede[nextIdx];
-  const lib=S.J.libreria[sc.id];
+  const lib=S.J.libreria?.[sc.id];
   const p=S.PL[nextIdx];
+  if(!p)return;
   let desc='—';
   if(lib){
     if(lib.descrizione) desc=lib.descrizione;
@@ -955,8 +992,7 @@ function renderNxt(){
   parEl.innerHTML=pt.join('');
 }
 
-function misuraTesto(testo, el){
-  // Misura la larghezza reale del testo creando un elemento fuori dal DOM
+function misuraTesto(testo,el){
   const ghost=document.createElement('span');
   const cs=getComputedStyle(el);
   ghost.style.cssText='position:fixed;top:-9999px;left:-9999px;white-space:nowrap;visibility:hidden;'
@@ -968,27 +1004,22 @@ function misuraTesto(testo, el){
   document.body.removeChild(ghost);
   return w;
 }
-
 function toggleTicker(){
   if(tickerAttivo){stopTicker();return;}
   const wrap=document.getElementById('nxt-desc-wrap');
   const el=document.getElementById('nxt-desc');
   const testoOrig=el.dataset.testo||el.textContent;
   el.dataset.testo=testoOrig;
-  // Non scorrere il messaggio ultima scheda
   if(!testoOrig||testoOrig==='QUESTA È L\'ULTIMA SCHEDA') return;
   const SEP='  ─────  ';
   const cw=wrap.getBoundingClientRect().width;
   const tw=misuraTesto(testoOrig,el);
   const sw=misuraTesto(SEP,el);
-  if(tw<=cw){return;} // testo corto: non serve
-  // Seamless: testo + sep + testo + sep
-  // L'animazione scorre di tw+sw (un segmento) e poi ricomincia identica
+  if(tw<=cw){return;}
   const segW=tw+sw;
-  const fullTesto=testoOrig+SEP+testoOrig+SEP;
   tickerAttivo=true;
-  el.textContent=fullTesto;
-  const dur=Math.max(5,segW/55); // ~55px/s
+  el.textContent=testoOrig+SEP+testoOrig+SEP;
+  const dur=Math.max(5,segW/55);
   el.style.setProperty('--tx','-'+segW.toFixed(1)+'px');
   el.style.setProperty('--dur',dur.toFixed(2)+'s');
   el.classList.add('scorri');
@@ -1002,6 +1033,7 @@ function stopTicker(){
   el.style.animation='';
   if(el.dataset.testo) el.textContent=el.dataset.testo;
 }
+
 // ══════════════════════════════════════════════════════════════
 // STORICO
 // ══════════════════════════════════════════════════════════════
@@ -1023,21 +1055,19 @@ function renderStorico(id){
 // ══════════════════════════════════════════════════════════════
 function salvaSessione(){
   const sess=S.J.sessioni[S.SI];
-  // Aggiorna i valori della sessione corrente con quelli modificati in S.PL
   sess.schede.forEach((s,i)=>{
     const p=S.PL[i];
-    s.ser=p.ser; s.rip=p.rip; s.pn=p.pn; s.pk=p.pk;
-    s.dm=p.dm;   s.ds=p.ds;
-    s.rs_m=p.rs_m; s.rs_s=p.rs_s;
-    s.rf_m=p.rf_m; s.rf_s=p.rf_s;
+    s.ser=p.ser;s.rip=p.rip;s.pn=p.pn;s.pk=p.pk;
+    s.dm=p.dm;s.ds=p.ds;
+    s.rs_m=p.rs_m;s.rs_s=p.rs_s;
+    s.rf_m=p.rf_m;s.rf_s=p.rf_s;
     ['serie','ripetizioni','pesi_num','pesi_kg',
      'durata_min','durata_sec',
      'riposo_serie_min','riposo_serie_sec',
      'riposo_finale_min','riposo_finale_sec'].forEach(k=>delete s[k]);
   });
   const out=buildJSON();
-  localStorage.setItem('fit_j',JSON.stringify(S.J));
-
+  salvaLocale();
   const d=new Date();
   const fn=S.J.programma+'_'
     +d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')
@@ -1053,87 +1083,50 @@ function salvaSessione(){
   document.getElementById('fine-i').textContent='File: '+fn;
 }
 
+// Mod 2: buildJSON usa JSON.stringify — sicuro con qualsiasi carattere
 function buildJSON(){
   const J=S.J;
-  const lines=[];
-  lines.push('{ "programma": "'+J.programma+'",');
-  lines.push('');
-  lines.push('"libreria":');
-  lines.push('{');
-  const libKeys=Object.keys(J.libreria);
-  libKeys.forEach((k,i)=>{
-    const comma=i<libKeys.length-1?',':'';
-    const desc=(J.libreria[k].descrizione||'').replace(/"/g,'\\"');
-    lines.push('    "'+k+'": { "descrizione": "'+desc+'" }'+comma);
+  // Costruisce oggetto con formato desiderato poi serializza
+  const out={
+    programma:J.programma,
+    libreria:{},
+    sessioni:[],
+    storico:{}
+  };
+  // Libreria
+  Object.keys(J.libreria||{}).forEach(k=>{
+    out.libreria[k]={descrizione:J.libreria[k].descrizione||''};
   });
-  lines.push('},');
-  lines.push('');
-  lines.push('"sessioni":');
-  lines.push('[');
-  J.sessioni.forEach((sess,si)=>{
-    const lastSess=si===J.sessioni.length-1;
-    lines.push('{ "nome": "'+sess.nome+'", "schede": [');
-    sess.schede.forEach((s,idx)=>{
-      const last=idx===sess.schede.length-1;
-      const ser  = s.ser  !==undefined?s.ser  :(s.serie||0);
-      const rip  = s.rip  !==undefined?s.rip  :(s.ripetizioni||0);
-      const pn   = s.pn   !==undefined?s.pn   :(s.pesi_num||0);
-      const pk   = s.pk   !==undefined?s.pk   :(s.pesi_kg||0);
-      const dm   = s.dm   !==undefined?s.dm   :(s.durata_min||0);
-      const ds   = s.ds   !==undefined?s.ds   :(s.durata_sec||0);
-      const rs_m = s.rs_m !==undefined?s.rs_m :(s.riposo_serie_min||0);
-      const rs_s = s.rs_s !==undefined?s.rs_s :(s.riposo_serie_sec||0);
-      const rf_m = s.rf_m !==undefined?s.rf_m :(s.riposo_finale_min||0);
-      const rf_s = s.rf_s !==undefined?s.rf_s :(s.riposo_finale_sec||0);
-      const pkFmt=Number.isInteger(pk)?pk+'.0':pk;
-      lines.push('        { "id": "'+s.id
-        +'", "ser": '+ser
-        +', "rip": '+rip
-        +', "pn": '+pn
-        +', "pk": '+pkFmt
-        +', "dm": '+dm
-        +', "ds": '+ds
-        +', "rs_m": '+rs_m
-        +', "rs_s": '+rs_s
-        +', "rf_m": '+rf_m
-        +', "rf_s": '+rf_s
-        +' }'+(last?'':','));
+  // Sessioni con nomi corti
+  J.sessioni.forEach(sess=>{
+    const s2={nome:sess.nome,schede:[]};
+    sess.schede.forEach(s=>{
+      const ser=s.ser!==undefined?s.ser:(s.serie||0);
+      const rip=s.rip!==undefined?s.rip:(s.ripetizioni||0);
+      const pn=s.pn!==undefined?s.pn:(s.pesi_num||0);
+      const pk=s.pk!==undefined?s.pk:(s.pesi_kg||0);
+      const dm=s.dm!==undefined?s.dm:(s.durata_min||0);
+      const ds=s.ds!==undefined?s.ds:(s.durata_sec||0);
+      const rs_m=s.rs_m!==undefined?s.rs_m:(s.riposo_serie_min||0);
+      const rs_s=s.rs_s!==undefined?s.rs_s:(s.riposo_serie_sec||0);
+      const rf_m=s.rf_m!==undefined?s.rf_m:(s.riposo_finale_min||0);
+      const rf_s=s.rf_s!==undefined?s.rf_s:(s.riposo_finale_sec||0);
+      const pk2=Number.isInteger(pk)?pk+0.0:pk;
+      s2.schede.push({id:s.id,ser,rip,pn,pk:pk2,dm,ds,rs_m,rs_s,rf_m,rf_s});
     });
-    lines.push('] }'+(lastSess?'':','));
-    if(!lastSess) lines.push('');
+    out.sessioni.push(s2);
   });
-  lines.push('],');
-  lines.push('');
-  lines.push('"storico":');
-  lines.push('{');
-  const storKeys=Object.keys(J.storico||{});
-  storKeys.forEach((k,ki)=>{
-    const lastKey=ki===storKeys.length-1;
-    const righe=J.storico[k];
-    if(!righe||righe.length===0){
-      lines.push('"'+k+'": []'+(lastKey?'':','));
-    } else {
-      lines.push('"'+k+'": [');
-      righe.forEach((r,ri)=>{
-        const last=ri===righe.length-1;
-        const pkr=Number.isInteger(r.pk)?r.pk+'.0':r.pk;
-        lines.push('{\"data\": \"'+r.data
-          +'\", "ser": '+r.ser
-          +', "rip": '+r.rip
-          +', "pn": '+r.pn
-          +', "pk": '+pkr
-          +', "dm": '+r.dm
-          +', "ds": '+r.ds
-          +' }'+(last?'':','));
-      });
-      lines.push(']'+(lastKey?'':','));
-    }
+  // Storico
+  Object.keys(J.storico||{}).forEach(k=>{
+    out.storico[k]=(J.storico[k]||[]).map(r=>({
+      data:r.data,ser:r.ser,rip:r.rip,pn:r.pn,
+      pk:Number.isInteger(r.pk)?r.pk+0.0:r.pk,
+      dm:r.dm,ds:r.ds
+    }));
   });
-  lines.push('}');
-  lines.push('');
-  lines.push('}');
-  return lines.join('\n');
+  return JSON.stringify(out,null,2);
 }
+
 function tornaInizio(){
   if(S.tInt){clearInterval(S.tInt);S.tInt=null;}
   if(S.pausaInt){clearTimeout(S.pausaInt);S.pausaInt=null;}
