@@ -492,10 +492,7 @@ function leggiJSON(e){
   const r=new FileReader();
   r.onload=ev=>{
     try{
-      try{localStorage.removeItem(LS_KEY);}catch(ex){}
-      document.getElementById('btn-riprendi').style.display='none';
       S.J=JSON.parse(ev.target.result);
-      S.SI=-1;S.CI=0;S.PL=[];S.ultComp=-1;S.activeCI=-1;S.serR=0;S.fase='idle';S.timerInCorso=false;
       if(!S.J.storico)S.J.storico={};
       document.getElementById('info-prog').textContent=S.J.programma;
       mostraSessioni();
