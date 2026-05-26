@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26052423_FIT</title>
+<title>CL26052410_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --grigio2:#1a1a1a; --testo:#fff;
@@ -79,6 +79,8 @@
   .rosso-txt{color:var(--rosso);}
   .verde-txt{color:var(--verde);}
   .giallo-txt{color:var(--giallo);}
+
+
   .desc-box{background:var(--grigio2);border:1px solid #2a2a2a;border-radius:6px;
     padding:6px 10px;margin-bottom:5px;overflow-y:auto;
     -webkit-overflow-scrolling:touch;touch-action:pan-y;}
@@ -175,6 +177,8 @@
   .cd-num{font-size:2.0rem;font-weight:900;color:var(--giallo);letter-spacing:.04em;}
   .cd-tipo{font-size:.55rem;color:var(--giallo);font-weight:900;text-transform:uppercase;
     letter-spacing:.06em;line-height:1.25;text-align:left;}
+
+
   .stor-box{background:var(--grigio2);border:1px solid #2a2a2a;border-radius:6px;
     padding:5px 8px;overflow-y:auto;
     -webkit-overflow-scrolling:touch;touch-action:pan-y;}
@@ -202,7 +206,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26052423_FIT</span>
+    <span class="h-versione">CL26052410_FIT</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -210,7 +214,6 @@
   <input type="file" id="finput" accept=".json" style="display:none" onchange="leggiJSON(event)">
   <div class="sez-label">Sessione</div>
   <div class="lista-sessioni" id="lista-sess"></div>
-  <button class="btn verde" id="btn-riprendi" style="display:none" onclick="riprendiSessione()">⚡ RIPRENDI SESSIONE</button>
   <button class="btn verde" id="btn-avvia" disabled onclick="avviaSessione()">AVVIA SESSIONE</button>
   <button class="btn-nav" id="btn-vai-s2" onclick="vaiPrimaScheda()" style="margin-bottom:7px">&#x25B6;</button>
 </div>
@@ -220,16 +223,20 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26052423_FIT</span>
+    <span class="h-versione">CL26052410_FIT</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
     <div class="pos-txt"   id="pos-txt">SESSIONE — DI —</div>
     <div class="serie-txt" id="serie-txt">SERIE — DI —</div>
   </div>
+
+
   <div class="desc-box">
     <div class="desc-unica" id="desc-unica">—</div>
   </div>
+
+
   <div class="pgrid3">
     <div class="pitem">
       <div class="plabel">SERIE</div>
@@ -319,7 +326,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26052423_FIT</span>
+    <span class="h-versione">CL26052410_FIT</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -361,17 +368,6 @@ document.addEventListener('visibilitychange',()=>{
 
 function gp(s,k){return s[k]!==undefined?s[k]:0;}
 
-function pDaStorico(id){
-  const righe=S.J&&S.J.storico&&S.J.storico[id];
-  if(!righe||!righe.length)return null;
-  const r=righe[0];
-  return {
-    ser:r.ser||0, rip:r.rip||0, pn:r.pn||0, pk:r.pk||0,
-    dm:r.dm||0,   ds:r.ds||0,
-    rs_m:0, rs_s:0, rf_m:0, rf_s:0
-  };
-}
-
 function modScheda(p){return(p.dm>0||p.ds>0)?'durata':'pesi';}
 function leggiKg(id){
   const v=document.getElementById(id).value.replace(',','.');
@@ -398,6 +394,8 @@ function sanitizeInt(el,mn,mx){
   if(v!==''){const n=parseInt(v);if(!isNaN(n)){if(n<mn)v=String(mn);if(n>mx)v=String(mx);}}
   el.value=v;
 }
+
+
 // 3s per ripetizione, durata esplicita se scheda durata,
 
 function calcolaTempoSessione(sess){
@@ -428,34 +426,8 @@ function fmtTempo(sec){
   return m+'min';
 }
 
-const LS_KEY='fit_sessione';
-
-function salvaStato(){
-  if(!S.J||S.SI<0)return;
-  try{
-    localStorage.setItem(LS_KEY,JSON.stringify({
-      J:S.J, SI:S.SI, CI:S.CI, PL:S.PL,
-      ultComp:S.ultComp, activeCI:S.activeCI, serR:S.serR, fase:S.fase
-    }));
-  }catch(e){}
-}
-function ripristinaStato(){
-  try{
-    const raw=localStorage.getItem(LS_KEY);
-    if(!raw)return false;
-    const st=JSON.parse(raw);
-    if(!st.J||st.SI<0)return false;
-    S.J=st.J; S.SI=st.SI; S.CI=st.CI||0; S.PL=st.PL||[];
-    S.ultComp=st.ultComp!=null?st.ultComp:-1;
-    S.activeCI=st.activeCI!=null?st.activeCI:-1;
-    S.serR=st.serR||0;
-    S.fase=st.fase||'idle';
-    return true;
-  }catch(e){return false;}
-}
-function cancellaStato(){
-  try{localStorage.removeItem(LS_KEY);}catch(e){}
-}
+// ══════════════════════════════════════════════════════════════
+// CONTATORI
 // ══════════════════════════════════════════════════════════════
 function aggSerieTxt(){
   const el=document.getElementById('serie-txt');
@@ -544,29 +516,6 @@ function avviaSessione(){
   document.getElementById('btn-vai-s2').classList.add('visibile');
   go('s2');render();
 }
-function riprendiSessione(){
-  if(!ripristinaStato())return;
-  if(!S.J.storico)S.J.storico={};
-  document.getElementById('info-prog').textContent=S.J.programma;
-  mostraSessioni();
-  setH(S.J.programma,S.J.sessioni[S.SI].nome);
-  document.getElementById('btn-vai-s2').classList.add('visibile');
-  richiediWakeLock();
-  go('s2');render();
-}
-
-window.addEventListener('load',()=>{
-  try{
-    const raw=localStorage.getItem(LS_KEY);
-    if(raw){
-      const st=JSON.parse(raw);
-      if(st&&st.J&&st.SI>=0){
-        document.getElementById('btn-riprendi').style.display='block';
-      }
-    }
-  }catch(e){}
-});
-
 function vaiPrimaScheda(){
   if(!S.J||S.SI<0||!S.PL.length)return;
   S.CI=0;go('s2');render();
@@ -584,6 +533,8 @@ function aggAltezze(){
   const descMax=descLH*4+descPad;
   descBox.style.maxHeight=descMax+'px';
   descBox.style.height='';
+
+
   const storBox=document.getElementById('stor-list').parentElement;
   const storRighe=storBox.querySelectorAll('.stor-riga');
   const storEmpty=storBox.querySelector('.stor-empty');
@@ -602,7 +553,7 @@ function aggAltezze(){
 function render(){
   const sess=S.J.sessioni[S.SI];
   const sc=sess.schede[S.CI];
-  const lib=S.J.libreria?.[sc.id];
+  const lib=S.J.libreria[sc.id];
   const p=S.PL[S.CI];
 
   aggPosTxt();
@@ -633,17 +584,12 @@ function render(){
     if(cls)el.classList.add(cls);
   });
 
-  const pDisp=(!isRosso&&isVerde)?
-    (()=>{const st=pDaStorico(sc.id);
-      return st?{...p,ser:st.ser,rip:st.rip,pn:st.pn,pk:st.pk,dm:st.dm,ds:st.ds}:p;})()
-    :p;
-
-  document.getElementById('p-ser').value  =pDisp.ser;
-  document.getElementById('p-rip').value  =pDisp.rip;
-  document.getElementById('p-pn').value   =pDisp.pn;
-  document.getElementById('p-pk').value   =fmtKg(pDisp.pk);
-  document.getElementById('p-dm').value   =pDisp.dm;
-  document.getElementById('p-ds').value   =pDisp.ds;
+  document.getElementById('p-ser').value  =p.ser;
+  document.getElementById('p-rip').value  =p.rip;
+  document.getElementById('p-pn').value   =p.pn;
+  document.getElementById('p-pk').value   =fmtKg(p.pk);
+  document.getElementById('p-dm').value   =p.dm;
+  document.getElementById('p-ds').value   =p.ds;
   document.getElementById('p-rs-m').value =p.rs_m;
   document.getElementById('p-rs-s').value =p.rs_s;
   document.getElementById('p-rf-m').value =p.rf_m;
@@ -797,7 +743,6 @@ function goSucc(){
     S.J.storico[sc.id].unshift({data:ds,ser:p.ser,rip:p.rip,pn:p.pn,pk:p.pk,dm:p.dm,ds:p.ds});
     if(S.J.storico[sc.id].length>10)S.J.storico[sc.id].length=10;
     localStorage.setItem('fit_j',JSON.stringify(S.J));
-    salvaStato();
     S.activeCI=-1;S.fase='idle';
   }
   if(S.CI>=nT-1){go('s3');return;}
@@ -811,7 +756,7 @@ function tornaUltimaScheda(){S.CI=S.J.sessioni[S.SI].schede.length-1;go('s2');re
 function dblTapTimer(){
   if(!S.timerInCorso)return;
   const ora=Date.now();
-  if(ora-S.dblTapLast<600){
+  if(ora-S.dblTapLast<400){
     if(S.tSec>5){
       S.tSec=5;
       cdShow(S.tSec,S.tTipo);
@@ -954,17 +899,12 @@ function aggProgress(rimasti,totali){
 // ══════════════════════════════════════════════════════════════
 // ALERT — vibrazione, flash, 5 beep
 // ══════════════════════════════════════════════════════════════
-let audioCtx=null;
-function getAudio(){
-  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-  return audioCtx;
-}
 function alert5(){
   const fl=document.getElementById('fl');
   for(let i=0;i<5;i++){const t=i*340;
     setTimeout(()=>{fl.classList.add('on');setTimeout(()=>fl.classList.remove('on'),180);},t);}
   try{
-    const ctx=getAudio();
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
     for(let i=0;i<5;i++){const t=i*0.34;
       const o=ctx.createOscillator(),g=ctx.createGain();
       o.connect(g);g.connect(ctx.destination);o.frequency.value=900;
@@ -982,6 +922,7 @@ let tickerAttivo=false;
 
 function renderNxt(){
   const box=document.getElementById('nxt-box');
+  // Visibile solo sulla scheda gialla
   if(S.CI!==S.activeCI){box.classList.remove('visibile');return;}
   box.classList.add('visibile');
   const nT=S.J.sessioni[S.SI].schede.length;
@@ -998,10 +939,8 @@ function renderNxt(){
   descEl.style.color='var(--verde)';
   descEl.dataset.testo='';
   const sc=S.J.sessioni[S.SI].schede[nextIdx];
-  const lib=S.J.libreria?.[sc.id];
+  const lib=S.J.libreria[sc.id];
   const p=S.PL[nextIdx];
-  const pNxt=(()=>{const st=pDaStorico(sc.id);
-    return st?{...p,ser:st.ser,rip:st.rip,pn:st.pn,pk:st.pk,dm:st.dm,ds:st.ds}:p;})();
   let desc='—';
   if(lib){
     if(lib.descrizione) desc=lib.descrizione;
@@ -1010,13 +949,14 @@ function renderNxt(){
   descEl.textContent=desc;
   descEl.dataset.testo=desc;
   let pt=[];
-  if(pNxt.ser>0||pNxt.rip>0) pt.push('<span class="nxt-s">'+pNxt.ser+'x'+pNxt.rip+'</span>');
-  if(pNxt.pn>0||pNxt.pk>0)   pt.push('<span class="nxt-p">'+pNxt.pn+'x'+fmtKg(pNxt.pk)+'kg</span>');
-  if(pNxt.dm>0||pNxt.ds>0)   pt.push('<span class="nxt-t">'+pNxt.dm+'m:'+String(pNxt.ds).padStart(2,'0')+'s</span>');
+  if(p.ser>0||p.rip>0) pt.push('<span class="nxt-s">'+p.ser+'x'+p.rip+'</span>');
+  if(p.pn>0||p.pk>0)   pt.push('<span class="nxt-p">'+p.pn+'x'+fmtKg(p.pk)+'kg</span>');
+  if(p.dm>0||p.ds>0)   pt.push('<span class="nxt-t">'+p.dm+'m:'+String(p.ds).padStart(2,'0')+'s</span>');
   parEl.innerHTML=pt.join('');
 }
 
 function misuraTesto(testo, el){
+  // Misura la larghezza reale del testo creando un elemento fuori dal DOM
   const ghost=document.createElement('span');
   const cs=getComputedStyle(el);
   ghost.style.cssText='position:fixed;top:-9999px;left:-9999px;white-space:nowrap;visibility:hidden;'
@@ -1035,13 +975,15 @@ function toggleTicker(){
   const el=document.getElementById('nxt-desc');
   const testoOrig=el.dataset.testo||el.textContent;
   el.dataset.testo=testoOrig;
-
+  // Non scorrere il messaggio ultima scheda
   if(!testoOrig||testoOrig==='QUESTA È L\'ULTIMA SCHEDA') return;
   const SEP='  ─────  ';
   const cw=wrap.getBoundingClientRect().width;
   const tw=misuraTesto(testoOrig,el);
   const sw=misuraTesto(SEP,el);
   if(tw<=cw){return;} // testo corto: non serve
+  // Seamless: testo + sep + testo + sep
+  // L'animazione scorre di tw+sw (un segmento) e poi ricomincia identica
   const segW=tw+sw;
   const fullTesto=testoOrig+SEP+testoOrig+SEP;
   tickerAttivo=true;
@@ -1081,7 +1023,7 @@ function renderStorico(id){
 // ══════════════════════════════════════════════════════════════
 function salvaSessione(){
   const sess=S.J.sessioni[S.SI];
-
+  // Aggiorna i valori della sessione corrente con quelli modificati in S.PL
   sess.schede.forEach((s,i)=>{
     const p=S.PL[i];
     s.ser=p.ser; s.rip=p.rip; s.pn=p.pn; s.pk=p.pk;
@@ -1094,7 +1036,6 @@ function salvaSessione(){
      'riposo_finale_min','riposo_finale_sec'].forEach(k=>delete s[k]);
   });
   const out=buildJSON();
-  cancellaStato();
   localStorage.setItem('fit_j',JSON.stringify(S.J));
 
   const d=new Date();
@@ -1113,19 +1054,95 @@ function salvaSessione(){
 }
 
 function buildJSON(){
-  return JSON.stringify(S.J,null,2);
+  const J=S.J;
+  const lines=[];
+  lines.push('{ "programma": "'+J.programma+'",');
+  lines.push('');
+  lines.push('"libreria":');
+  lines.push('{');
+  const libKeys=Object.keys(J.libreria);
+  libKeys.forEach((k,i)=>{
+    const comma=i<libKeys.length-1?',':'';
+    const desc=(J.libreria[k].descrizione||'').replace(/"/g,'\\"');
+    lines.push('    "'+k+'": { "descrizione": "'+desc+'" }'+comma);
+  });
+  lines.push('},');
+  lines.push('');
+  lines.push('"sessioni":');
+  lines.push('[');
+  J.sessioni.forEach((sess,si)=>{
+    const lastSess=si===J.sessioni.length-1;
+    lines.push('{ "nome": "'+sess.nome+'", "schede": [');
+    sess.schede.forEach((s,idx)=>{
+      const last=idx===sess.schede.length-1;
+      const ser  = s.ser  !==undefined?s.ser  :(s.serie||0);
+      const rip  = s.rip  !==undefined?s.rip  :(s.ripetizioni||0);
+      const pn   = s.pn   !==undefined?s.pn   :(s.pesi_num||0);
+      const pk   = s.pk   !==undefined?s.pk   :(s.pesi_kg||0);
+      const dm   = s.dm   !==undefined?s.dm   :(s.durata_min||0);
+      const ds   = s.ds   !==undefined?s.ds   :(s.durata_sec||0);
+      const rs_m = s.rs_m !==undefined?s.rs_m :(s.riposo_serie_min||0);
+      const rs_s = s.rs_s !==undefined?s.rs_s :(s.riposo_serie_sec||0);
+      const rf_m = s.rf_m !==undefined?s.rf_m :(s.riposo_finale_min||0);
+      const rf_s = s.rf_s !==undefined?s.rf_s :(s.riposo_finale_sec||0);
+      const pkFmt=Number.isInteger(pk)?pk+'.0':pk;
+      lines.push('        { "id": "'+s.id
+        +'", "ser": '+ser
+        +', "rip": '+rip
+        +', "pn": '+pn
+        +', "pk": '+pkFmt
+        +', "dm": '+dm
+        +', "ds": '+ds
+        +', "rs_m": '+rs_m
+        +', "rs_s": '+rs_s
+        +', "rf_m": '+rf_m
+        +', "rf_s": '+rf_s
+        +' }'+(last?'':','));
+    });
+    lines.push('] }'+(lastSess?'':','));
+    if(!lastSess) lines.push('');
+  });
+  lines.push('],');
+  lines.push('');
+  lines.push('"storico":');
+  lines.push('{');
+  const storKeys=Object.keys(J.storico||{});
+  storKeys.forEach((k,ki)=>{
+    const lastKey=ki===storKeys.length-1;
+    const righe=J.storico[k];
+    if(!righe||righe.length===0){
+      lines.push('"'+k+'": []'+(lastKey?'':','));
+    } else {
+      lines.push('"'+k+'": [');
+      righe.forEach((r,ri)=>{
+        const last=ri===righe.length-1;
+        const pkr=Number.isInteger(r.pk)?r.pk+'.0':r.pk;
+        lines.push('{\"data\": \"'+r.data
+          +'\", "ser": '+r.ser
+          +', "rip": '+r.rip
+          +', "pn": '+r.pn
+          +', "pk": '+pkr
+          +', "dm": '+r.dm
+          +', "ds": '+r.ds
+          +' }'+(last?'':','));
+      });
+      lines.push(']'+(lastKey?'':','));
+    }
+  });
+  lines.push('}');
+  lines.push('');
+  lines.push('}');
+  return lines.join('\n');
 }
 function tornaInizio(){
   if(S.tInt){clearInterval(S.tInt);S.tInt=null;}
   if(S.pausaInt){clearTimeout(S.pausaInt);S.pausaInt=null;}
   rilasciaWakeLock();
-  cancellaStato();
   if(S.J)mostraSessioni();
   S.J=null;S.SI=-1;S.CI=0;S.PL=[];S.ultComp=-1;S.activeCI=-1;S.serR=0;S.fase='idle';S.timerInCorso=false;
   document.getElementById('info-prog').textContent='Nessun programma caricato';
   document.getElementById('lista-sess').innerHTML='';
   document.getElementById('btn-avvia').disabled=true;
-  document.getElementById('btn-riprendi').style.display='none';
   document.getElementById('btn-vai-s2').classList.remove('visibile');
   document.getElementById('fine-av').style.display='none';
   const bs=document.getElementById('btn-salva');
