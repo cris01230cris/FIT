@@ -206,8 +206,8 @@
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
-  <button class="btn" onclick="document.getElementById('finput').click()">CARICA PROGRAMMA JSON</button>
-  <input type="file" id="finput" accept=".json" style="display:none" onchange="leggiJSON(event)">
+  <label for="finput" class="btn" style="display:block;text-align:center;cursor:pointer;box-sizing:border-box;">CARICA PROGRAMMA JSON</label>
+  <input type="file" id="finput" accept=".json" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0,0,0,0);pointer-events:none;" onchange="leggiJSON(event)">
   <div class="sez-label">Sessione</div>
   <div class="lista-sessioni" id="lista-sess"></div>
   <button class="btn verde" id="btn-riprendi" style="display:none" onclick="riprendiSessione()">⚡ RIPRENDI SESSIONE</button>
@@ -492,7 +492,10 @@ function leggiJSON(e){
   const r=new FileReader();
   r.onload=ev=>{
     try{
+      try{localStorage.removeItem(LS_KEY);}catch(ex){}
+      document.getElementById('btn-riprendi').style.display='none';
       S.J=JSON.parse(ev.target.result);
+      S.SI=-1;S.CI=0;S.PL=[];S.ultComp=-1;S.activeCI=-1;S.serR=0;S.fase='idle';S.timerInCorso=false;
       if(!S.J.storico)S.J.storico={};
       document.getElementById('info-prog').textContent=S.J.programma;
       mostraSessioni();
