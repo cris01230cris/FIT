@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26052612_FIT</title>
+<title>CL26052710_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --grigio2:#1a1a1a; --testo:#fff;
@@ -40,6 +40,18 @@
   @keyframes btnLampRosso{0%,100%{opacity:1;}50%{opacity:.15;}}
   .btn.lamp-rosso{animation:btnLampRosso .7s infinite;background:var(--rosso);color:#fff;box-shadow:0 4px 0 #990000;}
   .btn.lamp-rosso:active{animation:none;transform:translateY(3px);box-shadow:0 1px 0 #990000;}
+
+  /* Pulsante multifunzione — stili dedicati per i tre stati */
+  .btn-avs{font-size:1.05rem;line-height:1.2;padding:14px 4px;}
+  @keyframes avsLampVerde{0%,100%{opacity:1;}50%{opacity:.15;}}
+  .btn-avs.avs-verde{animation:avsLampVerde .7s infinite;background:var(--verde);color:var(--nero);box-shadow:0 4px 0 #008833;}
+  .btn-avs.avs-verde:active{animation:none;transform:translateY(3px);box-shadow:0 1px 0 #008833;}
+  @keyframes avsLampGiallo{0%,100%{opacity:1;}50%{opacity:.15;}}
+  .btn-avs.avs-giallo{animation:avsLampGiallo .7s infinite;background:var(--giallo);color:var(--nero);box-shadow:0 4px 0 #7a9900;}
+  .btn-avs.avs-giallo:active{animation:none;transform:translateY(3px);box-shadow:0 1px 0 #7a9900;}
+  @keyframes avsLampRosso{0%,100%{opacity:1;}50%{opacity:.15;}}
+  .btn-avs.avs-rosso{animation:avsLampRosso .7s infinite;background:var(--rosso);color:#fff;box-shadow:0 4px 0 #990000;}
+  .btn-avs.avs-rosso:active{animation:none;transform:translateY(3px);box-shadow:0 1px 0 #990000;}
 
   .nav4{display:grid;grid-template-columns:1fr 2fr 1fr;gap:5px;margin-bottom:5px;}
   .btn-nav{display:block;width:100%;background:var(--giallo);color:var(--nero);border:none;border-radius:8px;
@@ -206,7 +218,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26052612_FIT</span>
+    <span class="h-versione">CL26052710_FIT</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -225,7 +237,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26052612_FIT</span>
+    <span class="h-versione">CL26052710_FIT</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -306,7 +318,7 @@
 
   <div class="nav4">
     <button class="btn-nav" id="btn-prec" onclick="goPrec()">&#x25C0;</button>
-    <button class="btn sm"  id="btn-avs"  style="margin-bottom:0" disabled
+    <button class="btn sm btn-avs" id="btn-avs" style="margin-bottom:0" disabled
             onclick="tapAvs()">ESERCIZIO</button>
     <button class="btn-nav" id="btn-succ" onclick="goSucc()">&#x25B6;</button>
   </div>
@@ -328,7 +340,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26052612_FIT</span>
+    <span class="h-versione">CL26052710_FIT</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -394,7 +406,6 @@ function sanitizeInt(el,mn,mx){
   if(v!==''){const n=parseInt(v);if(!isNaN(n)){if(n<mn)v=String(mn);if(n>mx)v=String(mx);}}
   el.value=v;
 }
-
 function calcolaTempoSessione(sess){
   let tot=0;
   sess.schede.forEach(s=>{
@@ -523,20 +534,14 @@ function vaiPrimaScheda(){
 }
 
 // ══════════════════════════════════════════════════════════════
-// LOCALSTORAGE — deposito temporaneo sessione
+// LOCALSTORAGE
 // ══════════════════════════════════════════════════════════════
 function salvaLocale(){
   if(!S.J)return;
-  const snap={
-    J:S.J,
-    SI:S.SI,
-    PL:S.PL,
-    ultComp:S.ultComp,
-    activeCI:S.activeCI,
-    serR:S.serR,
-    fase:S.fase
-  };
-  localStorage.setItem('fit_j',JSON.stringify(snap));
+  localStorage.setItem('fit_j',JSON.stringify({
+    J:S.J,SI:S.SI,PL:S.PL,
+    ultComp:S.ultComp,activeCI:S.activeCI,serR:S.serR,fase:S.fase
+  }));
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -546,8 +551,7 @@ function aggAltezze(){
   const descBox=document.getElementById('desc-unica').parentElement;
   const descEl=document.getElementById('desc-unica');
   const descLH=parseFloat(getComputedStyle(descEl).lineHeight)||20;
-  const descMax=descLH*4+12;
-  descBox.style.maxHeight=descMax+'px';
+  descBox.style.maxHeight=(descLH*4+12)+'px';
   descBox.style.height='';
   const storBox=document.getElementById('stor-list').parentElement;
   const storRighe=storBox.querySelectorAll('.stor-riga');
@@ -634,20 +638,32 @@ function render(){
 }
 
 // ══════════════════════════════════════════════════════════════
-// aggUI
+// aggUI + setAvs
 // ══════════════════════════════════════════════════════════════
 function setBtnNav(id,attivo,lampeggia){
   const el=document.getElementById(id);el.disabled=!attivo;el.classList.remove('lamp');
   if(attivo&&lampeggia)el.classList.add('lamp');
 }
+function setAvs(attivo,lampeggia,testo){
+  const avs=document.getElementById('btn-avs');
+  avs.disabled=!attivo;
+  avs.classList.remove('avs-verde','avs-giallo','avs-rosso');
+  avs.dataset.azione=testo;
+  if(!attivo){
+    avs.textContent='ESERCIZIO';
+    return;
+  }
+  avs.textContent=testo;
+  if(testo.includes('INIZIA'))         avs.classList.add('avs-verde');
+  else if(testo.includes('RIPOSO SERIE'))  avs.classList.add('avs-giallo');
+  else if(testo.includes('RIPOSO FINALE')) avs.classList.add('avs-rosso');
+}
 function aggUI(){
   if(!S.J)return;
   setBtnNav('btn-prec',true,false);
   setBtnNav('btn-succ',true,(S.CI===S.activeCI&&S.fase==='completata'));
-
   if(S.timerInCorso){setAvs(false,false,'ESERCIZIO');return;}
   if(S.CI<=S.ultComp && S.CI!==S.activeCI){setAvs(false,false,'ESERCIZIO');return;}
-
   if(S.CI===S.activeCI){
     if(S.fase==='attesa_inizio')     setAvs(true,true,'PRONTO? INIZIA ESERCIZIO');
     else if(S.fase==='attesa_durata')setAvs(false,false,'ESERCIZIO');
@@ -662,7 +678,7 @@ function aggUI(){
 }
 
 // ══════════════════════════════════════════════════════════════
-// tapAvs — multifunzione
+// tapAvs
 // ══════════════════════════════════════════════════════════════
 window.tapAvs=function(){
   const avs=document.getElementById('btn-avs');
@@ -674,7 +690,6 @@ window.tapAvs=function(){
     setAvs(false,false,'ESERCIZIO');
     startTimer('rs');
   } else if(azione.includes('RIPOSO FINALE')){
-    // Mod 5: registra storico al tap RIPOSO FINALE
     registraStorico();
     setAvs(false,false,'ESERCIZIO');
     startTimer('rf');
@@ -690,16 +705,9 @@ function registraStorico(){
   const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   S.J.storico[sc.id].unshift({data:ds,ser:p.ser,rip:p.rip,pn:p.pn,pk:p.pk,dm:p.dm,ds:p.ds});
   if(S.J.storico[sc.id].length>10)S.J.storico[sc.id].length=10;
-  // Propaga storico aggiornato a tutte le schede verdi con stesso id (Mod 7)
-  propagaStorico(sc.id);
   salvaLocale();
   renderStorico(sc.id);
   aggAltezze();
-}
-
-function propagaStorico(id){
-  // Rende disponibile lo storico aggiornato a renderStorico per schede future con stesso id
-  // (il rendering lo legge direttamente da S.J.storico, nessuna azione extra necessaria)
 }
 
 function iniziaEsercizioAction(){
@@ -732,16 +740,12 @@ function iniziaEsercizioAction(){
 // NAVIGAZIONE
 // ══════════════════════════════════════════════════════════════
 function goPrec(){
-  if(S.CI===0){
-    if(S.J)mostraSessioni();
-    go('s1');return;
-  }
+  if(S.CI===0){if(S.J)mostraSessioni();go('s1');return;}
   S.CI--;render();
 }
 function goSucc(){
   const nT=S.J.sessioni[S.SI].schede.length;
   if(S.CI===S.activeCI&&S.fase==='completata'){
-    // Mod 5: salva parametri sessione nel JSON e localStorage al tap avanti
     aggiornaSessioneJSON();
     S.activeCI=-1;S.fase='idle';
   }
@@ -762,22 +766,15 @@ function aggiornaSessioneJSON(){
 function tornaUltimaScheda(){S.CI=S.J.sessioni[S.SI].schede.length-1;go('s2');render();}
 
 // ══════════════════════════════════════════════════════════════
-// DOPPIO TAP — salta timer a 5 secondi
+// DOPPIO TAP
 // ══════════════════════════════════════════════════════════════
 function dblTapTimer(){
   if(!S.timerInCorso)return;
   const ora=Date.now();
   if(ora-S.dblTapLast<600){
-    if(S.tSec>5){
-      S.tSec=5;
-      cdShow(S.tSec,S.tTipo);
-      aggProgress(S.tSec,S.tTotSec);
-      if(navigator.vibrate)navigator.vibrate(80);
-    }
+    if(S.tSec>5){S.tSec=5;cdShow(S.tSec,S.tTipo);aggProgress(S.tSec,S.tTotSec);if(navigator.vibrate)navigator.vibrate(80);}
     S.dblTapLast=0;
-  } else {
-    S.dblTapLast=ora;
-  }
+  } else {S.dblTapLast=ora;}
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -803,20 +800,17 @@ function saveP(){
     document.getElementById('p-rs-s').disabled=ser1;
     if(ser1){document.getElementById('p-rs-m').value=0;document.getElementById('p-rs-s').value=0;p.rs_m=0;p.rs_s=0;}
   }
-  // Mod 7: propaga parametri a schede verdi con stesso id
+  // Mod 2.3: propaga a TUTTE le schede con stesso id (incluse rosse)
   propagaParametri(S.CI,p);
   salvaLocale();
   aggUI();
 }
-
 function propagaParametri(idx,p){
   const idScheda=S.PL[idx].id||S.J.sessioni[S.SI].schede[idx].id;
   S.PL.forEach((q,i)=>{
     if(i===idx)return;
     const idQ=q.id||S.J.sessioni[S.SI].schede[i].id;
     if(idQ!==idScheda)return;
-    // Propaga solo su schede non ancora completate (verdi)
-    if(i<=S.ultComp)return;
     q.ser=p.ser;q.rip=p.rip;q.pn=p.pn;q.pk=p.pk;
     q.dm=p.dm;q.ds=p.ds;
     q.rs_m=p.rs_m;q.rs_s=p.rs_s;
@@ -831,14 +825,11 @@ function lockTimerInputs(lock){
   ['p-dm','p-ds','p-rs-m','p-rs-s','p-rf-m','p-rf-s']
     .forEach(id=>document.getElementById(id).disabled=lock);
 }
-
-// Mod 2: AudioContext singleton
 let audioCtx=null;
 function getAudio(){
   if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
   return audioCtx;
 }
-
 function startTimer(tipo){
   if(S.tInt){clearInterval(S.tInt);S.tInt=null;}
   S.timerInCorso=true;S.tTipo=tipo;
@@ -846,57 +837,40 @@ function startTimer(tipo){
   if(tipo==='d'){
     const dm=parseInt(document.getElementById('p-dm').value)||0;
     const ds=parseInt(document.getElementById('p-ds').value)||0;
-    sec=dm*60+ds;
-    S.PL[S.activeCI].dm=dm;S.PL[S.activeCI].ds=ds;
+    sec=dm*60+ds;S.PL[S.activeCI].dm=dm;S.PL[S.activeCI].ds=ds;
   } else if(tipo==='rs'){
     const m=parseInt(document.getElementById('p-rs-m').value)||0;
     const s=parseInt(document.getElementById('p-rs-s').value)||0;
-    sec=m*60+s;
-    S.PL[S.activeCI].rs_m=m;S.PL[S.activeCI].rs_s=s;
+    sec=m*60+s;S.PL[S.activeCI].rs_m=m;S.PL[S.activeCI].rs_s=s;
   } else if(tipo==='rf'){
     const m=parseInt(document.getElementById('p-rf-m').value)||0;
     const s=parseInt(document.getElementById('p-rf-s').value)||0;
-    sec=m*60+s;
-    S.PL[S.activeCI].rf_m=m;S.PL[S.activeCI].rf_s=s;
+    sec=m*60+s;S.PL[S.activeCI].rf_m=m;S.PL[S.activeCI].rf_s=s;
   }
   if(sec<=0){S.timerInCorso=false;onEnd(tipo);return;}
   S.tSec=sec;S.tTotSec=sec;
   lockTimerInputs(true);
-  cdShow(S.tSec,tipo);
-  aggProgress(S.tSec,S.tTotSec);
+  cdShow(S.tSec,tipo);aggProgress(S.tSec,S.tTotSec);
   S.tInt=setInterval(()=>{
     S.tSec--;
     if(S.tSec<=0){
       clearInterval(S.tInt);S.tInt=null;S.timerInCorso=false;
-      aggProgress(0,S.tTotSec);
-      alert5();
+      aggProgress(0,S.tTotSec);alert5();
       setTimeout(()=>{lockTimerInputs(false);onEnd(tipo);},200);
-    } else {
-      cdShow(S.tSec,tipo);
-      aggProgress(S.tSec,S.tTotSec);
-    }
+    } else {cdShow(S.tSec,tipo);aggProgress(S.tSec,S.tTotSec);}
   },1000);
 }
 function onEnd(tipo){
-  S.timerInCorso=false;
-  cdClear();
-  lockTimerInputs(false);
+  S.timerInCorso=false;cdClear();lockTimerInputs(false);
   const p=S.PL[S.activeCI];
-  if(tipo==='d'){
-    S.fase=(S.serR>=p.ser)?'attesa_rf':'attesa_rs';
-    render();
-  } else if(tipo==='rs'){
-    S.fase='attesa_inizio';
-    render();
-  } else if(tipo==='rf'){
-    completaScheda();
-  }
+  if(tipo==='d'){S.fase=(S.serR>=p.ser)?'attesa_rf':'attesa_rs';render();}
+  else if(tipo==='rs'){S.fase='attesa_inizio';render();}
+  else if(tipo==='rf'){completaScheda();}
 }
 function completaScheda(){
   const idx=S.activeCI;
   if(idx>S.ultComp)S.ultComp=idx;
-  S.fase='completata';
-  render();
+  S.fase='completata';render();
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -908,33 +882,24 @@ function cdShow(sec,tipo){
   const lbl=tipo==='d'?'DURATA':tipo==='rs'?'RIPOSO\nSERIE':'RIPOSO\nFINALE';
   document.getElementById('cd-num').textContent=m+':'+String(s).padStart(2,'0');
   const tipoEl=document.getElementById('cd-tipo');
-  tipoEl.style.whiteSpace='pre';
-  tipoEl.textContent=lbl;
+  tipoEl.style.whiteSpace='pre';tipoEl.textContent=lbl;
   document.getElementById('cd-wrap').classList.add('attivo');
 }
 function cdClear(){
   document.getElementById('cd-wrap').classList.remove('attivo');
   const b=document.getElementById('cd-banda');
-  b.style.transition='none';
-  b.style.clipPath='inset(0 100% 0 0)';
+  b.style.transition='none';b.style.clipPath='inset(0 100% 0 0)';
 }
 function aggProgress(rimasti,totali){
-  const b=document.getElementById('cd-banda');
-  if(!b)return;
+  const b=document.getElementById('cd-banda');if(!b)return;
   const trascorso=totali>0?((totali-rimasti)/totali)*100:0;
   const nascondi=Math.max(0,100-trascorso);
-  if(rimasti===totali){
-    b.style.transition='none';
-    b.style.clipPath='inset(0 100% 0 0)';
-    b.offsetWidth;
-  } else {
-    b.style.transition='clip-path 1s linear';
-    b.style.clipPath='inset(0 '+nascondi.toFixed(2)+'% 0 0)';
-  }
+  if(rimasti===totali){b.style.transition='none';b.style.clipPath='inset(0 100% 0 0)';b.offsetWidth;}
+  else{b.style.transition='clip-path 1s linear';b.style.clipPath='inset(0 '+nascondi.toFixed(2)+'% 0 0)';}
 }
 
 // ══════════════════════════════════════════════════════════════
-// ALERT — vibrazione, flash, 5 beep
+// ALERT
 // ══════════════════════════════════════════════════════════════
 function alert5(){
   const fl=document.getElementById('fl');
@@ -956,10 +921,11 @@ function alert5(){
 // PROSSIMA SCHEDA
 // ══════════════════════════════════════════════════════════════
 let tickerAttivo=false;
-
 function renderNxt(){
   const box=document.getElementById('nxt-box');
-  if(S.CI!==S.activeCI){box.classList.remove('visibile');return;}
+  // Mod 2.1: visibile su scheda gialla; su verdi mostra solo scheda successiva
+  const mostra=(S.CI===S.activeCI);
+  if(!mostra){box.classList.remove('visibile');return;}
   box.classList.add('visibile');
   const nT=S.J.sessioni[S.SI].schede.length;
   const nextIdx=S.CI+1;
@@ -967,7 +933,7 @@ function renderNxt(){
   const parEl=document.getElementById('nxt-par');
   stopTicker();
   if(nextIdx>=nT){
-    descEl.textContent='QUESTA È L\'ULTIMA SCHEDA';
+    descEl.textContent="QUESTA E' L'ULTIMA SCHEDA";
     descEl.style.color='#ff9900';
     parEl.innerHTML='';
     return;
@@ -983,25 +949,21 @@ function renderNxt(){
     if(lib.descrizione) desc=lib.descrizione;
     else desc=(lib.desc_breve||'')+(lib.desc_dettagliata?' — '+lib.desc_dettagliata:'');
   }
-  descEl.textContent=desc;
-  descEl.dataset.testo=desc;
+  descEl.textContent=desc;descEl.dataset.testo=desc;
   let pt=[];
   if(p.ser>0||p.rip>0) pt.push('<span class="nxt-s">'+p.ser+'x'+p.rip+'</span>');
   if(p.pn>0||p.pk>0)   pt.push('<span class="nxt-p">'+p.pn+'x'+fmtKg(p.pk)+'kg</span>');
   if(p.dm>0||p.ds>0)   pt.push('<span class="nxt-t">'+p.dm+'m:'+String(p.ds).padStart(2,'0')+'s</span>');
   parEl.innerHTML=pt.join('');
 }
-
 function misuraTesto(testo,el){
   const ghost=document.createElement('span');
   const cs=getComputedStyle(el);
   ghost.style.cssText='position:fixed;top:-9999px;left:-9999px;white-space:nowrap;visibility:hidden;'
     +'font-size:'+cs.fontSize+';font-family:'+cs.fontFamily+';font-weight:'+cs.fontWeight+';'
     +'letter-spacing:'+cs.letterSpacing+';';
-  ghost.textContent=testo;
-  document.body.appendChild(ghost);
-  const w=ghost.getBoundingClientRect().width;
-  document.body.removeChild(ghost);
+  ghost.textContent=testo;document.body.appendChild(ghost);
+  const w=ghost.getBoundingClientRect().width;document.body.removeChild(ghost);
   return w;
 }
 function toggleTicker(){
@@ -1010,8 +972,8 @@ function toggleTicker(){
   const el=document.getElementById('nxt-desc');
   const testoOrig=el.dataset.testo||el.textContent;
   el.dataset.testo=testoOrig;
-  if(!testoOrig||testoOrig==='QUESTA È L\'ULTIMA SCHEDA') return;
-  const SEP='  ─────  ';
+  if(!testoOrig||testoOrig.includes("ULTIMA SCHEDA")) return;
+  const SEP='  \u2500\u2500\u2500\u2500\u2500  ';
   const cw=wrap.getBoundingClientRect().width;
   const tw=misuraTesto(testoOrig,el);
   const sw=misuraTesto(SEP,el);
@@ -1027,10 +989,7 @@ function toggleTicker(){
 function stopTicker(){
   tickerAttivo=false;
   const el=document.getElementById('nxt-desc');
-  el.classList.remove('scorri');
-  el.style.animation='none';
-  el.offsetWidth;
-  el.style.animation='';
+  el.classList.remove('scorri');el.style.animation='none';el.offsetWidth;el.style.animation='';
   if(el.dataset.testo) el.textContent=el.dataset.testo;
 }
 
@@ -1058,13 +1017,10 @@ function salvaSessione(){
   sess.schede.forEach((s,i)=>{
     const p=S.PL[i];
     s.ser=p.ser;s.rip=p.rip;s.pn=p.pn;s.pk=p.pk;
-    s.dm=p.dm;s.ds=p.ds;
-    s.rs_m=p.rs_m;s.rs_s=p.rs_s;
-    s.rf_m=p.rf_m;s.rf_s=p.rf_s;
-    ['serie','ripetizioni','pesi_num','pesi_kg',
-     'durata_min','durata_sec',
-     'riposo_serie_min','riposo_serie_sec',
-     'riposo_finale_min','riposo_finale_sec'].forEach(k=>delete s[k]);
+    s.dm=p.dm;s.ds=p.ds;s.rs_m=p.rs_m;s.rs_s=p.rs_s;s.rf_m=p.rf_m;s.rf_s=p.rf_s;
+    ['serie','ripetizioni','pesi_num','pesi_kg','durata_min','durata_sec',
+     'riposo_serie_min','riposo_serie_sec','riposo_finale_min','riposo_finale_sec']
+      .forEach(k=>delete s[k]);
   });
   const out=buildJSON();
   salvaLocale();
@@ -1082,22 +1038,12 @@ function salvaSessione(){
   document.getElementById('fine-av').style.display='block';
   document.getElementById('fine-i').textContent='File: '+fn;
 }
-
-// Mod 2: buildJSON usa JSON.stringify — sicuro con qualsiasi carattere
 function buildJSON(){
   const J=S.J;
-  // Costruisce oggetto con formato desiderato poi serializza
-  const out={
-    programma:J.programma,
-    libreria:{},
-    sessioni:[],
-    storico:{}
-  };
-  // Libreria
+  const out={programma:J.programma,libreria:{},sessioni:[],storico:{}};
   Object.keys(J.libreria||{}).forEach(k=>{
     out.libreria[k]={descrizione:J.libreria[k].descrizione||''};
   });
-  // Sessioni con nomi corti
   J.sessioni.forEach(sess=>{
     const s2={nome:sess.nome,schede:[]};
     sess.schede.forEach(s=>{
@@ -1111,22 +1057,18 @@ function buildJSON(){
       const rs_s=s.rs_s!==undefined?s.rs_s:(s.riposo_serie_sec||0);
       const rf_m=s.rf_m!==undefined?s.rf_m:(s.riposo_finale_min||0);
       const rf_s=s.rf_s!==undefined?s.rf_s:(s.riposo_finale_sec||0);
-      const pk2=Number.isInteger(pk)?pk+0.0:pk;
-      s2.schede.push({id:s.id,ser,rip,pn,pk:pk2,dm,ds,rs_m,rs_s,rf_m,rf_s});
+      s2.schede.push({id:s.id,ser,rip,pn,pk:Number.isInteger(pk)?pk+0.0:pk,dm,ds,rs_m,rs_s,rf_m,rf_s});
     });
     out.sessioni.push(s2);
   });
-  // Storico
   Object.keys(J.storico||{}).forEach(k=>{
     out.storico[k]=(J.storico[k]||[]).map(r=>({
       data:r.data,ser:r.ser,rip:r.rip,pn:r.pn,
-      pk:Number.isInteger(r.pk)?r.pk+0.0:r.pk,
-      dm:r.dm,ds:r.ds
+      pk:Number.isInteger(r.pk)?r.pk+0.0:r.pk,dm:r.dm,ds:r.ds
     }));
   });
   return JSON.stringify(out,null,2);
 }
-
 function tornaInizio(){
   if(S.tInt){clearInterval(S.tInt);S.tInt=null;}
   if(S.pausaInt){clearTimeout(S.pausaInt);S.pausaInt=null;}
@@ -1150,5 +1092,6 @@ function setH(prog,sess){
   ['h2s','h3s'].forEach(id=>document.getElementById(id).textContent=sess);
 }
 </script>
+
 </body>
 </html>
