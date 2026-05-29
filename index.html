@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26052710_FIT</title>
+<title>CL26052909_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --grigio2:#1a1a1a; --testo:#fff;
@@ -22,7 +22,7 @@
   .btn{display:block;width:100%;padding:13px 6px;background:var(--giallo);color:var(--nero);
     border:none;border-radius:8px;font-family:'Arial Black',Arial,sans-serif;
     font-size:.82rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;
-    transition:transform .07s,box-shadow .07s;margin-bottom:7px;
+    transition:transform .07s,box-shadow .07s;margin-bottom:7px;text-align:center;
     -webkit-user-select:none;user-select:none;box-shadow:0 4px 0 #7a9900;}
   .btn:active{transform:translateY(3px);box-shadow:0 1px 0 #7a9900;}
   .btn:disabled{background:#2a2a2a;color:#555;cursor:not-allowed;transform:none;box-shadow:none;animation:none!important;}
@@ -218,7 +218,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26052710_FIT</span>
+    <span class="h-versione">CL26052909_FIT</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -237,7 +237,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26052710_FIT</span>
+    <span class="h-versione">CL26052909_FIT</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -340,7 +340,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26052710_FIT</span>
+    <span class="h-versione">CL26052909_FIT</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -486,7 +486,8 @@ function leggiJSON(e){
 function mostraSessioni(){
   const el=document.getElementById('lista-sess');
   el.innerHTML='';S.SI=-1;
-  document.getElementById('btn-avvia').disabled=true;
+  const ba=document.getElementById('btn-avvia');
+  ba.disabled=true;ba.classList.remove('lamp');ba.classList.add('verde');
   S.J.sessioni.forEach((sess,i)=>{
     const schede=sess.schede.map((s,idx)=>{
       if(S.PL.length>idx && S.SI===i) return S.PL[idx];
@@ -500,7 +501,10 @@ function mostraSessioni(){
     b.onclick=()=>{
       document.querySelectorAll('.btn-sess').forEach(x=>x.classList.remove('sel'));
       b.classList.add('sel');S.SI=i;
-      document.getElementById('btn-avvia').disabled=false;
+      const ba=document.getElementById('btn-avvia');
+      ba.disabled=false;
+      ba.classList.remove('verde');
+      ba.classList.add('lamp');
     };
     el.appendChild(b);
   });
@@ -1077,7 +1081,8 @@ function tornaInizio(){
   S.J=null;S.SI=-1;S.CI=0;S.PL=[];S.ultComp=-1;S.activeCI=-1;S.serR=0;S.fase='idle';S.timerInCorso=false;
   document.getElementById('info-prog').textContent='Nessun programma caricato';
   document.getElementById('lista-sess').innerHTML='';
-  document.getElementById('btn-avvia').disabled=true;
+  const _ba=document.getElementById('btn-avvia');
+  _ba.disabled=true;_ba.classList.remove('lamp');_ba.classList.add('verde');
   document.getElementById('btn-vai-s2').classList.remove('visibile');
   document.getElementById('fine-av').style.display='none';
   const bs=document.getElementById('btn-salva');
