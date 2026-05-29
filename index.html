@@ -22,7 +22,7 @@
   .btn{display:block;width:100%;padding:13px 6px;background:var(--giallo);color:var(--nero);
     border:none;border-radius:8px;font-family:'Arial Black',Arial,sans-serif;
     font-size:.82rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;
-    transition:transform .07s,box-shadow .07s;margin-bottom:7px;text-align:center;
+    transition:transform .07s,box-shadow .07s;margin-bottom:7px;
     -webkit-user-select:none;user-select:none;box-shadow:0 4px 0 #7a9900;}
   .btn:active{transform:translateY(3px);box-shadow:0 1px 0 #7a9900;}
   .btn:disabled{background:#2a2a2a;color:#555;cursor:not-allowed;transform:none;box-shadow:none;animation:none!important;}
@@ -222,13 +222,13 @@
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
-  <label for="finput" class="btn">CARICA PROGRAMMA JSON</label>
+  <label for="finput" class="btn" style="text-align:center;display:flex;align-items:center;justify-content:center;">CARICA PROGRAMMA JSON</label>
   <input type="file" id="finput" accept=".json"
          style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;"
          onchange="leggiJSON(event)">
   <div class="sez-label">Sessione</div>
   <div class="lista-sessioni" id="lista-sess"></div>
-  <button class="btn verde" id="btn-avvia" disabled onclick="avviaSessione()">AVVIA SESSIONE</button>
+  <button class="btn" id="btn-avvia" disabled onclick="avviaSessione()">AVVIA SESSIONE</button>
   <button class="btn-nav" id="btn-vai-s2" onclick="vaiPrimaScheda()" style="margin-bottom:7px">&#x25B6;</button>
 </div>
 
@@ -486,8 +486,7 @@ function leggiJSON(e){
 function mostraSessioni(){
   const el=document.getElementById('lista-sess');
   el.innerHTML='';S.SI=-1;
-  const ba=document.getElementById('btn-avvia');
-  ba.disabled=true;ba.classList.remove('lamp');ba.classList.add('verde');
+  const ba=document.getElementById('btn-avvia');ba.disabled=true;ba.classList.remove('lamp');
   S.J.sessioni.forEach((sess,i)=>{
     const schede=sess.schede.map((s,idx)=>{
       if(S.PL.length>idx && S.SI===i) return S.PL[idx];
@@ -501,10 +500,7 @@ function mostraSessioni(){
     b.onclick=()=>{
       document.querySelectorAll('.btn-sess').forEach(x=>x.classList.remove('sel'));
       b.classList.add('sel');S.SI=i;
-      const ba=document.getElementById('btn-avvia');
-      ba.disabled=false;
-      ba.classList.remove('verde');
-      ba.classList.add('lamp');
+      const ba=document.getElementById('btn-avvia');ba.disabled=false;ba.classList.add('lamp');
     };
     el.appendChild(b);
   });
@@ -526,6 +522,7 @@ function avviaSessione(){
     rf_s:s.rf_s!==undefined?s.rf_s:(s.riposo_finale_sec!==undefined?s.riposo_finale_sec:gp(s,'rf_s'))
   }));
   S.CI=0;S.ultComp=-1;S.activeCI=-1;S.serR=0;S.fase='idle';
+  document.getElementById('btn-avvia').classList.remove('lamp');
   setH(S.J.programma,sess.nome);
   salvaLocale();
   richiediWakeLock();
@@ -1081,8 +1078,7 @@ function tornaInizio(){
   S.J=null;S.SI=-1;S.CI=0;S.PL=[];S.ultComp=-1;S.activeCI=-1;S.serR=0;S.fase='idle';S.timerInCorso=false;
   document.getElementById('info-prog').textContent='Nessun programma caricato';
   document.getElementById('lista-sess').innerHTML='';
-  const _ba=document.getElementById('btn-avvia');
-  _ba.disabled=true;_ba.classList.remove('lamp');_ba.classList.add('verde');
+  document.getElementById('btn-avvia').disabled=true;document.getElementById('btn-avvia').classList.remove('lamp');
   document.getElementById('btn-vai-s2').classList.remove('visibile');
   document.getElementById('fine-av').style.display='none';
   const bs=document.getElementById('btn-salva');
