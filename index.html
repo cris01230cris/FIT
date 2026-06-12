@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26052909_FIT</title>
+<title>CL26061214_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --grigio2:#1a1a1a; --testo:#fff;
@@ -218,7 +218,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26052909_FIT</span>
+    <span class="h-versione">CL26061214_FIT</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -237,7 +237,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26052909_FIT</span>
+    <span class="h-versione">CL26061214_FIT</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -340,7 +340,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26052909_FIT</span>
+    <span class="h-versione">CL26061214_FIT</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -1041,34 +1041,72 @@ function salvaSessione(){
 }
 function buildJSON(){
   const J=S.J;
-  const out={programma:J.programma,libreria:{},sessioni:[],storico:{}};
-  Object.keys(J.libreria||{}).forEach(k=>{
-    out.libreria[k]={descrizione:J.libreria[k].descrizione||''};
+  function fmtPk(v){
+    const n=Number.isInteger(v)?v:Math.round(v*10)/10;
+    return n%1===0?n.toFixed(1):String(n);
+  }
+  function schRow(s){
+    const ser=s.ser!==undefined?s.ser:(s.serie||0);
+    const rip=s.rip!==undefined?s.rip:(s.ripetizioni||0);
+    const pn=s.pn!==undefined?s.pn:(s.pesi_num||0);
+    const pk=s.pk!==undefined?s.pk:(s.pesi_kg||0);
+    const dm=s.dm!==undefined?s.dm:(s.durata_min||0);
+    const ds=s.ds!==undefined?s.ds:(s.durata_sec||0);
+    const rs_m=s.rs_m!==undefined?s.rs_m:(s.riposo_serie_min||0);
+    const rs_s=s.rs_s!==undefined?s.rs_s:(s.riposo_serie_sec||0);
+    const rf_m=s.rf_m!==undefined?s.rf_m:(s.riposo_finale_min||0);
+    const rf_s=s.rf_s!==undefined?s.rf_s:(s.riposo_finale_sec||0);
+    return '        { "id": "'+s.id+'", "ser": '+ser+', "rip": '+rip+', "pn": '+pn+', "pk": '+fmtPk(pk)+', "dm": '+dm+', "ds": '+ds+', "rs_m": '+rs_m+', "rs_s": '+rs_s+', "rf_m": '+rf_m+', "rf_s": '+rf_s+' }';
+  }
+  function storRow(r){
+    return '{"data": "'+r.data+'", "ser": '+r.ser+', "rip": '+r.rip+', "pn": '+r.pn+', "pk": '+fmtPk(r.pk)+', "dm": '+r.dm+', "ds": '+r.ds+' }';
+  }
+  let lines=[];
+  lines.push('{ "programma": "'+J.programma+'",');
+  lines.push('');
+  lines.push('"libreria":');
+  lines.push('{');
+  const libKeys=Object.keys(J.libreria||{});
+  libKeys.forEach((k,i)=>{
+    const desc=(J.libreria[k].descrizione||'').replace(/"/g,'\\"');
+    const comma=i<libKeys.length-1?',':'';
+    lines.push('    "'+k+'": { "descrizione": "'+desc+'" }'+comma);
   });
-  J.sessioni.forEach(sess=>{
-    const s2={nome:sess.nome,schede:[]};
-    sess.schede.forEach(s=>{
-      const ser=s.ser!==undefined?s.ser:(s.serie||0);
-      const rip=s.rip!==undefined?s.rip:(s.ripetizioni||0);
-      const pn=s.pn!==undefined?s.pn:(s.pesi_num||0);
-      const pk=s.pk!==undefined?s.pk:(s.pesi_kg||0);
-      const dm=s.dm!==undefined?s.dm:(s.durata_min||0);
-      const ds=s.ds!==undefined?s.ds:(s.durata_sec||0);
-      const rs_m=s.rs_m!==undefined?s.rs_m:(s.riposo_serie_min||0);
-      const rs_s=s.rs_s!==undefined?s.rs_s:(s.riposo_serie_sec||0);
-      const rf_m=s.rf_m!==undefined?s.rf_m:(s.riposo_finale_min||0);
-      const rf_s=s.rf_s!==undefined?s.rf_s:(s.riposo_finale_sec||0);
-      s2.schede.push({id:s.id,ser,rip,pn,pk:Number.isInteger(pk)?pk+0.0:pk,dm,ds,rs_m,rs_s,rf_m,rf_s});
+  lines.push('},');
+  lines.push('');
+  lines.push('"sessioni":');
+  lines.push('[');
+  J.sessioni.forEach((sess,si)=>{
+    lines.push('{ "nome": "'+sess.nome+'", "schede": [');
+    const schede=sess.schede;
+    schede.forEach((s,idx)=>{
+      const p=S.PL.length>idx&&S.SI===si?S.PL[idx]:s;
+      const comma=idx<schede.length-1?',':'';
+      lines.push(schRow(p)+comma);
     });
-    out.sessioni.push(s2);
+    const sesComma=si<J.sessioni.length-1?"] },":"] }";
+    lines.push(sesComma);
+    if(si<J.sessioni.length-1)lines.push('');
   });
-  Object.keys(J.storico||{}).forEach(k=>{
-    out.storico[k]=(J.storico[k]||[]).map(r=>({
-      data:r.data,ser:r.ser,rip:r.rip,pn:r.pn,
-      pk:Number.isInteger(r.pk)?r.pk+0.0:r.pk,dm:r.dm,ds:r.ds
-    }));
+  lines.push('],');
+  lines.push('');
+  lines.push('"storico":');
+  lines.push('{');
+  const stKeys=Object.keys(J.storico||{});
+  stKeys.forEach((k,ki)=>{
+    const righe=(J.storico[k]||[]);
+    const comma=ki<stKeys.length-1?',':'';
+    lines.push('"'+k+'": [');
+    righe.forEach((r,ri)=>{
+      const rc=ri<righe.length-1?',':'';
+      lines.push(storRow(r)+rc);
+    });
+    lines.push(']'+comma);
   });
-  return JSON.stringify(out,null,2);
+  lines.push('}');
+  lines.push('');
+  lines.push('}');
+  return lines.join('\n');
 }
 function tornaInizio(){
   if(S.tInt){clearInterval(S.tInt);S.tInt=null;}
