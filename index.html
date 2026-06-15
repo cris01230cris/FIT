@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26061214_FIT</title>
+<title>CL26061512_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --grigio2:#1a1a1a; --testo:#fff;
@@ -33,12 +33,9 @@
   .btn.lamp{animation:btnLamp .7s infinite;background:var(--giallo);color:var(--nero);box-shadow:0 4px 0 #7a9900;}
   .btn.lamp:active{animation:none;transform:translateY(3px);box-shadow:0 1px 0 #7a9900;}
 
-  @keyframes btnLampVerde{0%,100%{opacity:1;}50%{opacity:.15;}}
-  .btn.lamp-verde{animation:btnLampVerde .7s infinite;background:var(--verde);color:var(--nero);box-shadow:0 4px 0 #008833;}
+  .btn.lamp-verde{animation:btnLamp .7s infinite;background:var(--verde);color:var(--nero);box-shadow:0 4px 0 #008833;}
   .btn.lamp-verde:active{animation:none;transform:translateY(3px);box-shadow:0 1px 0 #008833;}
-
-  @keyframes btnLampRosso{0%,100%{opacity:1;}50%{opacity:.15;}}
-  .btn.lamp-rosso{animation:btnLampRosso .7s infinite;background:var(--rosso);color:#fff;box-shadow:0 4px 0 #990000;}
+  .btn.lamp-rosso{animation:btnLamp .7s infinite;background:var(--rosso);color:#fff;box-shadow:0 4px 0 #990000;}
   .btn.lamp-rosso:active{animation:none;transform:translateY(3px);box-shadow:0 1px 0 #990000;}
 
   /* Pulsante multifunzione — stili dedicati per i tre stati */
@@ -218,7 +215,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26061214_FIT</span>
+    <span class="h-versione">CL26061512_FIT</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -237,7 +234,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26061214_FIT</span>
+    <span class="h-versione">CL26061512_FIT</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -249,7 +246,6 @@
   <div class="desc-box">
     <div class="desc-unica" id="desc-unica">—</div>
   </div>
-
 
   <div class="pgrid3">
     <div class="pitem">
@@ -340,7 +336,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26061214_FIT</span>
+    <span class="h-versione">CL26061512_FIT</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -488,11 +484,7 @@ function mostraSessioni(){
   el.innerHTML='';S.SI=-1;
   const ba=document.getElementById('btn-avvia');ba.disabled=true;ba.classList.remove('lamp');
   S.J.sessioni.forEach((sess,i)=>{
-    const schede=sess.schede.map((s,idx)=>{
-      if(S.PL.length>idx && S.SI===i) return S.PL[idx];
-      return s;
-    });
-    const sec=calcolaTempoSessione({schede});
+    const sec=calcolaTempoSessione(sess);
     const tempoTxt=fmtTempo(sec);
     const b=document.createElement('button');
     b.className='btn-sess';
@@ -801,7 +793,6 @@ function saveP(){
     document.getElementById('p-rs-s').disabled=ser1;
     if(ser1){document.getElementById('p-rs-m').value=0;document.getElementById('p-rs-s').value=0;p.rs_m=0;p.rs_s=0;}
   }
-  // Mod 2.3: propaga a TUTTE le schede con stesso id (incluse rosse)
   propagaParametri(S.CI,p);
   salvaLocale();
   aggUI();
@@ -924,7 +915,6 @@ function alert5(){
 let tickerAttivo=false;
 function renderNxt(){
   const box=document.getElementById('nxt-box');
-  // Mod 2.1: visibile su scheda gialla; su verdi mostra solo scheda successiva
   const mostra=(S.CI===S.activeCI);
   if(!mostra){box.classList.remove('visibile');return;}
   box.classList.add('visibile');
@@ -1027,7 +1017,7 @@ function salvaSessione(){
   salvaLocale();
   const d=new Date();
   const fn=S.J.programma+'_'
-    +d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')
+    +String(d.getFullYear()).slice(-2)+String(d.getMonth()+1).padStart(2,'0')
     +String(d.getDate()).padStart(2,'0')+'.json';
   const blob=new Blob([out],{type:'application/json'});
   const url=URL.createObjectURL(blob);
