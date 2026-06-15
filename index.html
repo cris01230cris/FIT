@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26061512_FIT</title>
+<title>CL26061515_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --grigio2:#1a1a1a; --testo:#fff;
@@ -215,7 +215,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26061512_FIT</span>
+    <span class="h-versione">CL26061515_FIT</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -234,7 +234,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26061512_FIT</span>
+    <span class="h-versione">CL26061515_FIT</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -336,7 +336,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26061512_FIT</span>
+    <span class="h-versione">CL26061515_FIT</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -1020,14 +1020,36 @@ function salvaSessione(){
     +String(d.getFullYear()).slice(-2)+String(d.getMonth()+1).padStart(2,'0')
     +String(d.getDate()).padStart(2,'0')+'.json';
   const blob=new Blob([out],{type:'application/json'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download=fn;a.click();
-  URL.revokeObjectURL(url);
-  rilasciaWakeLock();
-  const bs=document.getElementById('btn-salva');
-  bs.classList.remove('lamp-verde');bs.disabled=true;bs.textContent='SALVATO';
-  document.getElementById('fine-av').style.display='block';
-  document.getElementById('fine-i').textContent='File: '+fn;
+  if(window.showSaveFilePicker){
+    (async()=>{
+      try{
+        const fh=await window.showSaveFilePicker({
+          suggestedName:fn,
+          types:[{description:'JSON',accept:{'application/json':['.json']}}]
+        });
+        const w=await fh.createWritable();
+        await w.write(blob);
+        await w.close();
+        rilasciaWakeLock();
+        const bs=document.getElementById('btn-salva');
+        bs.classList.remove('lamp-verde');bs.disabled=true;bs.textContent='SALVATO';
+        document.getElementById('fine-av').style.display='block';
+        document.getElementById('fine-i').textContent='File: '+fn;
+      }catch(e){
+        if(e.name!=='AbortError') throw e;
+        // utente ha premuto Annulla: non cambiare nulla
+      }
+    })();
+  } else {
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download=fn;a.click();
+    URL.revokeObjectURL(url);
+    rilasciaWakeLock();
+    const bs=document.getElementById('btn-salva');
+    bs.classList.remove('lamp-verde');bs.disabled=true;bs.textContent='SALVATO';
+    document.getElementById('fine-av').style.display='block';
+    document.getElementById('fine-i').textContent='File: '+fn;
+  }
 }
 function buildJSON(){
   const J=S.J;
