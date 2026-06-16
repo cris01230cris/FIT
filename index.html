@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26061515_FIT</title>
+<title>CL26061517_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --grigio2:#1a1a1a; --testo:#fff;
@@ -215,7 +215,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26061515_FIT</span>
+    <span class="h-versione">CL26061517_FIT</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -234,7 +234,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26061515_FIT</span>
+    <span class="h-versione">CL26061517_FIT</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -336,7 +336,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26061515_FIT</span>
+    <span class="h-versione">CL26061517_FIT</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -344,6 +344,12 @@
   <button class="btn verde lamp-verde" id="btn-salva" onclick="salvaSessione()">SALVA SESSIONE</button>
   <button class="btn-nav" style="margin-top:6px;box-shadow:0 4px 0 #7a9900" onclick="tornaInizio()">&#x25C0;&#x25C0;</button>
   <button class="btn-nav" style="margin-top:6px;box-shadow:0 4px 0 #7a9900" onclick="tornaUltimaScheda()">&#x25C0;</button>
+  <!-- pannello conferma salvataggio -->
+  <div id="panel-hai-salvato" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:999;display:none;flex-direction:column;align-items:center;justify-content:center;gap:24px;">
+    <div style="font-size:1.5rem;font-weight:700;color:var(--giallo);letter-spacing:.08em;text-align:center;">HAI SALVATO?</div>
+    <button class="btn verde" style="color:var(--nero);" onclick="confermaSalvato(true)">Sì, ho salvato</button>
+    <button class="btn rosso" style="color:#fff;" onclick="confermaSalvato(false)">No, ho annullato</button>
+  </div>
 </div>
 
 <script>
@@ -1003,6 +1009,7 @@ function renderStorico(id){
 // ══════════════════════════════════════════════════════════════
 // S3
 // ══════════════════════════════════════════════════════════════
+let _ultimoFn='';
 function salvaSessione(){
   const sess=S.J.sessioni[S.SI];
   sess.schede.forEach((s,i)=>{
@@ -1016,40 +1023,27 @@ function salvaSessione(){
   const out=buildJSON();
   salvaLocale();
   const d=new Date();
-  const fn=S.J.programma+'_'
+  _ultimoFn=S.J.programma+'_'
     +String(d.getFullYear()).slice(-2)+String(d.getMonth()+1).padStart(2,'0')
     +String(d.getDate()).padStart(2,'0')+'.json';
   const blob=new Blob([out],{type:'application/json'});
-  if(window.showSaveFilePicker){
-    (async()=>{
-      try{
-        const fh=await window.showSaveFilePicker({
-          suggestedName:fn,
-          types:[{description:'JSON',accept:{'application/json':['.json']}}]
-        });
-        const w=await fh.createWritable();
-        await w.write(blob);
-        await w.close();
-        rilasciaWakeLock();
-        const bs=document.getElementById('btn-salva');
-        bs.classList.remove('lamp-verde');bs.disabled=true;bs.textContent='SALVATO';
-        document.getElementById('fine-av').style.display='block';
-        document.getElementById('fine-i').textContent='File: '+fn;
-      }catch(e){
-        if(e.name!=='AbortError') throw e;
-        // utente ha premuto Annulla: non cambiare nulla
-      }
-    })();
-  } else {
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');a.href=url;a.download=fn;a.click();
-    URL.revokeObjectURL(url);
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=_ultimoFn;a.click();
+  URL.revokeObjectURL(url);
+  // mostra pannello di conferma
+  const p=document.getElementById('panel-hai-salvato');
+  p.style.display='flex';
+}
+function confermaSalvato(siHoSalvato){
+  document.getElementById('panel-hai-salvato').style.display='none';
+  if(siHoSalvato){
     rilasciaWakeLock();
     const bs=document.getElementById('btn-salva');
     bs.classList.remove('lamp-verde');bs.disabled=true;bs.textContent='SALVATO';
     document.getElementById('fine-av').style.display='block';
-    document.getElementById('fine-i').textContent='File: '+fn;
+    document.getElementById('fine-i').textContent='File: '+_ultimoFn;
   }
+  // se no: non cambia nulla, btn-salva rimane SALVA SESSIONE lampeggiante
 }
 function buildJSON(){
   const J=S.J;
