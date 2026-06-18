@@ -1101,7 +1101,62 @@ function confermaSalvato(siHoSalvato){
   // se no: non cambia nulla, btn-salva rimane SALVA SESSIONE lampeggiante
 }
 function buildJSON(){
-  return JSON.stringify(S.J, null, 2);
+  const J=S.J;
+  // Usa JSON.stringify per l'escape sicuro delle stringhe
+  function qs(v){return JSON.stringify(String(v));}
+  function fmtPk(v){
+    const n=Math.round(v*10)/10;
+    return (n%1===0?n.toFixed(1):String(n));
+  }
+  function schRow(s){
+    return '        { "id": '+qs(s.id)+', "ser": '+s.ser+', "rip": '+s.rip+', "pn": '+s.pn+', "pk": '+fmtPk(s.pk)+', "dm": '+s.dm+', "ds": '+s.ds+', "rs_m": '+s.rs_m+', "rs_s": '+s.rs_s+', "rf_m": '+s.rf_m+', "rf_s": '+s.rf_s+' }';
+  }
+  function storRow(r){
+    return '{"data": '+qs(r.data)+', "ser": '+r.ser+', "rip": '+r.rip+', "pn": '+r.pn+', "pk": '+fmtPk(r.pk)+', "dm": '+r.dm+', "ds": '+r.ds+' }';
+  }
+  const lines=[];
+  lines.push('{ "programma": '+qs(J.programma)+',');
+  lines.push('');
+  lines.push('"libreria":');
+  lines.push('{');
+  const libKeys=Object.keys(J.libreria||{});
+  libKeys.forEach((k,i)=>{
+    const comma=i<libKeys.length-1?',':'';
+    lines.push('    '+qs(k)+': { "descrizione": '+qs((J.libreria[k].descrizione||''))+' }'+comma);
+  });
+  lines.push('},');
+  lines.push('');
+  lines.push('"sessioni":');
+  lines.push('[');
+  J.sessioni.forEach((sess,si)=>{
+    lines.push('{ "nome": '+qs(sess.nome)+', "schede": [');
+    sess.schede.forEach((s,idx)=>{
+      const comma=idx<sess.schede.length-1?',':'';
+      lines.push(schRow(s)+comma);
+    });
+    const sesComma=si<J.sessioni.length-1?'] },':'] }';
+    lines.push(sesComma);
+    if(si<J.sessioni.length-1)lines.push('');
+  });
+  lines.push('],');
+  lines.push('');
+  lines.push('"storico":');
+  lines.push('{');
+  const stKeys=Object.keys(J.storico||{});
+  stKeys.forEach((k,ki)=>{
+    const righe=J.storico[k]||[];
+    const comma=ki<stKeys.length-1?',':'';
+    lines.push(qs(k)+': [');
+    righe.forEach((r,ri)=>{
+      const rc=ri<righe.length-1?',':'';
+      lines.push(storRow(r)+rc);
+    });
+    lines.push(']'+comma);
+  });
+  lines.push('}');
+  lines.push('');
+  lines.push('}');
+  return lines.join('\n');
 }
 function tornaInizio(){
   if(S.tInt){clearInterval(S.tInt);S.tInt=null;}
