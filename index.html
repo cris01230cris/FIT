@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26061517_FIT</title>
+<title>CL26061717_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --grigio2:#1a1a1a; --testo:#fff;
@@ -215,7 +215,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26061517_FIT</span>
+    <span class="h-versione">CL26061717_FIT</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -234,7 +234,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26061517_FIT</span>
+    <span class="h-versione">CL26061717_FIT</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -336,7 +336,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26061517_FIT</span>
+    <span class="h-versione">CL26061717_FIT</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -345,7 +345,7 @@
   <button class="btn-nav" style="margin-top:6px;box-shadow:0 4px 0 #7a9900" onclick="tornaInizio()">&#x25C0;&#x25C0;</button>
   <button class="btn-nav" style="margin-top:6px;box-shadow:0 4px 0 #7a9900" onclick="tornaUltimaScheda()">&#x25C0;</button>
   <!-- pannello conferma salvataggio -->
-  <div id="panel-hai-salvato" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:999;display:none;flex-direction:column;align-items:center;justify-content:center;gap:24px;">
+  <div id="panel-hai-salvato" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:24px;">
     <div style="font-size:1.5rem;font-weight:700;color:var(--giallo);letter-spacing:.08em;text-align:center;">HAI SALVATO?</div>
     <button class="btn verde" style="color:var(--nero);" onclick="confermaSalvato(true)">Sì, ho salvato</button>
     <button class="btn" style="background:#ff2222;color:#fff;box-shadow:0 4px 0 #990000;" onclick="confermaSalvato(false)">No, ho annullato</button>
@@ -359,7 +359,7 @@
 const S = {
   J:null, SI:-1, CI:0, PL:[], ultComp:-1, activeCI:-1, serR:0,
   fase:'idle',
-  tInt:null, tSec:0, tTotSec:0, timerInCorso:false, tTipo:'',
+  tInt:null, tSec:0, tTotSec:0, tEndTime:0, timerInCorso:false, tTipo:'',
   dblTapLast:0, pausaInt:null
 };
 
@@ -369,7 +369,11 @@ const S = {
 let wakeLock=null;
 async function richiediWakeLock(){
   if('wakeLock' in navigator){try{wakeLock=await navigator.wakeLock.request('screen');
-    wakeLock.addEventListener('release',()=>{wakeLock=null;});}catch(e){}}
+    wakeLock.addEventListener('release',()=>{
+      wakeLock=null;
+      // riacquisizione automatica se la sessione è ancora attiva
+      if(S.J!==null && document.visibilityState==='visible') richiediWakeLock();
+    });}catch(e){}}
 }
 async function rilasciaWakeLock(){
   if(wakeLock){try{await wakeLock.release();}catch(e){} wakeLock=null;}
@@ -474,9 +478,15 @@ function leggiJSON(e){
   r.onload=ev=>{
     try{
       S.J=JSON.parse(ev.target.result);
+      if(!S.J || !Array.isArray(S.J.sessioni))
+        throw new Error('Campo "sessioni" mancante o non valido');
+      S.J.sessioni.forEach((sess,i)=>{
+        if(!Array.isArray(sess.schede))
+          throw new Error('Sessione '+i+' ("'+(sess.nome||'?')+'"): campo "schede" mancante o non valido');
+      });
       if(!S.J.storico)S.J.storico={};
       if(!S.J.libreria)S.J.libreria={};
-      localStorage.setItem('fit_j',JSON.stringify(S.J));
+      salvaLocale();
       document.getElementById('info-prog').textContent=S.J.programma;
       mostraSessioni();
     }catch(err){
@@ -537,10 +547,13 @@ function vaiPrimaScheda(){
 // ══════════════════════════════════════════════════════════════
 function salvaLocale(){
   if(!S.J)return;
-  localStorage.setItem('fit_j',JSON.stringify({
-    J:S.J,SI:S.SI,PL:S.PL,
+  try{localStorage.setItem('fit_libreria',JSON.stringify(S.J.libreria||{}));}catch(e){}
+  try{localStorage.setItem('fit_storico', JSON.stringify(S.J.storico||{}));}catch(e){}
+  try{localStorage.setItem('fit_sessione',JSON.stringify({
+    J_senza_lib:{programma:S.J.programma,sessioni:S.J.sessioni},
+    SI:S.SI,PL:S.PL,
     ultComp:S.ultComp,activeCI:S.activeCI,serR:S.serR,fase:S.fase
-  }));
+  }));}catch(e){}
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -771,7 +784,12 @@ function dblTapTimer(){
   if(!S.timerInCorso)return;
   const ora=Date.now();
   if(ora-S.dblTapLast<600){
-    if(S.tSec>5){S.tSec=5;cdShow(S.tSec,S.tTipo);aggProgress(S.tSec,S.tTotSec);if(navigator.vibrate)navigator.vibrate(80);}
+    if(S.tSec>5){
+      S.tSec=5;
+      S.tEndTime=Date.now()+5000;
+      cdShow(S.tSec,S.tTipo);aggProgress(S.tSec,S.tTotSec);
+      if(navigator.vibrate)navigator.vibrate(80);
+    }
     S.dblTapLast=0;
   } else {S.dblTapLast=ora;}
 }
@@ -847,10 +865,12 @@ function startTimer(tipo){
   }
   if(sec<=0){S.timerInCorso=false;onEnd(tipo);return;}
   S.tSec=sec;S.tTotSec=sec;
+  S.tEndTime=Date.now()+sec*1000;
   lockTimerInputs(true);
   cdShow(S.tSec,tipo);aggProgress(S.tSec,S.tTotSec);
   S.tInt=setInterval(()=>{
-    S.tSec--;
+    const remaining=Math.max(0,Math.ceil((S.tEndTime-Date.now())/1000));
+    S.tSec=remaining;
     if(S.tSec<=0){
       clearInterval(S.tInt);S.tInt=null;S.timerInCorso=false;
       aggProgress(0,S.tTotSec);alert5();
@@ -905,12 +925,14 @@ function alert5(){
     setTimeout(()=>{fl.classList.add('on');setTimeout(()=>fl.classList.remove('on'),180);},t);}
   try{
     const ctx=getAudio();
-    for(let i=0;i<5;i++){const t=i*0.34;
-      const o=ctx.createOscillator(),g=ctx.createGain();
-      o.connect(g);g.connect(ctx.destination);o.frequency.value=900;
-      g.gain.setValueAtTime(.9,ctx.currentTime+t);
-      g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+t+.22);
-      o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+.25);}
+    ctx.resume().then(()=>{
+      for(let i=0;i<5;i++){const t=i*0.34;
+        const o=ctx.createOscillator(),g=ctx.createGain();
+        o.connect(g);g.connect(ctx.destination);o.frequency.value=900;
+        g.gain.setValueAtTime(.9,ctx.currentTime+t);
+        g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+t+.22);
+        o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+.25);}
+    });
   }catch(e){}
   if(navigator.vibrate)navigator.vibrate([180,60,180,60,180,60,180,60,300]);
 }
@@ -948,10 +970,16 @@ function renderNxt(){
   }
   descEl.textContent=desc;descEl.dataset.testo=desc;
   let pt=[];
-  if(p.ser>0||p.rip>0) pt.push('<span class="nxt-s">'+p.ser+'x'+p.rip+'</span>');
-  if(p.pn>0||p.pk>0)   pt.push('<span class="nxt-p">'+p.pn+'x'+fmtKg(p.pk)+'kg</span>');
-  if(p.dm>0||p.ds>0)   pt.push('<span class="nxt-t">'+p.dm+'m:'+String(p.ds).padStart(2,'0')+'s</span>');
-  parEl.innerHTML=pt.join('');
+  if(p.ser>0||p.rip>0) pt.push({cls:'nxt-s',txt:p.ser+'x'+p.rip});
+  if(p.pn>0||p.pk>0)   pt.push({cls:'nxt-p',txt:p.pn+'x'+fmtKg(p.pk)+'kg'});
+  if(p.dm>0||p.ds>0)   pt.push({cls:'nxt-t',txt:p.dm+'m:'+String(p.ds).padStart(2,'0')+'s'});
+  parEl.innerHTML='';
+  pt.forEach(item=>{
+    const span=document.createElement('span');
+    span.className=item.cls;
+    span.textContent=item.txt;
+    parEl.appendChild(span);
+  });
 }
 function misuraTesto(testo,el){
   const ghost=document.createElement('span');
@@ -996,14 +1024,41 @@ function stopTicker(){
 function renderStorico(id){
   const righe=(S.J&&S.J.storico&&S.J.storico[id])?S.J.storico[id]:[];
   const el=document.getElementById('stor-list');
-  if(!righe.length){el.innerHTML='<div class="stor-empty">Nessuna prestazione registrata</div>';return;}
-  el.innerHTML=righe.map(r=>{
-    let pt=[];
-    if(r.ser>0||r.rip>0)pt.push('<span class="stor-s">'+r.ser+'x'+r.rip+'</span>');
-    if(r.pn>0||r.pk>0)  pt.push('<span class="stor-p">'+r.pn+'x'+fmtKg(r.pk)+'kg</span>');
-    if(r.dm>0||r.ds>0)  pt.push('<span class="stor-t">'+r.dm+'m:'+String(r.ds).padStart(2,'0')+'s</span>');
-    return '<div class="stor-riga"><span class="stor-data">'+r.data+'</span>'+pt.join('')+'</div>';
-  }).join('');
+  el.innerHTML='';
+  if(!righe.length){
+    const empty=document.createElement('div');
+    empty.className='stor-empty';
+    empty.textContent='Nessuna prestazione registrata';
+    el.appendChild(empty);
+    return;
+  }
+  righe.forEach(r=>{
+    const riga=document.createElement('div');
+    riga.className='stor-riga';
+    const data=document.createElement('span');
+    data.className='stor-data';
+    data.textContent=r.data;
+    riga.appendChild(data);
+    if(r.ser>0||r.rip>0){
+      const s=document.createElement('span');
+      s.className='stor-s';
+      s.textContent=r.ser+'x'+r.rip;
+      riga.appendChild(s);
+    }
+    if(r.pn>0||r.pk>0){
+      const p=document.createElement('span');
+      p.className='stor-p';
+      p.textContent=r.pn+'x'+fmtKg(r.pk)+'kg';
+      riga.appendChild(p);
+    }
+    if(r.dm>0||r.ds>0){
+      const t=document.createElement('span');
+      t.className='stor-t';
+      t.textContent=r.dm+'m:'+String(r.ds).padStart(2,'0')+'s';
+      riga.appendChild(t);
+    }
+    el.appendChild(riga);
+  });
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1046,73 +1101,7 @@ function confermaSalvato(siHoSalvato){
   // se no: non cambia nulla, btn-salva rimane SALVA SESSIONE lampeggiante
 }
 function buildJSON(){
-  const J=S.J;
-  function fmtPk(v){
-    const n=Number.isInteger(v)?v:Math.round(v*10)/10;
-    return n%1===0?n.toFixed(1):String(n);
-  }
-  function schRow(s){
-    const ser=s.ser!==undefined?s.ser:(s.serie||0);
-    const rip=s.rip!==undefined?s.rip:(s.ripetizioni||0);
-    const pn=s.pn!==undefined?s.pn:(s.pesi_num||0);
-    const pk=s.pk!==undefined?s.pk:(s.pesi_kg||0);
-    const dm=s.dm!==undefined?s.dm:(s.durata_min||0);
-    const ds=s.ds!==undefined?s.ds:(s.durata_sec||0);
-    const rs_m=s.rs_m!==undefined?s.rs_m:(s.riposo_serie_min||0);
-    const rs_s=s.rs_s!==undefined?s.rs_s:(s.riposo_serie_sec||0);
-    const rf_m=s.rf_m!==undefined?s.rf_m:(s.riposo_finale_min||0);
-    const rf_s=s.rf_s!==undefined?s.rf_s:(s.riposo_finale_sec||0);
-    return '        { "id": "'+s.id+'", "ser": '+ser+', "rip": '+rip+', "pn": '+pn+', "pk": '+fmtPk(pk)+', "dm": '+dm+', "ds": '+ds+', "rs_m": '+rs_m+', "rs_s": '+rs_s+', "rf_m": '+rf_m+', "rf_s": '+rf_s+' }';
-  }
-  function storRow(r){
-    return '{"data": "'+r.data+'", "ser": '+r.ser+', "rip": '+r.rip+', "pn": '+r.pn+', "pk": '+fmtPk(r.pk)+', "dm": '+r.dm+', "ds": '+r.ds+' }';
-  }
-  let lines=[];
-  lines.push('{ "programma": "'+J.programma+'",');
-  lines.push('');
-  lines.push('"libreria":');
-  lines.push('{');
-  const libKeys=Object.keys(J.libreria||{});
-  libKeys.forEach((k,i)=>{
-    const desc=(J.libreria[k].descrizione||'').replace(/"/g,'\\"');
-    const comma=i<libKeys.length-1?',':'';
-    lines.push('    "'+k+'": { "descrizione": "'+desc+'" }'+comma);
-  });
-  lines.push('},');
-  lines.push('');
-  lines.push('"sessioni":');
-  lines.push('[');
-  J.sessioni.forEach((sess,si)=>{
-    lines.push('{ "nome": "'+sess.nome+'", "schede": [');
-    const schede=sess.schede;
-    schede.forEach((s,idx)=>{
-      const p=S.PL.length>idx&&S.SI===si?S.PL[idx]:s;
-      const comma=idx<schede.length-1?',':'';
-      lines.push(schRow(p)+comma);
-    });
-    const sesComma=si<J.sessioni.length-1?"] },":"] }";
-    lines.push(sesComma);
-    if(si<J.sessioni.length-1)lines.push('');
-  });
-  lines.push('],');
-  lines.push('');
-  lines.push('"storico":');
-  lines.push('{');
-  const stKeys=Object.keys(J.storico||{});
-  stKeys.forEach((k,ki)=>{
-    const righe=(J.storico[k]||[]);
-    const comma=ki<stKeys.length-1?',':'';
-    lines.push('"'+k+'": [');
-    righe.forEach((r,ri)=>{
-      const rc=ri<righe.length-1?',':'';
-      lines.push(storRow(r)+rc);
-    });
-    lines.push(']'+comma);
-  });
-  lines.push('}');
-  lines.push('');
-  lines.push('}');
-  return lines.join('\n');
+  return JSON.stringify(S.J, null, 2);
 }
 function tornaInizio(){
   if(S.tInt){clearInterval(S.tInt);S.tInt=null;}
