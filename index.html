@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26061717_FIT</title>
+<title>CL26061917_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --grigio2:#1a1a1a; --testo:#fff;
@@ -99,8 +99,7 @@
   /* Prossima scheda — solo scheda gialla */
   .nxt-box{display:none;border-top:1px solid #1e3a1e;padding:4px 0 0 0;margin-top:2px;}
   .nxt-box.visibile{display:block;}
-  .nxt-desc-wrap{overflow:hidden;white-space:nowrap;cursor:pointer;margin-bottom:3px;
-    -webkit-user-select:none;user-select:none;}
+  .nxt-desc-wrap{overflow:hidden;white-space:nowrap;margin-bottom:3px;}
   .nxt-desc{display:inline-block;font-size:.78rem;color:var(--verde);font-weight:700;
     font-family:Arial,sans-serif;white-space:nowrap;}
   @keyframes ticker{0%{transform:translateX(0);}100%{transform:translateX(var(--tx));}}
@@ -215,7 +214,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26061717_FIT</span>
+    <span class="h-versione">CL26061917_FIT</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -234,7 +233,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26061717_FIT</span>
+    <span class="h-versione">CL26061917_FIT</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -324,7 +323,7 @@
   </div>
 
   <div class="nxt-box" id="nxt-box">
-    <div class="nxt-desc-wrap" id="nxt-desc-wrap" onclick="toggleTicker()">
+    <div class="nxt-desc-wrap" id="nxt-desc-wrap">
       <span class="nxt-desc" id="nxt-desc"></span>
     </div>
     <div class="nxt-par" id="nxt-par"></div>
@@ -336,7 +335,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26061717_FIT</span>
+    <span class="h-versione">CL26061917_FIT</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -980,6 +979,8 @@ function renderNxt(){
     span.textContent=item.txt;
     parEl.appendChild(span);
   });
+  // avvio automatico: parte solo se il testo supera la larghezza del contenitore
+  requestAnimationFrame(()=>{ avviaTicker(); });
 }
 function misuraTesto(testo,el){
   const ghost=document.createElement('span');
@@ -991,8 +992,8 @@ function misuraTesto(testo,el){
   const w=ghost.getBoundingClientRect().width;document.body.removeChild(ghost);
   return w;
 }
-function toggleTicker(){
-  if(tickerAttivo){stopTicker();return;}
+function avviaTicker(){
+  if(tickerAttivo)return;
   const wrap=document.getElementById('nxt-desc-wrap');
   const el=document.getElementById('nxt-desc');
   const testoOrig=el.dataset.testo||el.textContent;
