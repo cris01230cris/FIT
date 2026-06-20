@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26061917_FIT</title>
+<title>CL26062020_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --grigio2:#1a1a1a; --testo:#fff;
@@ -214,7 +214,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26061917_FIT</span>
+    <span class="h-versione">CL26062020_FIT.html</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -233,7 +233,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26061917_FIT</span>
+    <span class="h-versione">CL26062020_FIT.html</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -335,7 +335,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26061917_FIT</span>
+    <span class="h-versione">CL26062020_FIT.html</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -485,8 +485,10 @@ function leggiJSON(e){
       });
       if(!S.J.storico)S.J.storico={};
       if(!S.J.libreria)S.J.libreria={};
+      S.J._nomeFile=f.name;
       salvaLocale();
-      document.getElementById('info-prog').textContent=S.J.programma;
+      document.getElementById('info-prog').textContent=f.name;
+      document.getElementById('h1p').textContent=f.name;
       mostraSessioni();
     }catch(err){
       document.getElementById('info-prog').textContent='⚠ JSON non valido: '+err.message;
@@ -1178,7 +1180,8 @@ function tornaInizio(){
 }
 function go(id){document.querySelectorAll('.schermata').forEach(s=>s.classList.remove('attiva'));document.getElementById(id).classList.add('attiva');}
 function setH(prog,sess){
-  ['h2p','h3p'].forEach(id=>document.getElementById(id).textContent=prog);
+  const label=S.J._nomeFile||prog;
+  ['h2p','h3p'].forEach(id=>document.getElementById(id).textContent=label);
   ['h2s','h3s'].forEach(id=>document.getElementById(id).textContent=sess);
 }
 </script>
