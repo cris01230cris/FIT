@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26062121_FIT</title>
+<title>CL26062222_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --grigio2:#1a1a1a; --testo:#fff;
@@ -214,7 +214,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26062121_FIT.html</span>
+    <span class="h-versione">CL26062222_FIT.html</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -233,7 +233,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26062121_FIT.html</span>
+    <span class="h-versione">CL26062222_FIT.html</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -335,7 +335,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26062121_FIT.html</span>
+    <span class="h-versione">CL26062222_FIT.html</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -1122,7 +1122,7 @@ function buildJSON(){
   lines.push('');
   lines.push('"libreria":');
   lines.push('{');
-  const libKeys=Object.keys(J.libreria||{});
+  const libKeys=Object.keys(J.libreria||{}).sort();
   libKeys.forEach((k,i)=>{
     const comma=i<libKeys.length-1?',':'';
     lines.push('    '+qs(k)+': { "descrizione": '+qs((J.libreria[k].descrizione||''))+' }'+comma);
@@ -1145,7 +1145,7 @@ function buildJSON(){
   lines.push('');
   lines.push('"storico":');
   lines.push('{');
-  const stKeys=Object.keys(J.storico||{});
+  const stKeys=Object.keys(J.storico||{}).sort();
   stKeys.forEach((k,ki)=>{
     const righe=J.storico[k]||[];
     const comma=ki<stKeys.length-1?',':'';
