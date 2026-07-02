@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26062222_FIT</title>
+<title>CL26070202_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --grigio2:#1a1a1a; --testo:#fff;
@@ -214,7 +214,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26062222_FIT.html</span>
+    <span class="h-versione">CL26070202_FIT.html</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -233,7 +233,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26062222_FIT.html</span>
+    <span class="h-versione">CL26070202_FIT.html</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -335,7 +335,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26062222_FIT.html</span>
+    <span class="h-versione">CL26070202_FIT.html</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -971,6 +971,10 @@ function renderNxt(){
   }
   descEl.textContent=desc;descEl.dataset.testo=desc;
   let pt=[];
+  // data più recente dallo storico dell'esercizio successivo
+  const stNext=(S.J.storico&&S.J.storico[sc.id]&&S.J.storico[sc.id].length>0)
+    ?S.J.storico[sc.id][0].data:null;
+  if(stNext) pt.push({cls:'stor-data',txt:stNext});
   if(p.ser>0||p.rip>0) pt.push({cls:'nxt-s',txt:p.ser+'x'+p.rip});
   if(p.pn>0||p.pk>0)   pt.push({cls:'nxt-p',txt:p.pn+'x'+fmtKg(p.pk)+'kg'});
   if(p.dm>0||p.ds>0)   pt.push({cls:'nxt-t',txt:p.dm+'m:'+String(p.ds).padStart(2,'0')+'s'});
