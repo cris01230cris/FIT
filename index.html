@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26070202_FIT</title>
+<title>CL26070303_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --grigio2:#1a1a1a; --testo:#fff;
@@ -214,7 +214,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26070202_FIT.html</span>
+    <span class="h-versione">CL26070303_FIT.html</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -233,7 +233,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26070202_FIT.html</span>
+    <span class="h-versione">CL26070303_FIT.html</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -335,7 +335,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26070202_FIT.html</span>
+    <span class="h-versione">CL26070303_FIT.html</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -1088,13 +1088,22 @@ function salvaSessione(){
   _ultimoFn=S.J.programma+'_'
     +String(d.getFullYear()).slice(-2)+String(d.getMonth()+1).padStart(2,'0')
     +String(d.getDate()).padStart(2,'0')+'.json';
-  const blob=new Blob([out],{type:'application/json'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download=_ultimoFn;a.click();
-  URL.revokeObjectURL(url);
-  // mostra pannello di conferma
+  // mostra subito il pannello di conferma, PRIMA di avviare il download:
+  // così, se Android mostra per un istante la pagina sottostante durante
+  // l'apertura del dialog nativo di salvataggio, si vede il pannello nero
+  // e non la scritta "SESSIONE COMPLETATA"
   const p=document.getElementById('panel-hai-salvato');
   p.style.display='flex';
+  // doppio requestAnimationFrame per garantire che il pannello sia
+  // effettivamente dipinto sullo schermo prima di avviare il download
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      const blob=new Blob([out],{type:'application/json'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');a.href=url;a.download=_ultimoFn;a.click();
+      URL.revokeObjectURL(url);
+    });
+  });
 }
 function confermaSalvato(siHoSalvato){
   document.getElementById('panel-hai-salvato').style.display='none';
