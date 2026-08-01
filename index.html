@@ -195,6 +195,8 @@
   .stor-data{color:#fff;font-size:.62rem;min-width:54px;}
   .stor-s{color:var(--verde);}  .stor-p{color:var(--giallo);}  .stor-t{color:var(--rosso);}
   .stor-empty{color:#333;font-size:.68rem;font-style:italic;}
+  .stor-riga.blink{animation:storBlink 1s ease-in-out infinite;}
+  @keyframes storBlink{0%,100%{background:transparent;}50%{background:rgba(255,153,0,.35);}}
 
   .flash{position:fixed;inset:0;background:var(--giallo);opacity:0;pointer-events:none;z-index:9999;transition:opacity .08s;}
   .flash.on{opacity:.9;}
@@ -717,7 +719,7 @@ function registraStorico(){
   const d=new Date();
   const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   S.J.storico[sc.id].unshift({data:ds,ser:p.ser,rip:p.rip,pn:p.pn,pk:p.pk,dm:p.dm,ds:p.ds});
-  if(S.J.storico[sc.id].length>10)S.J.storico[sc.id].length=10;
+  if(S.J.storico[sc.id].length>16)S.J.storico[sc.id].length=16;
   salvaLocale();
   renderStorico(sc.id);
   aggAltezze();
@@ -819,6 +821,8 @@ function saveP(){
     if(ser1){document.getElementById('p-rs-m').value=0;document.getElementById('p-rs-s').value=0;p.rs_m=0;p.rs_s=0;}
   }
   propagaParametri(S.CI,p);
+  const idScheda=S.J.sessioni[S.SI].schede[S.CI].id;
+  aggBlinkStorico(idScheda);
   salvaLocale();
   aggUI();
 }
@@ -1066,6 +1070,21 @@ function renderStorico(id){
     }
     el.appendChild(riga);
   });
+  aggBlinkStorico(id);
+}
+
+// lampeggia la riga dello storico più recente se i parametri operativi
+// correnti dell'esercizio differiscono da quelli dell'ultima prestazione
+function aggBlinkStorico(id){
+  const p=S.PL[S.CI];
+  const righe=(S.J&&S.J.storico&&S.J.storico[id])?S.J.storico[id]:[];
+  const el=document.getElementById('stor-list');
+  const primaRiga=el.querySelector('.stor-riga');
+  if(!p||!righe.length||!primaRiga){if(primaRiga)primaRiga.classList.remove('blink');return;}
+  const ultimo=righe[0];
+  const uguali = p.ser===ultimo.ser && p.rip===ultimo.rip && p.pn===ultimo.pn
+    && p.pk===ultimo.pk && p.dm===ultimo.dm && p.ds===ultimo.ds;
+  primaRiga.classList.toggle('blink',!uguali);
 }
 
 // ══════════════════════════════════════════════════════════════
