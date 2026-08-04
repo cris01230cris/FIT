@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26070303_FIT</title>
+<title>CL26070404_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --grigio2:#1a1a1a; --testo:#fff;
@@ -195,7 +195,7 @@
   .stor-data{color:#fff;font-size:.62rem;min-width:54px;}
   .stor-s{color:var(--verde);}  .stor-p{color:var(--giallo);}  .stor-t{color:var(--rosso);}
   .stor-empty{color:#333;font-size:.68rem;font-style:italic;}
-  .stor-riga.blink{animation:storBlink 1s ease-in-out infinite;}
+  .blink{animation:storBlink 1s ease-in-out infinite;}
   @keyframes storBlink{0%,100%{background:transparent;}50%{background:rgba(255,153,0,.35);}}
 
   .flash{position:fixed;inset:0;background:var(--giallo);opacity:0;pointer-events:none;z-index:9999;transition:opacity .08s;}
@@ -216,7 +216,7 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26070303_FIT.html</span>
+    <span class="h-versione">CL26070404_FIT.html</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
@@ -235,7 +235,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26070303_FIT.html</span>
+    <span class="h-versione">CL26070404_FIT.html</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -337,7 +337,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26070303_FIT.html</span>
+    <span class="h-versione">CL26070404_FIT.html</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -948,10 +948,12 @@ function alert5(){
 let tickerAttivo=false;
 function renderNxt(){
   const box=document.getElementById('nxt-box');
-  const mostra=(S.CI===S.activeCI);
+  const sess=S.J.sessioni[S.SI];
+  const isRosso=(S.CI<=S.ultComp && S.CI!==S.activeCI);
+  const mostra=!isRosso;
   if(!mostra){box.classList.remove('visibile');return;}
   box.classList.add('visibile');
-  const nT=S.J.sessioni[S.SI].schede.length;
+  const nT=sess.schede.length;
   const nextIdx=S.CI+1;
   const descEl=document.getElementById('nxt-desc');
   const parEl=document.getElementById('nxt-par');
@@ -960,11 +962,12 @@ function renderNxt(){
     descEl.textContent="QUESTA E' L'ULTIMA SCHEDA";
     descEl.style.color='#ff9900';
     parEl.innerHTML='';
+    parEl.classList.remove('blink');
     return;
   }
   descEl.style.color='var(--verde)';
   descEl.dataset.testo='';
-  const sc=S.J.sessioni[S.SI].schede[nextIdx];
+  const sc=sess.schede[nextIdx];
   const lib=S.J.libreria?.[sc.id];
   const p=S.PL[nextIdx];
   if(!p)return;
@@ -975,13 +978,16 @@ function renderNxt(){
   }
   descEl.textContent=desc;descEl.dataset.testo=desc;
   let pt=[];
-  // data più recente dallo storico dell'esercizio successivo
-  const stNext=(S.J.storico&&S.J.storico[sc.id]&&S.J.storico[sc.id].length>0)
-    ?S.J.storico[sc.id][0].data:null;
-  if(stNext) pt.push({cls:'stor-data',txt:stNext});
-  if(p.ser>0||p.rip>0) pt.push({cls:'nxt-s',txt:p.ser+'x'+p.rip});
-  if(p.pn>0||p.pk>0)   pt.push({cls:'nxt-p',txt:p.pn+'x'+fmtKg(p.pk)+'kg'});
-  if(p.dm>0||p.ds>0)   pt.push({cls:'nxt-t',txt:p.dm+'m:'+String(p.ds).padStart(2,'0')+'s'});
+  // dati operativi dello storico più recente dell'esercizio successivo
+  // (non i dati operativi correnti/pianificati dell'esercizio)
+  const righeNext=(S.J.storico&&S.J.storico[sc.id])?S.J.storico[sc.id]:[];
+  const ultimoNext=righeNext.length?righeNext[0]:null;
+  if(ultimoNext){
+    pt.push({cls:'stor-data',txt:ultimoNext.data});
+    if(ultimoNext.ser>0||ultimoNext.rip>0) pt.push({cls:'nxt-s',txt:ultimoNext.ser+'x'+ultimoNext.rip});
+    if(ultimoNext.pn>0||ultimoNext.pk>0)   pt.push({cls:'nxt-p',txt:ultimoNext.pn+'x'+fmtKg(ultimoNext.pk)+'kg'});
+    if(ultimoNext.dm>0||ultimoNext.ds>0)   pt.push({cls:'nxt-t',txt:ultimoNext.dm+'m:'+String(ultimoNext.ds).padStart(2,'0')+'s'});
+  }
   parEl.innerHTML='';
   pt.forEach(item=>{
     const span=document.createElement('span');
@@ -989,6 +995,11 @@ function renderNxt(){
     span.textContent=item.txt;
     parEl.appendChild(span);
   });
+  // lampeggio marrone se lo storico più recente differisce dai dati
+  // operativi dell'esercizio successivo
+  const uguali = !!ultimoNext && p.ser===ultimoNext.ser && p.rip===ultimoNext.rip
+    && p.pn===ultimoNext.pn && p.pk===ultimoNext.pk && p.dm===ultimoNext.dm && p.ds===ultimoNext.ds;
+  parEl.classList.toggle('blink', !!ultimoNext && !uguali);
   // avvio automatico: parte solo se il testo supera la larghezza del contenitore
   requestAnimationFrame(()=>{ avviaTicker(); });
 }
