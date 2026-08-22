@@ -2,8 +2,8 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CL26080101_FIT</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CL26080202_FIT</title>
 <style>
   :root {
     --nero:#000; --giallo:#ccff00; --verde:#00ff66; --rosso:#ff2222; --grigio2:#1a1a1a; --testo:#fff;
@@ -29,25 +29,22 @@
   .btn.sm{padding:11px 4px;font-size:.72rem;line-height:1.2;}
   .btn.verde{background:var(--verde);box-shadow:0 4px 0 #008833;}
   .btn.verde:active{box-shadow:0 1px 0 #008833;}
-  @keyframes btnLamp{0%,100%{opacity:1;}50%{opacity:.15;}}
-  .btn.lamp{animation:btnLamp .7s infinite;background:var(--giallo);color:var(--nero);box-shadow:0 4px 0 #7a9900;}
+  @keyframes lamp{0%,100%{opacity:1;}50%{opacity:.15;}}
+  .btn.lamp{animation:lamp .7s infinite;background:var(--giallo);color:var(--nero);box-shadow:0 4px 0 #7a9900;}
   .btn.lamp:active{animation:none;transform:translateY(3px);box-shadow:0 1px 0 #7a9900;}
 
-  .btn.lamp-verde{animation:btnLamp .7s infinite;background:var(--verde);color:var(--nero);box-shadow:0 4px 0 #008833;}
+  .btn.lamp-verde{animation:lamp .7s infinite;background:var(--verde);color:var(--nero);box-shadow:0 4px 0 #008833;}
   .btn.lamp-verde:active{animation:none;transform:translateY(3px);box-shadow:0 1px 0 #008833;}
-  .btn.lamp-rosso{animation:btnLamp .7s infinite;background:var(--rosso);color:#fff;box-shadow:0 4px 0 #990000;}
+  .btn.lamp-rosso{animation:lamp .7s infinite;background:var(--rosso);color:#fff;box-shadow:0 4px 0 #990000;}
   .btn.lamp-rosso:active{animation:none;transform:translateY(3px);box-shadow:0 1px 0 #990000;}
 
   /* Pulsante multifunzione — stili dedicati per i tre stati */
   .btn-avs{font-size:1.05rem;line-height:1.2;padding:14px 4px;}
-  @keyframes avsLampVerde{0%,100%{opacity:1;}50%{opacity:.15;}}
-  .btn-avs.avs-verde{animation:avsLampVerde .7s infinite;background:var(--verde);color:var(--nero);box-shadow:0 4px 0 #008833;}
+  .btn-avs.avs-verde{animation:lamp .7s infinite;background:var(--verde);color:var(--nero);box-shadow:0 4px 0 #008833;}
   .btn-avs.avs-verde:active{animation:none;transform:translateY(3px);box-shadow:0 1px 0 #008833;}
-  @keyframes avsLampGiallo{0%,100%{opacity:1;}50%{opacity:.15;}}
-  .btn-avs.avs-giallo{animation:avsLampGiallo .7s infinite;background:var(--giallo);color:var(--nero);box-shadow:0 4px 0 #7a9900;}
+  .btn-avs.avs-giallo{animation:lamp .7s infinite;background:var(--giallo);color:var(--nero);box-shadow:0 4px 0 #7a9900;}
   .btn-avs.avs-giallo:active{animation:none;transform:translateY(3px);box-shadow:0 1px 0 #7a9900;}
-  @keyframes avsLampRosso{0%,100%{opacity:1;}50%{opacity:.15;}}
-  .btn-avs.avs-rosso{animation:avsLampRosso .7s infinite;background:var(--rosso);color:#fff;box-shadow:0 4px 0 #990000;}
+  .btn-avs.avs-rosso{animation:lamp .7s infinite;background:var(--rosso);color:#fff;box-shadow:0 4px 0 #990000;}
   .btn-avs.avs-rosso:active{animation:none;transform:translateY(3px);box-shadow:0 1px 0 #990000;}
 
   .nav4{display:grid;grid-template-columns:1fr 2fr 1fr;gap:5px;margin-bottom:5px;}
@@ -56,8 +53,7 @@
     transition:transform .07s,box-shadow .07s;-webkit-user-select:none;user-select:none;box-shadow:0 4px 0 #7a9900;}
   .btn-nav:active{transform:translateY(3px);box-shadow:0 1px 0 #7a9900;}
   .btn-nav:disabled{background:#2a2a2a;color:#333;cursor:not-allowed;transform:none;box-shadow:none;animation:none!important;}
-  @keyframes navLamp{0%,100%{opacity:1;}50%{opacity:.15;}}
-  .btn-nav.lamp{animation:navLamp .7s infinite;}
+  .btn-nav.lamp{animation:lamp .7s infinite;}
   .btn-nav.lamp:active{animation:none;transform:translateY(3px);box-shadow:0 1px 0 #7a9900;}
 
   /* S1 */
@@ -111,22 +107,14 @@
   .pgrid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:5px;}
   .pitem{background:var(--grigio2);border:1px solid #2a2a2a;border-radius:6px;padding:7px 5px;display:flex;flex-direction:column;align-items:center;}
   .plabel{font-size:.50rem;color:var(--giallo);font-weight:900;text-transform:uppercase;letter-spacing:.03em;margin-bottom:3px;white-space:nowrap;}
-  .pinput{width:100%;background:transparent;border:none;border-bottom:1px solid #444;
+  .pinput,.pinput-kg{width:100%;background:transparent;border:none;border-bottom:1px solid #444;
     color:var(--giallo);font-family:'Arial Black',Arial,sans-serif;
     font-size:1.15rem;font-weight:900;text-align:center;padding:3px 0;outline:none;}
-  .pinput:disabled{color:var(--giallo);border-bottom-color:#555;opacity:0.55;}
-  .pinput.rosso-val{color:var(--rosso);}
-  .pinput.rosso-val:disabled{color:var(--rosso);opacity:0.7;}
-  .pinput.verde-val{color:var(--verde);}
-  .pinput.verde-val:disabled{color:var(--verde);opacity:0.7;}
-  .pinput-kg{width:100%;background:transparent;border:none;border-bottom:1px solid #444;
-    color:var(--giallo);font-family:'Arial Black',Arial,sans-serif;
-    font-size:1.15rem;font-weight:900;text-align:center;padding:3px 0;outline:none;}
-  .pinput-kg:disabled{color:var(--giallo);border-bottom-color:#555;opacity:0.55;}
-  .pinput-kg.rosso-val{color:var(--rosso);}
-  .pinput-kg.rosso-val:disabled{color:var(--rosso);opacity:0.7;}
-  .pinput-kg.verde-val{color:var(--verde);}
-  .pinput-kg.verde-val:disabled{color:var(--verde);opacity:0.7;}
+  .pinput:disabled,.pinput-kg:disabled{color:var(--giallo);border-bottom-color:#555;opacity:0.55;}
+  .pinput.rosso-val,.pinput-kg.rosso-val{color:var(--rosso);}
+  .pinput.rosso-val:disabled,.pinput-kg.rosso-val:disabled{color:var(--rosso);opacity:0.7;}
+  .pinput.verde-val,.pinput-kg.verde-val{color:var(--verde);}
+  .pinput.verde-val:disabled,.pinput-kg.verde-val:disabled{color:var(--verde);opacity:0.7;}
 
   .pesi-row{display:flex;align-items:center;gap:3px;width:100%;}
   .pesi-row .pinput:first-child{width:22px;flex-shrink:0;}
@@ -216,14 +204,14 @@
   <div class="header">
     <span class="h-programma" id="h1p">FIT TRAINER</span>
     <span class="h-sessione"  id="h1s"></span>
-    <span class="h-versione">CL26080101_FIT.html</span>
+    <span class="h-versione">CL26080202_FIT.html</span>
   </div>
   <div class="sez-label">Programma</div>
   <div class="info-box" id="info-prog">Nessun programma caricato</div>
   <label for="finput" class="btn" style="text-align:center;display:flex;align-items:center;justify-content:center;">CARICA PROGRAMMA JSON</label>
   <input type="file" id="finput" accept=".json"
          style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;"
-         onchange="leggiJSON(event)">
+         onclick="this.value=null" onchange="leggiJSON(event)">
   <div class="sez-label">Sessione</div>
   <div class="lista-sessioni" id="lista-sess"></div>
   <button class="btn" id="btn-avvia" disabled onclick="avviaSessione()">AVVIA SESSIONE</button>
@@ -235,7 +223,7 @@
   <div class="header">
     <span class="h-programma" id="h2p">—</span>
     <span class="h-sessione"  id="h2s">—</span>
-    <span class="h-versione">CL26080101_FIT.html</span>
+    <span class="h-versione">CL26080202_FIT.html</span>
   </div>
   <div class="riga-id">
     <div class="id-badge id-verde" id="id-badge">—</div>
@@ -337,7 +325,7 @@
   <div class="header">
     <span class="h-programma" id="h3p">—</span>
     <span class="h-sessione"  id="h3s">—</span>
-    <span class="h-versione">CL26080101_FIT.html</span>
+    <span class="h-versione">CL26080202_FIT.html</span>
   </div>
   <div class="fine-t">SESSIONE<br>COMPLETATA</div>
   <div class="fine-s" id="fine-av" style="display:none">ARRIVEDERCI!</div>
@@ -369,6 +357,7 @@ const S = {
 // ══════════════════════════════════════════════════════════════
 let wakeLock=null;
 async function richiediWakeLock(){
+  if(wakeLock)return;
   if('wakeLock' in navigator){try{wakeLock=await navigator.wakeLock.request('screen');
     wakeLock.addEventListener('release',()=>{
       wakeLock=null;
@@ -409,7 +398,7 @@ function cleanKg(el){
 }
 function sanitizeInt(el,mn,mx){
   let v=el.value.replace(/[^0-9]/g,'');
-  v=v.replace(/^0+([1-9])/,'$1');
+  v=v.replace(/^0+/,'')||'0';
   if(v!==''){const n=parseInt(v);if(!isNaN(n)){if(n<mn)v=String(mn);if(n>mx)v=String(mx);}}
   el.value=v;
 }
